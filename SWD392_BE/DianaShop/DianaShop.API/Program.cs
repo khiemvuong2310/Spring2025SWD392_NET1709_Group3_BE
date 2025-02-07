@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Diagnostics;
-using RepositoryLayer;
-
+using DianaShop.Repository;
+using DianaShop.Service;
+using DianaShop.API.AppStarts;
 namespace DianaShop.API
 {
     public class Program
@@ -10,7 +11,7 @@ namespace DianaShop.API
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
-            builder.Services.AddRepositories().AddServices();
+            builder.Services.AddRepositories().AddServices().InstallService(builder.Configuration);
             builder.Services.AddControllers();
             builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
             builder.Services.AddProblemDetails();
