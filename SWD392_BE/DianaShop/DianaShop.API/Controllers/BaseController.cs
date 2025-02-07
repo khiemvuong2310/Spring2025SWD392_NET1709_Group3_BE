@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 
-namespace DianaShop.API.Controllers
+namespace RepositoryLayer.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]

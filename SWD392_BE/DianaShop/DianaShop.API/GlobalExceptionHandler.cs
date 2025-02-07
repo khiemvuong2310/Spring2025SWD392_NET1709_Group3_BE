@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 
 
-namespace DianaShop
+namespace RepositoryLayer
 {
     public class GlobalExceptionHandler : IExceptionHandler
     {

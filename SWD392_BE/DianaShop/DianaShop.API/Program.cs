@@ -1,6 +1,6 @@
-using DianaShop.Data;
-using DianaShop.Service;
 using Microsoft.AspNetCore.Diagnostics;
+using RepositoryLayer;
+
 namespace DianaShop.API
 {
     public class Program

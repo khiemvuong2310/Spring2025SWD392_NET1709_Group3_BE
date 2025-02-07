@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DianaShop.Data.Interfaces
+namespace DianaShop.Repository.UnitOfWork
 {
     public interface IUnitOfWork : IDisposable
     {
