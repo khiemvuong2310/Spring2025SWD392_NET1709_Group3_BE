@@ -10,11 +10,11 @@ namespace DianaShop.Data.Entities
     {
         public string Name { get; set; }
 
-        public string Description { get; set; }
+        public string? Description { get; set; }
 
         public int CategoryID { get; set; }
 
-        public double price { get; set; }
+        public double Price { get; set; }
 
         public string Brand { get; set; }
 
@@ -22,7 +22,7 @@ namespace DianaShop.Data.Entities
 
         public string imageURL { get; set; }
 
-        public string? AdoptionStatus { get; set; }
+        public string? Status { get; set; }
 
         public virtual ICollection<Category> Categories { get; set; }
     }
