@@ -9,7 +9,7 @@ namespace DianaShop.Repository.Utils
 {
     public static class AuthenTools
     {
-        public static string GetCurrentUserId(ClaimsIdentity identity)
+        public static string? GetCurrentUserId(ClaimsIdentity identity)
         {
             if (identity != null)
             {
