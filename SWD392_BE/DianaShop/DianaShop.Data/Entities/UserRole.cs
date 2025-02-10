@@ -10,8 +10,9 @@ namespace DianaShop.Data.Entities
 {
     public class UserRole
     {
+        public int UserRoleId { get; set; }
         public int UserId { get; set; }
-        public int RoleId { get; set; }
+        
         public bool Status { get; set; }
         public DateTime CreatedDate { get; set; }
 

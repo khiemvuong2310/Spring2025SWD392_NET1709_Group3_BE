@@ -1,4 +1,5 @@
-﻿using DianaShop.Repository.UnitOfWork;
+﻿using DianaShop.Data;
+using DianaShop.Repository.UoW;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System;
@@ -19,16 +20,16 @@ namespace DianaShop.API.AppStarts
                 options.LowercaseUrls = true; ;
                 options.LowercaseQueryStrings = true;
             });
-            //services.AddDbContext<PawFundContext>(options =>
-            //{
-            //    var connectionString = configuration.GetConnectionString("DefaultConnection");
-            //    var serverVersion = new MySqlServerVersion(new Version(8, 0, 2)); // Adjust the version to match your MySQL version
+            services.AddDbContext<AppDbContext>(options =>
+            {
+                var connectionString = configuration.GetConnectionString("DefaultConnection");
+                var serverVersion = new MySqlServerVersion(new Version(8, 0, 2)); // Adjust the version to match your MySQL version
 
-            //    options.UseMySql(connectionString, serverVersion);
-            //});
+                options.UseMySql(connectionString, serverVersion);
+            });
             services.AddSingleton<ITwilioRestClient>(new TwilioRestClient("ACCOUNT_SID", "AUTH_TOKEN"));
 
-            services.AddScoped<IUnitOfWork, UnitOfWork>();
+            //services.AddScoped<IUnitOfWork, UnitOfWork>();
             //services.AddScoped(typeof(IRepository<>), typeof(GenericRepository<>));
 
             //services.AddScoped<IJwtService, JwtService>();

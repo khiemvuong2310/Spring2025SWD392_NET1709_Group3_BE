@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DianaShop.Repository.UnitOfWork
+namespace DianaShop.Repository.UoW
 {
     public class UnitOfWork : IUnitOfWork, IDisposable
     {
