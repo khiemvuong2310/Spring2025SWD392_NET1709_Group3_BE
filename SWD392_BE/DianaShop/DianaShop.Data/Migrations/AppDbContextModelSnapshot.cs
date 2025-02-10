@@ -58,9 +58,6 @@ namespace DianaShop.Data.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("AdoptionStatus")
-                        .HasColumnType("longtext");
-
                     b.Property<string>("Brand")
                         .IsRequired()
                         .HasColumnType("longtext");
@@ -69,7 +66,6 @@ namespace DianaShop.Data.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("Description")
-                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<bool?>("IsDelete")
@@ -79,19 +75,42 @@ namespace DianaShop.Data.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
+                    b.Property<double>("Price")
+                        .HasColumnType("double");
+
                     b.Property<int>("QuantityInStock")
                         .HasColumnType("int");
+
+                    b.Property<string>("Status")
+                        .HasColumnType("longtext");
 
                     b.Property<string>("imageURL")
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<double>("price")
-                        .HasColumnType("double");
-
                     b.HasKey("Id");
 
                     b.ToTable("Products");
+                });
+
+            modelBuilder.Entity("DianaShop.Data.Entities.Role", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool?>("IsDelete")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Roles");
                 });
 
             modelBuilder.Entity("DianaShop.Data.Entities.User", b =>
@@ -139,29 +158,23 @@ namespace DianaShop.Data.Migrations
 
             modelBuilder.Entity("DianaShop.Data.Entities.UserRole", b =>
                 {
-                    b.Property<int>("UserRoleId")
-                        .ValueGeneratedOnAdd()
+                    b.Property<int>("UserId")
                         .HasColumnType("int");
 
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("UserRoleId"));
+                    b.Property<int>("RoleId")
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<int?>("Role")
-                        .HasColumnType("int");
-
                     b.Property<bool>("Status")
                         .HasColumnType("tinyint(1)");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
+                    b.HasKey("UserId", "RoleId");
 
-                    b.HasKey("UserRoleId");
+                    b.HasIndex("RoleId");
 
-                    b.HasIndex("UserId");
-
-                    b.ToTable("Roles");
+                    b.ToTable("UserRoles");
                 });
 
             modelBuilder.Entity("DianaShop.Data.Entities.Category", b =>
@@ -173,11 +186,19 @@ namespace DianaShop.Data.Migrations
 
             modelBuilder.Entity("DianaShop.Data.Entities.UserRole", b =>
                 {
+                    b.HasOne("DianaShop.Data.Entities.Role", "Role")
+                        .WithMany("UserRoles")
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("DianaShop.Data.Entities.User", "User")
                         .WithMany("UserRoles")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Role");
 
                     b.Navigation("User");
                 });
@@ -185,6 +206,11 @@ namespace DianaShop.Data.Migrations
             modelBuilder.Entity("DianaShop.Data.Entities.Product", b =>
                 {
                     b.Navigation("Categories");
+                });
+
+            modelBuilder.Entity("DianaShop.Data.Entities.Role", b =>
+                {
+                    b.Navigation("UserRoles");
                 });
 
             modelBuilder.Entity("DianaShop.Data.Entities.User", b =>
