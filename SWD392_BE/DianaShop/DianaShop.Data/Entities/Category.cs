@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace DianaShop.Data.Entities
 {
-    public class Category : BaseEntity
+    public class Category : BaseEntity //cleanser, toner, exfoliator, sunscreen, moisturizer
     {
         public string Name { get; set; }
 

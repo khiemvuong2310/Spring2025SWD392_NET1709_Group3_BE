@@ -13,7 +13,7 @@ namespace DianaShop.Data.Entities
         public string BrandName { get; set; }
 
         public string? Description { get; set; }
-
+        public string Origin { get; set; }
         public virtual ICollection<Product> Products { get; set; }
     }
 }
