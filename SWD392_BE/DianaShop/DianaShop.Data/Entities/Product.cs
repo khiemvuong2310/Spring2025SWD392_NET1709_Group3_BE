@@ -12,33 +12,27 @@ namespace DianaShop.Data.Entities
     public class Product : BaseEntity
     {
         public string Name { get; set; }
-
         public string? Description { get; set; }
-
-        public int BrandID { get; set; }
-
-        public int CategoryID { get; set; }
-
+        public int BrandId { get; set; }
+        public int CategoryId { get; set; }
+        public int PackagingId { get; set; }
         public decimal? Price { get; set; }
-
-        public string? ImageURL { get; set; }
-
-        public string? Ingredients { get; set; }
-
-        public string? Size { get; set; }
-
-        public string? PackagingType { get; set; }
-
-        public string? FormulationType { get; set; }
-
-        public string? SNF { get; set; } // Có thể là "Skin Nutrition Factor"
-
+        public int FormulationTypeId { get; set; }
+        public string Direction { get; set; }
+        public string PAO { get; set; } //period after opening (12M , 24M, 36M)
+        public string Precaution { get; set; }
+        public string Storage { get; set; }
+        public string AdditionalInformation { get; set; }
         public bool Status { get; set; } // true: available, false: out of stock
+        public virtual Category Category { get; set; }
+        public virtual FormulationType FormulationType { get; set; }
+        public virtual Brand Brand { get; set; }
+        public virtual Packaging Packaging { get; set; }
 
-        public virtual ICollection<Category> Categories { get; set; }
-
-        public virtual Brand Brands { get; set; }
-
-        public virtual ICollection<ProductBratch> ProductBratches { get; set; }
+        public virtual ICollection<ProductBatch> ProductBatches { get; set; }
+        public virtual ICollection<ProductTag> ProductTags { get; set; }
+        public virtual ICollection<ProductImage> ProductImages { get; set; }
+        public virtual ICollection<ProductIngredient> ProductIngredients { get; set; }
+        public virtual ICollection<ProductSkinType> ProductSkinTypes { get; set; }
     }
 }

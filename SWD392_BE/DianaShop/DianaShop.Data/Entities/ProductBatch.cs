@@ -8,18 +8,19 @@ using System.Threading.Tasks;
 
 namespace DianaShop.Data.Entities
 {
-    public class ProductBratch : BaseEntity
+    public class ProductBatch : BaseEntity
     {
         public int ProductID { get; set; }
 
         public int? Quantity { get; set; }
 
-        public DateTime? ExpDate { get; set; }
+        public DateTime? ExpiryDate { get; set; }
 
         public DateTime? ImportDate { get; set; }
+        public DateTime? ManufactureDate { get; set; }
 
         public bool? Status { get; set; } // true: active, false: expired
 
-        public virtual Product Products { get; set; }
+        public virtual Product Product { get; set; }
     }
 }
