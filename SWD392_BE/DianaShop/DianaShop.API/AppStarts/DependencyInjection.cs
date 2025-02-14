@@ -1,5 +1,6 @@
 ﻿using DianaShop.Data;
-using DianaShop.Repository.UoW;
+using DianaShop.Repository.UnitOfWork;
+using DianaShop.Service.Mapping;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System;
@@ -34,6 +35,8 @@ namespace DianaShop.API.AppStarts
 
             //services.AddScoped<IJwtService, JwtService>();
 
+            // Thêm AutoMapper vào dịch vụ
+            services.AddAutoMapper(typeof(CategoryMapping));  // Đảm bảo bạn truyền đúng assembly
 
         }
     }

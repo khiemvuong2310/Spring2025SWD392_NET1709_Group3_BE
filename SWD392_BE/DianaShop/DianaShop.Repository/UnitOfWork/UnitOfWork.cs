@@ -1,55 +1,87 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using DianaShop.Data;
+using DianaShop.Repository.Repositories;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DianaShop.Repository.UoW
+namespace DianaShop.Repository.UnitOfWork
 {
-    public class UnitOfWork : IUnitOfWork, IDisposable
+    public class UnitOfWork : IUnitOfWork
     {
-        private readonly DbContext _dbContext;
-        private IDbContextTransaction? _transaction = null;
+        private readonly AppDbContext _dbContext;
 
-        public UnitOfWork(DbContext dbContext)
+        private readonly Dictionary<Type, object> reposotories = new Dictionary<Type, object>();
+        public UnitOfWork(AppDbContext dbContext)
         {
             _dbContext = dbContext;
         }
+        public IGenericRepository<T> Repository<T>() where T : class
+        {
+            Type type = typeof(T);
+            if (!reposotories.TryGetValue(type, out object value))
+            {
+                var genericRepos = new GenericRepository<T>(_dbContext);
+                reposotories.Add(type, genericRepos);
+                return genericRepos;
+            }
+            return value as GenericRepository<T>;
+        }
 
+        private bool disposed = false;
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposed)
+            {
+                if (disposing)
+                {
+                    _dbContext.Dispose();
+                }
+            }
+            disposed = true;
+        }
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+        public int Commit()
+        {
+            return _dbContext.SaveChanges();
+        }
+
+        public Task<int> CommitAsync()
+        {
+            TrackChanges();
+            return _dbContext.SaveChangesAsync();
+        }
         public async Task<int> SaveChangesAsync()
         {
             return await _dbContext.SaveChangesAsync();
         }
 
-        public void Dispose()
+        private void TrackChanges()
         {
-            _dbContext.Dispose();
-            GC.SuppressFinalize(this);
-        }
-
-        public async Task BeginTransactionAsync()
-        {
-            _transaction = await _dbContext.Database.BeginTransactionAsync();
-        }
-
-        public async Task CommitTransactionAsync()
-        {
-            if (_transaction != null)
+            var validationErrors = _dbContext.ChangeTracker.Entries<IValidatableObject>()
+                .SelectMany(e => e.Entity.Validate(null))
+                .Where(e => e != ValidationResult.Success)
+                .ToArray();
+            if (validationErrors.Any())
             {
-                await _transaction.CommitAsync();
-                await _transaction.DisposeAsync();
+                var exceptionMessage = string.Join(Environment.NewLine,
+                    validationErrors.Select(error => $"Properties {error.MemberNames} Error: {error.ErrorMessage}"));
+                throw new Exception(exceptionMessage);
             }
         }
 
-        public async Task RollbackTransactionAsync()
+        public async Task<IDbContextTransaction> BeginTransactionAsync()
         {
-            if (_transaction != null)
-            {
-                await _transaction.RollbackAsync();
-                await _transaction.DisposeAsync();
-            }
+            return await _dbContext.Database.BeginTransactionAsync();
         }
     }
 }

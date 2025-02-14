@@ -1,4 +1,4 @@
-﻿using DianaShop.Repository.UoW;
+﻿using DianaShop.Repository.UnitOfWork;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
