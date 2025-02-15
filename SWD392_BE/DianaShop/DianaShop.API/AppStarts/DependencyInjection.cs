@@ -1,4 +1,5 @@
 ﻿using DianaShop.Data;
+using DianaShop.Repository.Repositories;
 using DianaShop.Repository.UnitOfWork;
 using DianaShop.Service.Mapping;
 using Microsoft.EntityFrameworkCore;
@@ -30,13 +31,15 @@ namespace DianaShop.API.AppStarts
             });
             services.AddSingleton<ITwilioRestClient>(new TwilioRestClient("ACCOUNT_SID", "AUTH_TOKEN"));
 
-            //services.AddScoped<IUnitOfWork, UnitOfWork>();
-            //services.AddScoped(typeof(IRepository<>), typeof(GenericRepository<>));
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
+            services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 
             //services.AddScoped<IJwtService, JwtService>();
 
             // Thêm AutoMapper vào dịch vụ
             services.AddAutoMapper(typeof(CategoryMapping));  // Đảm bảo bạn truyền đúng assembly
+            services.AddAutoMapper(typeof(PackagingMapping));
+            services.AddAutoMapper(typeof(ProductMapping));
 
         }
     }

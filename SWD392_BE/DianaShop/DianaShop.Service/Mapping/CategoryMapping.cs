@@ -21,8 +21,10 @@ namespace DianaShop.Service.Mapping
             CreateMap<Category, CategoryResponseModel>()
                 .ForMember(dest => dest.Products, opt => opt.MapFrom(src => src.Products.Select(p => new ProductResponseModel
                 {
-                    Id = p.Id,
-                    Name = p.Name,
+                    FormulationType = p.FormulationType.Texture,
+                    Packaging = p.Packaging.Type,
+                    Category = p.Category.Name,
+                    Brand = p.Brand.Name,
                 }).ToList()));
         }
     }

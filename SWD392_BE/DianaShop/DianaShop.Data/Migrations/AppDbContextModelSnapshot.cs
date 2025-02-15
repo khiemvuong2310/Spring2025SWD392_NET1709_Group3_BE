@@ -49,7 +49,7 @@ namespace DianaShop.Data.Migrations
 
                     b.HasIndex("SkinTypeId");
 
-                    b.ToTable("Answer");
+                    b.ToTable("Answers");
                 });
 
             modelBuilder.Entity("DianaShop.Data.Entities.Brand", b =>
@@ -60,15 +60,15 @@ namespace DianaShop.Data.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("BrandName")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
                     b.Property<string>("Description")
                         .HasColumnType("longtext");
 
                     b.Property<bool?>("IsDelete")
                         .HasColumnType("tinyint(1)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("longtext");
 
                     b.Property<string>("Origin")
                         .IsRequired()
@@ -76,7 +76,7 @@ namespace DianaShop.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Brand");
+                    b.ToTable("Brands");
                 });
 
             modelBuilder.Entity("DianaShop.Data.Entities.Category", b =>
@@ -176,7 +176,7 @@ namespace DianaShop.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("FormulationType");
+                    b.ToTable("FormulationTypes");
                 });
 
             modelBuilder.Entity("DianaShop.Data.Entities.Image", b =>
@@ -196,7 +196,7 @@ namespace DianaShop.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Image");
+                    b.ToTable("Images");
                 });
 
             modelBuilder.Entity("DianaShop.Data.Entities.Ingredient", b =>
@@ -220,7 +220,7 @@ namespace DianaShop.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Ingredient");
+                    b.ToTable("Ingredients");
                 });
 
             modelBuilder.Entity("DianaShop.Data.Entities.Packaging", b =>
@@ -251,7 +251,7 @@ namespace DianaShop.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Packaging");
+                    b.ToTable("Packagings");
                 });
 
             modelBuilder.Entity("DianaShop.Data.Entities.Post", b =>
@@ -292,7 +292,7 @@ namespace DianaShop.Data.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Post");
+                    b.ToTable("Posts");
                 });
 
             modelBuilder.Entity("DianaShop.Data.Entities.PostImage", b =>
@@ -310,7 +310,7 @@ namespace DianaShop.Data.Migrations
 
                     b.HasIndex("ImageId");
 
-                    b.ToTable("PostImage");
+                    b.ToTable("PostImages");
                 });
 
             modelBuilder.Entity("DianaShop.Data.Entities.PostTag", b =>
@@ -325,7 +325,7 @@ namespace DianaShop.Data.Migrations
 
                     b.HasIndex("TagId");
 
-                    b.ToTable("PostTag");
+                    b.ToTable("PostTags");
                 });
 
             modelBuilder.Entity("DianaShop.Data.Entities.Product", b =>
@@ -430,7 +430,7 @@ namespace DianaShop.Data.Migrations
 
                     b.HasIndex("ProductID");
 
-                    b.ToTable("ProductBatch");
+                    b.ToTable("ProductBatches");
                 });
 
             modelBuilder.Entity("DianaShop.Data.Entities.ProductImage", b =>
@@ -448,7 +448,7 @@ namespace DianaShop.Data.Migrations
 
                     b.HasIndex("ImageId");
 
-                    b.ToTable("ProductImage");
+                    b.ToTable("ProductImages");
                 });
 
             modelBuilder.Entity("DianaShop.Data.Entities.ProductIngredient", b =>
@@ -463,7 +463,7 @@ namespace DianaShop.Data.Migrations
 
                     b.HasIndex("IngredientId");
 
-                    b.ToTable("ProductIngredient");
+                    b.ToTable("ProductIngredients");
                 });
 
             modelBuilder.Entity("DianaShop.Data.Entities.ProductSkinType", b =>
@@ -478,7 +478,7 @@ namespace DianaShop.Data.Migrations
 
                     b.HasIndex("SkinTypeId");
 
-                    b.ToTable("ProductSkinType");
+                    b.ToTable("ProductSkinTypes");
                 });
 
             modelBuilder.Entity("DianaShop.Data.Entities.ProductTag", b =>
@@ -493,7 +493,7 @@ namespace DianaShop.Data.Migrations
 
                     b.HasIndex("TagId");
 
-                    b.ToTable("ProductTag");
+                    b.ToTable("ProductTags");
                 });
 
             modelBuilder.Entity("DianaShop.Data.Entities.Question", b =>
@@ -513,7 +513,7 @@ namespace DianaShop.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Question");
+                    b.ToTable("Questions");
                 });
 
             modelBuilder.Entity("DianaShop.Data.Entities.Role", b =>
@@ -548,7 +548,7 @@ namespace DianaShop.Data.Migrations
 
                     b.HasIndex("SkinTypeId");
 
-                    b.ToTable("RoutineSkinType");
+                    b.ToTable("RoutineSkinTypes");
                 });
 
             modelBuilder.Entity("DianaShop.Data.Entities.RoutineStep", b =>
@@ -607,7 +607,7 @@ namespace DianaShop.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("SkinType");
+                    b.ToTable("SkinTypes");
                 });
 
             modelBuilder.Entity("DianaShop.Data.Entities.SkincareRoutine", b =>
@@ -631,7 +631,7 @@ namespace DianaShop.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("SkincareRoutine");
+                    b.ToTable("Routines");
                 });
 
             modelBuilder.Entity("DianaShop.Data.Entities.Tag", b =>
@@ -651,7 +651,7 @@ namespace DianaShop.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Tag");
+                    b.ToTable("Tags");
                 });
 
             modelBuilder.Entity("DianaShop.Data.Entities.User", b =>
@@ -831,7 +831,7 @@ namespace DianaShop.Data.Migrations
                         .IsRequired();
 
                     b.HasOne("DianaShop.Data.Entities.Packaging", "Packaging")
-                        .WithMany()
+                        .WithMany("Products")
                         .HasForeignKey("PackagingId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -1017,6 +1017,11 @@ namespace DianaShop.Data.Migrations
             modelBuilder.Entity("DianaShop.Data.Entities.Ingredient", b =>
                 {
                     b.Navigation("ProductIngredients");
+                });
+
+            modelBuilder.Entity("DianaShop.Data.Entities.Packaging", b =>
+                {
+                    b.Navigation("Products");
                 });
 
             modelBuilder.Entity("DianaShop.Data.Entities.Post", b =>

@@ -17,6 +17,25 @@ namespace DianaShop.Data
         public DbSet<Category> Categories { get; set; }
         public DbSet<Role> Roles { get; set; }
         public DbSet<UserRole> UserRoles { get; set; }
+        public DbSet<Brand> Brands { get; set; }
+        public DbSet<Image> Images { get; set; }
+        public DbSet<Ingredient> Ingredients { get; set; }
+        public DbSet<ProductImage> ProductImages { get; set; }
+        public DbSet<ProductIngredient> ProductIngredients { get; set; }
+        public DbSet<ProductSkinType> ProductSkinTypes { get; set; }
+        public DbSet<ProductTag> ProductTags { get; set; }
+        public DbSet<Tag> Tags { get; set; }
+        public DbSet<Post> Posts { get; set; }
+        public DbSet<PostImage> PostImages { get; set; }
+        public DbSet<PostTag> PostTags { get; set; }
+        public DbSet<SkincareRoutine> Routines { get; set; }
+        public DbSet<RoutineSkinType> RoutineSkinTypes { get; set; }
+        public DbSet<SkinType> SkinTypes { get; set; }
+        public DbSet<FormulationType> FormulationTypes { get; set; }
+        public DbSet<Packaging> Packagings { get; set; }
+        public DbSet<ProductBatch> ProductBatches { get; set; }
+        public DbSet<Question> Questions { get; set; }
+        public DbSet<Answer> Answers { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<UserRole>()
