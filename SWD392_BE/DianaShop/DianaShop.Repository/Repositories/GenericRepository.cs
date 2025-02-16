@@ -22,17 +22,6 @@ namespace DianaShop.Repository.Repositories
             Context = context ?? throw new ArgumentNullException(nameof(context));  // Thêm kiểm tra null
             Table = Context.Set<T>();
         }
-        public IEnumerable<T> GetInclude(string includeProperties = "")
-        {
-            IQueryable<T> query = Table;
-
-            foreach (var includeProperty in includeProperties.Split
-                (new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
-            {
-                query = query.Include(includeProperty);
-            }
-            return query.ToList();
-        }
         public IEnumerable<T> Find(Expression<Func<T, bool>> predicate)
         {
             return Context.Set<T>().AsQueryable().Where(predicate).ToList();
