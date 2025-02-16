@@ -17,5 +17,6 @@ namespace DianaShop.Repository.UnitOfWork
 
         Task<int> CommitAsync();
         Task<IDbContextTransaction> BeginTransactionAsync();
+        Task<int> SaveChangesAsync();
     }
 }

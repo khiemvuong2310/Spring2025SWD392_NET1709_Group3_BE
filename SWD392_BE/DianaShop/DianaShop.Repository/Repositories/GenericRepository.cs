@@ -22,12 +22,22 @@ namespace DianaShop.Repository.Repositories
             Context = context ?? throw new ArgumentNullException(nameof(context));  // Thêm kiểm tra null
             Table = Context.Set<T>();
         }
+        public IEnumerable<T> GetInclude(string includeProperties = "")
+        {
+            IQueryable<T> query = Table;
 
+            foreach (var includeProperty in includeProperties.Split
+                (new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
+            {
+                query = query.Include(includeProperty);
+            }
+            return query.ToList();
+        }
         public IEnumerable<T> Find(Expression<Func<T, bool>> predicate)
         {
             return Context.Set<T>().AsQueryable().Where(predicate).ToList();
         }
-        public async Task<T> FindAsync(Expression<Func<T, bool>> predicate)
+        public async Task<T?> FindAsync(Expression<Func<T, bool>> predicate)
         {
             return
                 await Table.SingleOrDefaultAsync(predicate);
@@ -52,12 +62,12 @@ namespace DianaShop.Repository.Repositories
         {
             return Context.Set<T>().AsQueryable(); // Trả về IQueryable để hỗ trợ Include()
         }
-        public async Task<T> GetByIdGuid(Guid Id)
+        public async Task<T?> GetByIdGuid(Guid Id)
         {
             return await Table.FindAsync(Id);
         }
 
-        public async Task<T> GetById(int Id)
+        public async Task<T?> GetById(int Id)
         {
             return await Table.FindAsync(Id);
         }
@@ -82,15 +92,21 @@ namespace DianaShop.Repository.Repositories
         public async Task UpdateGuid(T entity, Guid Id)
         {
             var existEntity = await GetByIdGuid(Id);
-            Context.Entry(existEntity).CurrentValues.SetValues(entity);
-            Table.Update(existEntity);
+            if (existEntity != null)
+            {
+                Context.Entry(existEntity).CurrentValues.SetValues(entity);
+                Table.Update(existEntity);
+            }
         }
 
         public async Task Update(T entity, int Id)
         {
             var existEntity = await GetById(Id);
-            Context.Entry(existEntity).CurrentValues.SetValues(entity);
-            Table.Update(existEntity);
+            if (existEntity != null)
+            {
+                Context.Entry(existEntity).CurrentValues.SetValues(entity);
+                Table.Update(existEntity);
+            }
         }
 
 

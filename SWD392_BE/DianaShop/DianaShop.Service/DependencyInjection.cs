@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using DianaShop.Service.Interfaces;
+using DianaShop.Service.Services;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,6 +13,7 @@ namespace DianaShop.Service
     {
         public static IServiceCollection AddServices(this IServiceCollection service)
         {
+            service.AddTransient<IPackagingService, PackagingService>();
             return service;
         }
     }

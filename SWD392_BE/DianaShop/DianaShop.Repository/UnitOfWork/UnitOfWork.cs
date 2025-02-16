@@ -15,7 +15,7 @@ namespace DianaShop.Repository.UnitOfWork
     {
         private readonly AppDbContext _dbContext;
 
-        private readonly Dictionary<Type, object> reposotories = new Dictionary<Type, object>();
+        private readonly Dictionary<Type, object> repositories = new Dictionary<Type, object>();
         public UnitOfWork(AppDbContext dbContext)
         {
             _dbContext = dbContext;
@@ -23,10 +23,10 @@ namespace DianaShop.Repository.UnitOfWork
         public IGenericRepository<T> Repository<T>() where T : class
         {
             Type type = typeof(T);
-            if (!reposotories.TryGetValue(type, out object value))
+            if (!repositories.TryGetValue(type, out object value))
             {
                 var genericRepos = new GenericRepository<T>(_dbContext);
-                reposotories.Add(type, genericRepos);
+                repositories.Add(type, genericRepos);
                 return genericRepos;
             }
             return value as GenericRepository<T>;

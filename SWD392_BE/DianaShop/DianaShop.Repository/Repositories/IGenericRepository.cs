@@ -21,6 +21,7 @@ namespace DianaShop.Repository.Repositories
 
         //DbSet<TEntity> GetAll();
         // Thêm mới
+        IEnumerable<TEntity> GetInclude(string includeProperties = "");
         IQueryable<TEntity> GetAll(); // Trả về IEnumerable thay vì IQueryable hoặc DbSet
         IQueryable<TEntity> GetAllApart();
         Task<IEnumerable<TEntity>> GetWhere(Expression<Func<TEntity, bool>> predicate);
@@ -28,11 +29,11 @@ namespace DianaShop.Repository.Repositories
         IQueryable<TEntity> FindAll(Func<TEntity, bool> predicate);
 
         IEnumerable<TEntity> Find(Expression<Func<TEntity, bool>> predicate);
-        Task<TEntity> FindAsync(Expression<Func<TEntity, bool>> predicate);
+        Task<TEntity?> FindAsync(Expression<Func<TEntity, bool>> predicate);
         Task<bool> AnyAsync(Expression<Func<TEntity, bool>> predicate);
-        Task<TEntity> GetById(int Id);
+        Task<TEntity?> GetById(int Id);
 
-        Task<TEntity> GetByIdGuid(Guid Id);
+        Task<TEntity?> GetByIdGuid(Guid Id);
 
         void Insert(TEntity entity);
 

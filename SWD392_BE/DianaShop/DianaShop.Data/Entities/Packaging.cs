@@ -12,5 +12,6 @@ namespace DianaShop.Data.Entities
         public string Material { get; set; }
         public string Size { get; set; }
         public bool IsRefillable { get; set; }
+        public virtual ICollection<Product> Products { get; set; }
     }
 }
