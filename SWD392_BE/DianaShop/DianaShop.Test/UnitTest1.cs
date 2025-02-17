@@ -1,4 +1,4 @@
-namespace DianaShop.Test
+namespace RepositoryLayer.Test
 {
     public class Tests
     {
