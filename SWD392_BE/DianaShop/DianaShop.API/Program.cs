@@ -11,7 +11,7 @@ namespace DianaShop.API
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
-            builder.Services.AddRepositories().AddServices().InstallService(builder.Configuration);
+            builder.Services.AddServices().InstallService(builder.Configuration);
             builder.Services.AddControllers();
             builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
             builder.Services.AddProblemDetails();

@@ -15,6 +15,7 @@ namespace DianaShop.Service
         {
             service.AddTransient<IPackagingService, PackagingService>();
             service.AddTransient<IProductService, ProductService>();
+            service.AddTransient<ISkinTypeTestService, SkinTypeTestService>();
             return service;
         }
     }
