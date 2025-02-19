@@ -36,6 +36,12 @@ namespace DianaShop.Data
         public DbSet<ProductBatch> ProductBatches { get; set; }
         public DbSet<Question> Questions { get; set; }
         public DbSet<Answer> Answers { get; set; }
+        public DbSet<Cart> Carts { get; set; }
+        public DbSet<FeedBack> FeedBacks { get; set; }
+        public DbSet<Order> Orders { get; set; }
+        public DbSet<Comment> Comments { get; set; }
+        public DbSet<Voucher> Vouchers { get; set; }
+        public DbSet<VoucherStorage> VoucherStorages { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<UserRole>()

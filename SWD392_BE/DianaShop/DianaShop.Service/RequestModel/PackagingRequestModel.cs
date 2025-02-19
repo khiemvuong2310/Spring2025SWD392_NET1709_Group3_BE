@@ -17,6 +17,7 @@ namespace DianaShop.Service.RequestModel
 
         [Required]
         public string Size { get; set; }
+        [Required]
 
         public bool IsRefillable { get; set; }
     }

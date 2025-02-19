@@ -21,16 +21,15 @@ namespace DianaShop.API
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
             //CORS add frontend link here
-            //builder.Services.AddCors(options =>
-            //{
-            //    options.AddPolicy("AllowNextApp", policy =>
-            //    {
-            //        policy.WithOrigins("http://localhost:3000")
-            //              .AllowAnyHeader()
-            //              .AllowAnyMethod();
-            //    });
-            //});
-
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowNextApp", policy =>
+                {
+                    policy.WithOrigins("http://localhost:3000")
+                          .AllowAnyHeader()
+                          .AllowAnyMethod();
+                });
+            });
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -45,6 +44,7 @@ namespace DianaShop.API
             app.UseExceptionHandler();
 
             app.UseHttpsRedirection();
+            app.UseCors("AllowNextApp");
             app.UseAuthentication();
             app.UseAuthorization();
 
