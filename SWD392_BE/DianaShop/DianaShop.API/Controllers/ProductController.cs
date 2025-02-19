@@ -36,5 +36,20 @@ namespace DianaShop.API.Controllers
             var response = await _productService.AddProductAsync(request);
             return CreatedAtAction(nameof(GetById), new { id = response.Id }, response);
         }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(int id, [FromBody] ProductRequestModel request)
+        {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+            await _productService.UpdateProductAsync(id, request);
+            return NoContent();
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            await _productService.DeleteProductAsync(id);
+            return NoContent();
+        }
     }
 }
