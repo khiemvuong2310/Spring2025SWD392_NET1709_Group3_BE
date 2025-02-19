@@ -41,7 +41,7 @@ namespace DianaShop.Service.Services
             if (user != null)
             {
                 var userWithRole = await _userService.GetUserByUsernameAsync(user.Username);
-                var roleNames = string.Join(",", userWithRole.UserRoles.Select(ur => ur.Roles));
+                var roleNames = string.Join(",", userWithRole.UserRoles.Select(ur => ur.Role.Name));
                 string token = GenerateJwtToken(user.Username, roleNames, user.Id);
 
                 if (user.Status == false)
@@ -141,7 +141,7 @@ namespace DianaShop.Service.Services
             await _unitOfWork.CommitAsync();
 
             var userWithRole = await _userService.GetUserByUsernameAsync(user.Username);
-            var roleNames = string.Join(",", userWithRole.UserRoles.Select(ur => ur.Roles));
+            var roleNames = string.Join(",", userWithRole.UserRoles.Select(ur => ur.Role.Name));
             string token = GenerateJwtToken(user.Username, roleNames, user.Id);
 
             return new BaseResponse<TokenModel>
@@ -185,7 +185,7 @@ namespace DianaShop.Service.Services
 
             var userWithRole = await _userService.GetUserByUsernameAsync(user.Username);
 
-            var roleNames = string.Join(",", userWithRole.UserRoles.Select(ur => ur.Roles)); //Note sửa
+            var roleNames = string.Join(",", userWithRole.UserRoles.Select(ur => ur.Role.Name)); //Note sửa
 
 
             string token = GenerateJwtToken(user.Username, roleNames, user.Id);

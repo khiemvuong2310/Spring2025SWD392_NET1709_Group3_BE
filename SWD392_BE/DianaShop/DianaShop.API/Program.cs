@@ -11,7 +11,7 @@ namespace DianaShop.API
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
-            builder.Services.AddRepositories().AddServices().InstallService(builder.Configuration);
+            builder.Services.InstallService(builder.Configuration);
             builder.Services.AddControllers().AddJsonOptions(options =>{options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve;
             });
             builder.Services.AddExceptionHandler<GlobalExceptionHandler>();

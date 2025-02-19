@@ -14,7 +14,7 @@ namespace DianaShop.Service.Interfaces
 
         Task<bool> UpdatePasswordAsync(int id, string oldPassword, string newPassword);
 
-        Task<UserResponseModel?> GetUserByUsernameAsync(string username);
-        Task<UserResponseModel?> GetUserByEmailAsync(string email);
+        Task<User?> GetUserByUsernameAsync(string username);
+        Task<User?> GetUserByEmailAsync(string email);
     }
 }

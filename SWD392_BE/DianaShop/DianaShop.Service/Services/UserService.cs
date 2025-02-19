@@ -122,7 +122,7 @@ namespace DianaShop.Service.Services
         }
 
         // Lấy người dùng theo username
-        public async Task<UserResponseModel?> GetUserByUsernameAsync(string username)
+        public async Task<User?> GetUserByUsernameAsync(string username)
         {
             var user = await _unitOfWork.Repository<User>()
                 .GetAll()
@@ -130,16 +130,18 @@ namespace DianaShop.Service.Services
                 .ThenInclude(ur => ur.Role)
                 .FirstOrDefaultAsync(u => u.Username == username && !u.IsDelete);
 
-            return _mapper.Map<UserResponseModel?>(user);
+            //return _mapper.Map<UserResponseModel?>(user);
+            return user;
         }
 
         // Lấy người dùng theo email
-        public async Task<UserResponseModel?> GetUserByEmailAsync(string email)
+        public async Task<User?> GetUserByEmailAsync(string email)
         {
             var user = await _unitOfWork.Repository<User>()
                 .GetAll()
                 .FirstOrDefaultAsync(u => EF.Functions.Collate(u.Email, "utf8mb4_bin") == email && !u.IsDelete);
-            return _mapper.Map<UserResponseModel?>(user);
+            //return _mapper.Map<UserResponseModel?>(user);
+            return user;
         }
     }
 }
