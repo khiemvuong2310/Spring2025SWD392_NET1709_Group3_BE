@@ -37,7 +37,7 @@ namespace DianaShop.Service.RequestModel
 
         public bool Status { get; set; } = true; // Mặc định là true
 
-        public List<int>? RoleIds { get; set; } // Cho phép null nếu không cần
+        //public List<int>? RoleIds { get; set; } 
     }
 
     public class UserUpdateRequest

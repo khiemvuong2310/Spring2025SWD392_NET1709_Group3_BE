@@ -12,7 +12,8 @@ namespace DianaShop.API
 
             // Add services to the container.
             builder.Services.AddRepositories().AddServices().InstallService(builder.Configuration);
-            builder.Services.AddControllers();
+            builder.Services.AddControllers().AddJsonOptions(options =>{options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve;
+            });
             builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
             builder.Services.AddProblemDetails();
 
@@ -29,6 +30,7 @@ namespace DianaShop.API
             //              .AllowAnyMethod();
             //    });
             //});
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.

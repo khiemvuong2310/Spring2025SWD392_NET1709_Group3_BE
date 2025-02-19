@@ -127,6 +127,15 @@ namespace DianaShop.Data
                 .HasOne(rst => rst.SkinType)
                 .WithMany(st => st.RoutineSkinTypes)
                 .HasForeignKey(rst => rst.SkinTypeId);
+
+
+            //SeedData
+            modelBuilder.Entity<Role>().HasData(
+                new Role { Id = 1, Name = "Manager" },
+                new Role { Id = 2, Name = "Staff" },
+                new Role { Id = 3, Name = "Customer" }
+                );
+
         }
     }
 }
