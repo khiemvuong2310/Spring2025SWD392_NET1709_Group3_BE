@@ -21,37 +21,57 @@ using Microsoft.AspNetCore.Http;
 
 namespace DianaShop.Service.Services
 {
-    public class AuthServices : IAuthServices
-    {
-        private readonly IConfiguration _configuration;
-        private readonly IUserService _userService;
-        private readonly IUnitOfWork _unitOfWork;
-
-        public AuthServices(IConfiguration configuration, IUserService userService, IUnitOfWork unitOfWork)
+        public class AuthServices : IAuthServices
         {
-            _configuration = configuration;
-            _userService = userService;
-            _unitOfWork = unitOfWork;
-        }
+            private readonly IConfiguration _configuration;
+            private readonly IUserService _userService;
+            private readonly IUnitOfWork _unitOfWork;
 
-        public async Task<BaseResponseForLogin<LoginResponseModel>> AuthenticateAsync(string email, string password)
-        {
-            var user = await _userService.GetUserByEmailAsync(email);
-
-            if (user != null)
+            public AuthServices(IConfiguration configuration, IUserService userService, IUnitOfWork unitOfWork)
             {
-                var userWithRole = await _userService.GetUserByUsernameAsync(user.Username);
-                var roleNames = string.Join(",", userWithRole.UserRoles.Select(ur => ur.Role.Name));
-                string token = GenerateJwtToken(user.Username, roleNames, user.Id);
+                _configuration = configuration;
+                _userService = userService;
+                _unitOfWork = unitOfWork;
+            }
 
-                if (user.Status == false)
+            public async Task<BaseResponseForLogin<LoginResponseModel>> AuthenticateAsync(string email, string password)
+            {
+                var user = await _userService.GetUserByEmailAsync(email);
+
+                if (user != null)
                 {
+                    var userWithRole = await _userService.GetUserByUsernameAsync(user.Username);
+                    var roleNames = string.Join(",", userWithRole.UserRoles.Select(ur => ur.RoleName));
+                    string token = GenerateJwtToken(user.Username, roleNames, user.Id);
+
+                    if (user.Status == false)
+                    {
+                        return new BaseResponseForLogin<LoginResponseModel>()
+                        {
+                            Code = 404,
+                            Message = "Your Account has been banned. Check email for reason",
+                            Data = new LoginResponseModel()
+                            {
+                                User = new UserResponseModel()
+                                {
+                                    Id = user.Id,
+                                    Username = user.Username,
+                                    Email = user.Email,
+                                    Location = user.Location,
+                                    Phone = user.Phone,
+                                },
+                            },
+                            IsBanned = true,
+                        };
+                    }
+
                     return new BaseResponseForLogin<LoginResponseModel>()
                     {
-                        Code = 404,
-                        Message = "Your Account has been banned. Check email for reason",
+                        Code = 200,
+                        Message = "",
                         Data = new LoginResponseModel()
                         {
+                            Token = token,
                             User = new UserResponseModel()
                             {
                                 Id = user.Id,
@@ -61,168 +81,145 @@ namespace DianaShop.Service.Services
                                 Phone = user.Phone,
                             },
                         },
-                        IsBanned = true,
+                        IsBanned = false
                     };
                 }
-
                 return new BaseResponseForLogin<LoginResponseModel>()
                 {
-                    Code = 200,
-                    Message = "",
-                    Data = new LoginResponseModel()
-                    {
-                        Token = token,
-                        User = new UserResponseModel()
-                        {
-                            Id = user.Id,
-                            Username = user.Username,
-                            Email = user.Email,
-                            Location = user.Location,
-                            Phone = user.Phone,
-                        },
-                    },
+                    Code = 404,
+                    Message = "Username or Password incorrect",
+                    Data = null,
                     IsBanned = false
                 };
             }
-            return new BaseResponseForLogin<LoginResponseModel>()
-            {
-                Code = 404,
-                Message = "Username or Password incorrect",
-                Data = null,
-                IsBanned = false
-            };
-        }
 
-        public string GenerateJwtToken(string username, string roleName, int userId)
-        {
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.ASCII.GetBytes(_configuration["Jwt:Key"]);
-
-            var tokenDescriptor = new SecurityTokenDescriptor
+            public string GenerateJwtToken(string username, string roleName, int userId)
             {
-                Subject = new ClaimsIdentity(new[]
+                var tokenHandler = new JwtSecurityTokenHandler();
+                var key = Encoding.ASCII.GetBytes(_configuration["Jwt:Key"]);
+
+                var tokenDescriptor = new SecurityTokenDescriptor
                 {
+                    Subject = new ClaimsIdentity(new[]
+                    {
                     new Claim(ClaimTypes.Name, username),
                     new Claim(ClaimTypes.Role, roleName),
                     new Claim(ClaimTypes.NameIdentifier, userId.ToString())
                 }),
-                Expires = DateTime.UtcNow.AddHours(24),
-                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
-            };
-
-            var token = tokenHandler.CreateToken(tokenDescriptor);
-            return tokenHandler.WriteToken(token);
-        }
-
-        public async Task<BaseResponse<TokenModel>> RegisterAsync(RegisterModel registerModel)
-        {
-            var existingUser = await _unitOfWork.Repository<User>().FindAsync(u => u.Email == registerModel.Email);
-
-            if (existingUser != null)
-            {
-                return new BaseResponse<TokenModel>
-                {
-                    Code = 409,
-                    Message = "Email already exists",
+                    Expires = DateTime.UtcNow.AddHours(24),
+                    SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
                 };
+
+                var token = tokenHandler.CreateToken(tokenDescriptor);
+                return tokenHandler.WriteToken(token);
             }
 
-            var user = new User()
+            public async Task<BaseResponse<TokenModel>> RegisterAsync(RegisterModel registerModel)
             {
-                Location = registerModel.Location,
-                Username = registerModel.Username,
-                Email = registerModel.Email,
-                Password = PasswordTools.HashPassword(registerModel.Password),
-                Phone = registerModel.Phone,
-                Status = true,
-            };
+                var existingUser = await _unitOfWork.Repository<User>().FindAsync(u => u.Email == registerModel.Email);
 
-            await _unitOfWork.Repository<User>().InsertAsync(user);
-            await _unitOfWork.CommitAsync();
-
-            var userWithRole = await _userService.GetUserByUsernameAsync(user.Username);
-            var roleNames = string.Join(",", userWithRole.UserRoles.Select(ur => ur.Role.Name));
-            string token = GenerateJwtToken(user.Username, roleNames, user.Id);
-
-            return new BaseResponse<TokenModel>
-            {
-                Code = 201,
-                Message = "Register successfully",
-                Data = new TokenModel
+                if (existingUser != null)
                 {
-                    Token = token
+                    return new BaseResponse<TokenModel>
+                    {
+                        Code = 409,
+                        Message = "Email already exists",
+                    };
                 }
-            };
-        }
 
-        public async Task<BaseResponse<TokenModel>> AdminGenAcc(AdminCreateAccountModel adminCreateAccountModel)
-        {
-            var existingUser = await _unitOfWork.Repository<User>().FindAsync(u => u.Email == adminCreateAccountModel.Email);
-
-            if (existingUser != null)
-            {
-                return new BaseResponse<TokenModel>
+                var user = new User()
                 {
-                    Code = 409,
-                    Message = "Email already exists",
+                    Location = registerModel.Location,
+                    Username = registerModel.Username,
+                    Email = registerModel.Email,
+                    Password = PasswordTools.HashPassword(registerModel.Password),
+                    Phone = registerModel.Phone,
+                    Status = true,
                 };
-            }
 
-            var user = new User()
-            {
-                Location = adminCreateAccountModel.Location,
-                Username = adminCreateAccountModel.Username,
-                Email = adminCreateAccountModel.Email,
-                Password = "01234",
-                Phone = adminCreateAccountModel.Phone,
-                Status = true,
-            };
-
-            await _unitOfWork.Repository<User>().InsertAsync(user);
-            await _unitOfWork.CommitAsync();
-
-            await SendAccount(user.Id);
-
-            var userWithRole = await _userService.GetUserByUsernameAsync(user.Username);
-
-            var roleNames = string.Join(",", userWithRole.UserRoles.Select(ur => ur.Role.Name)); //Note sửa
-
-
-            string token = GenerateJwtToken(user.Username, roleNames, user.Id);
-
-            return new BaseResponse<TokenModel>
-            {
-                Code = 201,
-                Message = "Register successfully",
-                Data = new TokenModel
-                {
-                    Token = token
-                }
-            };
-        }
-
-        public async Task<BaseResponse> SendAccount(int userId)
-        {
-            try
-            {
-                var user = await _unitOfWork.Repository<User>().GetById(userId);
-                var providePassword = GeneratePassword();
-                user.Password = PasswordTools.HashPassword(providePassword);
-                await _unitOfWork.Repository<User>().Update(user, user.Id);
+                await _unitOfWork.Repository<User>().InsertAsync(user);
                 await _unitOfWork.CommitAsync();
 
-                var smtpClient = new SmtpClient("smtp.gmail.com");
-                smtpClient.Port = 587;
-                smtpClient.EnableSsl = true;
-                smtpClient.UseDefaultCredentials = false;
-                smtpClient.Credentials = new NetworkCredential("studentexchangeweb@gmail.com", "fwpl wpkw zhqe peyh");
+                var userWithRole = await _userService.GetUserByUsernameAsync(user.Username);
+                var roleNames = string.Join(",", userWithRole.UserRoles.Select(ur => ur.RoleName));
+                string token = GenerateJwtToken(user.Username, roleNames, user.Id);
 
-                MailMessage mailMessage = new MailMessage();
-                mailMessage.From = new MailAddress("studentexchangeweb@gmail.com");
-                mailMessage.To.Add(user.Email);
-                mailMessage.Subject = "YOUR ENTRY ACCOUNT";
+                return new BaseResponse<TokenModel>
+                {
+                    Code = 201,
+                    Message = "Register successfully",
+                    Data = new TokenModel
+                    {
+                        Token = token
+                    }
+                };
+            }
 
-                mailMessage.Body = @"
+            public async Task<BaseResponse<TokenModel>> AdminGenAcc(AdminCreateAccountModel adminCreateAccountModel)
+            {
+                var existingUser = await _unitOfWork.Repository<User>().FindAsync(u => u.Email == adminCreateAccountModel.Email);
+
+                if (existingUser != null)
+                {
+                    return new BaseResponse<TokenModel>
+                    {
+                        Code = 409,
+                        Message = "Email already exists",
+                    };
+                }
+
+                var user = new User()
+                {
+                    Location = adminCreateAccountModel.Location,
+                    Username = adminCreateAccountModel.Username,
+                    Email = adminCreateAccountModel.Email,
+                    Password = "01234",
+                    Phone = adminCreateAccountModel.Phone,
+                    Status = true,
+                };
+
+                await _unitOfWork.Repository<User>().InsertAsync(user);
+                await _unitOfWork.CommitAsync();
+
+                await SendAccount(user.Id);
+
+                var userWithRole = await _userService.GetUserByUsernameAsync(user.Username);
+                var roleNames = string.Join(",", userWithRole.UserRoles.Select(ur => ur.RoleName));
+                string token = GenerateJwtToken(user.Username, roleNames, user.Id);
+
+                return new BaseResponse<TokenModel>
+                {
+                    Code = 201,
+                    Message = "Register successfully",
+                    Data = new TokenModel
+                    {
+                        Token = token
+                    }
+                };
+            }
+
+            public async Task<BaseResponse> SendAccount(int userId)
+            {
+                try
+                {
+                    var user = await _unitOfWork.Repository<User>().GetById(userId);
+                    var providePassword = GeneratePassword();
+                    //user.Password = PasswordTools.HashPassword(providePassword);
+                    await _unitOfWork.Repository<User>().Update(user, user.Id);
+                    await _unitOfWork.CommitAsync();
+
+                    var smtpClient = new SmtpClient("smtp.gmail.com");
+                    smtpClient.Port = 587;
+                    smtpClient.EnableSsl = true;
+                    smtpClient.UseDefaultCredentials = false;
+                    smtpClient.Credentials = new NetworkCredential("studentexchangeweb@gmail.com", "fwpl wpkw zhqe peyh");
+
+                    MailMessage mailMessage = new MailMessage();
+                    mailMessage.From = new MailAddress("studentexchangeweb@gmail.com");
+                    mailMessage.To.Add(user.Email);
+                    mailMessage.Subject = "YOUR ENTRY ACCOUNT";
+
+                    mailMessage.Body = @"
 <html>
 <head>
   <style>
@@ -275,58 +272,58 @@ namespace DianaShop.Service.Services
 </body>
 </html>";
 
-                mailMessage.IsBodyHtml = true;
+                    mailMessage.IsBodyHtml = true;
 
-                await smtpClient.SendMailAsync(mailMessage);
+                    await smtpClient.SendMailAsync(mailMessage);
 
-                return new BaseResponse
-                {
-                    Code = 200,
-                    Message = "Send succeed."
-                };
-            }
-            catch (Exception ex)
-            {
-                return new BaseResponse
-                {
-                    Code = 400,
-                    Message = "An error occurred: " + ex.Message
-                };
-            }
-        }
-
-        public async Task<BaseResponse> ForgotPassword(RequestModel.ForgotPasswordRequest request)
-        {
-            try
-            {
-                var query = await _unitOfWork.Repository<User>()
-                    .AsNoTracking()
-                    .SingleOrDefaultAsync(x => x.Email == request.Email);
-
-                if (query == null || query.Email != request.Email)
+                    return new BaseResponse
+                    {
+                        Code = 200,
+                        Message = "Send succeed."
+                    };
+                }
+                catch (Exception ex)
                 {
                     return new BaseResponse
                     {
-                        Code = StatusCodes.Status400BadRequest,
-                        Message = "Email is not matched"
+                        Code = 400,
+                        Message = "An error occurred: " + ex.Message
                     };
                 }
+            }
 
-                var providePassword = GeneratePassword();
-                query.Password = PasswordTools.HashPassword(providePassword);
+            public async Task<BaseResponse> ForgotPassword(RequestModel.ForgotPasswordRequest request)
+            {
+                try
+                {
+                    var query = await _unitOfWork.Repository<User>()
+                        .AsNoTracking()
+                        .SingleOrDefaultAsync(x => x.Email == request.Email);
 
-                var smtpClient = new SmtpClient("smtp.gmail.com");
-                smtpClient.Port = 587;
-                smtpClient.EnableSsl = true;
-                smtpClient.UseDefaultCredentials = false;
-                smtpClient.Credentials = new NetworkCredential("studentexchangeweb@gmail.com", "fwpl wpkw zhqe peyh");
+                    if (query == null || query.Email != request.Email)
+                    {
+                        return new BaseResponse
+                        {
+                            Code = StatusCodes.Status400BadRequest,
+                            Message = "Email is not matched"
+                        };
+                    }
 
-                MailMessage mailMessage = new MailMessage();
-                mailMessage.From = new MailAddress("studentexchangeweb@gmail.com");
-                mailMessage.To.Add(query.Email);
-                mailMessage.Subject = "WEB EXCHANGE: YOUR RESET PASSWORD";
+                    var providePassword = GeneratePassword();
+                    query.Password = PasswordTools.HashPassword(providePassword);
 
-                mailMessage.Body = @"
+                    var smtpClient = new SmtpClient("smtp.gmail.com");
+                    smtpClient.Port = 587;
+                    smtpClient.EnableSsl = true;
+                    smtpClient.UseDefaultCredentials = false;
+                    smtpClient.Credentials = new NetworkCredential("studentexchangeweb@gmail.com", "fwpl wpkw zhqe peyh");
+
+                    MailMessage mailMessage = new MailMessage();
+                    mailMessage.From = new MailAddress("studentexchangeweb@gmail.com");
+                    mailMessage.To.Add(query.Email);
+                    mailMessage.Subject = "WEB EXCHANGE: YOUR RESET PASSWORD";
+
+                    mailMessage.Body = @"
 <html>
 <head>
   <style>
@@ -379,38 +376,38 @@ namespace DianaShop.Service.Services
 </body>
 </html>";
 
-                mailMessage.IsBodyHtml = true;
+                    mailMessage.IsBodyHtml = true;
 
-                await smtpClient.SendMailAsync(mailMessage);
-                await _unitOfWork.Repository<User>().Update(query, query.Id);
-                await _unitOfWork.CommitAsync();
+                    await smtpClient.SendMailAsync(mailMessage);
+                    await _unitOfWork.Repository<User>().Update(query, query.Id);
+                    await _unitOfWork.CommitAsync();
 
-                return new BaseResponse
+                    return new BaseResponse
+                    {
+                        Code = StatusCodes.Status200OK,
+                        Message = "Your reset password has been sent."
+                    };
+                }
+                catch (Exception ex)
                 {
-                    Code = StatusCodes.Status200OK,
-                    Message = "Your reset password has been sent."
-                };
+                    return new BaseResponse
+                    {
+                        Code = StatusCodes.Status500InternalServerError,
+                        Message = "An error occurred: " + ex.Message
+                    };
+                }
             }
-            catch (Exception ex)
-            {
-                return new BaseResponse
-                {
-                    Code = StatusCodes.Status500InternalServerError,
-                    Message = "An error occurred: " + ex.Message
-                };
-            }
-        }
 
-        public string GeneratePassword()
-        {
-            string characters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!@#$%^&*()";
-            var bytes = new byte[8];
-            using (RandomNumberGenerator rng = RandomNumberGenerator.Create())
+            public string GeneratePassword()
             {
-                rng.GetBytes(bytes);
+                string characters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!@#$%^&*()";
+                var bytes = new byte[8];
+                using (RandomNumberGenerator rng = RandomNumberGenerator.Create())
+                {
+                    rng.GetBytes(bytes);
+                }
+                var password = new string(bytes.Select(b => characters[b % characters.Length]).ToArray());
+                return password;
             }
-            var password = new string(bytes.Select(b => characters[b % characters.Length]).ToArray());
-            return password;
         }
     }
-}

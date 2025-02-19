@@ -1,4 +1,5 @@
 ﻿using DianaShop.Data.Entities;
+using DianaShop.Service.ReponseModel;
 
 namespace DianaShop.Service.Interfaces
 {
@@ -7,7 +8,7 @@ namespace DianaShop.Service.Interfaces
         Task AcceptRoleRequestAsync(int userId, int roleId);
         Task AddRoleAsync(UserRole role);
         Task<IEnumerable<UserRole>> GetAllPendingRoleRequestsAsync();
-        Task<IEnumerable<string>> GetRolesOfUserAsync(int userId);
+        Task<IEnumerable<UserRoleResponseModel>> GetRolesOfUserAsync(int userId);
         Task RemoveRoleAsync(int userId, int roleId);
         Task RequestRoleAsync(int userId, int roleId);
         Task UpdateRolesAsync(int userId, List<int> newRoleIds);

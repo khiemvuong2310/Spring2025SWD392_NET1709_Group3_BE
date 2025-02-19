@@ -21,16 +21,17 @@ namespace DianaShop.Service.Mapping
                 .ForMember(dest => dest.VoucherStorage, opt => opt.MapFrom(src => src.VoucherStorage))
                 .ForMember(dest => dest.UserRoles, opt => opt.MapFrom(src => src.UserRoles.Select(ur => ur.Role.Name))) // Chỉ lấy tên role
                 .ForMember(dest => dest.FeedBacks, opt => opt.MapFrom(src => src.FeedBacks))
-                .ForMember(dest => dest.Orders, opt => opt.MapFrom(src => src.Orders));
+                .ForMember(dest => dest.Orders, opt => opt.MapFrom(src => src.Orders))
+                .ForMember(dest => dest.UserRoles, opt => opt.MapFrom(src => src.UserRoles));
 
             // Mapping UserCreateRequest -> User
             CreateMap<UserCreateRequest, User>()
-                .ForMember(dest => dest.Token, opt => opt.Ignore())
+                .ForMember(dest => dest.Token, opt => opt.Ignore()) // Không map Token
                 .ForMember(dest => dest.Cart, opt => opt.Ignore()) // Không tạo giỏ hàng ngay khi đăng ký
                 .ForMember(dest => dest.VoucherStorage, opt => opt.Ignore()) // Không có voucher khi tạo mới
                 .ForMember(dest => dest.FeedBacks, opt => opt.Ignore()) // Không có feedback khi tạo mới
                 .ForMember(dest => dest.Orders, opt => opt.Ignore()) // Không có đơn hàng khi tạo mới
-                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status));// Ánh xạ Status
+                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status)); // Ánh xạ Status
         }
     }
 

@@ -10,7 +10,7 @@ namespace DianaShop.Service.ReponseModel
     public class UserRoleResponseModel
     {
         public int UserId { get; set; }
-        public List<string> Roles { get; set; }
+        public string RoleName { get; set; }
     }
 
     public class RoleDetailResponseModel : UserRoleResponseModel

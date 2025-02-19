@@ -21,7 +21,7 @@ namespace DianaShop.API.Controllers
 
         // GET: api/UserRole/Role/{roleId}
         [HttpGet("Role/{userId}/Roles")]
-        [Authorize]
+        //[Authorize]
         public async Task<ActionResult<UserRoleResponseModel>> GetRoles(int userId)
         {
             if (userId <= 0)
@@ -30,17 +30,11 @@ namespace DianaShop.API.Controllers
             }
 
             // Await the async method
-            var role = await _userRoleService.GetRolesOfUserAsync(userId);
+            var response = await _userRoleService.GetRolesOfUserAsync(userId);
 
-            if (role == null || !role.Any())
+            if (response == null || !response.Any())
             {
                 return NotFound($"No roles found for UserId {userId}.");
-            }
-
-            var response = new UserRoleResponseModel
-            {
-                UserId = userId,
-                Roles = role.ToList()
             };
 
             return Ok(response);

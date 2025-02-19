@@ -1,6 +1,8 @@
-﻿using DianaShop.Data.Entities;
+﻿using AutoMapper;
+using DianaShop.Data.Entities;
 using DianaShop.Repository.UnitOfWork;
 using DianaShop.Service.Interfaces;
+using DianaShop.Service.ReponseModel;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -13,21 +15,21 @@ namespace DianaShop.Service.Services
     public class UserRoleService : IUserRoleService
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IMapper _mapper;
 
-        public UserRoleService(IUnitOfWork unitOfWork)
+        public UserRoleService(IUnitOfWork unitOfWork, IMapper mapper)
         {
             _unitOfWork = unitOfWork;
+            _mapper = mapper;
         }
 
-        public async Task<IEnumerable<string>> GetRolesOfUserAsync(int userId)
+        public async Task<IEnumerable<UserRoleResponseModel>> GetRolesOfUserAsync(int userId)
         {
-            return await _unitOfWork.Repository<UserRole>()
-                .AsQueryable()
-                .AsNoTracking()
+            var userRoles = await _unitOfWork.Repository<UserRole>().GetAll()
                 .Where(s => s.UserId == userId && s.Status == true)
                 .Include(s => s.Role)
-                .Select(s => s.Role.Name)
                 .ToListAsync();
+            return _mapper.Map<IEnumerable<UserRoleResponseModel>>(userRoles);
         }
 
         public bool UserHasRole(int userId, string roleName)

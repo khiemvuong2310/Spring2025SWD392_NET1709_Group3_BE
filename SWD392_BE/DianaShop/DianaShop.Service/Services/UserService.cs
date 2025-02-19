@@ -28,7 +28,7 @@ namespace DianaShop.Service.Services
         // Lấy tất cả người dùng
         public async Task<IEnumerable<UserResponseModel>> GetAllUsersAsync()
         {
-            var user = await _unitOfWork.Repository<User>()
+            var users = await _unitOfWork.Repository<User>()
                 .Include(u => u.SkinType)
                 .Include(u => u.Cart)
                 .Include(u => u.VoucherStorage)
@@ -37,7 +37,7 @@ namespace DianaShop.Service.Services
                 .Include(u => u.Orders)
                 .Where(u => !u.IsDelete)
                 .ToListAsync();
-            return _mapper.Map<IEnumerable<UserResponseModel>>(user);
+            return _mapper.Map<IEnumerable<UserResponseModel>>(users);
         }
 
         // Lấy người dùng theo ID
@@ -51,25 +51,22 @@ namespace DianaShop.Service.Services
                 .Include(u => u.FeedBacks)
                 .Include(u => u.Orders)
                 .FirstOrDefaultAsync(u => u.Id == id && !u.IsDelete);
-
             return _mapper.Map<UserResponseModel>(user);
         }
 
         // Tạo mới người dùng
-        public async Task<UserResponseModel> CreateUserAsync(UserCreateRequest request)
+        public async Task<User> CreateUserAsync(UserCreateRequest request)
         {
             var user = _mapper.Map<User>(request);
             user.Password = PasswordTools.HashPassword(user.Password);
-
-            user.UserRoles = new List<UserRole> { new UserRole { UserId = user.Id, RoleId = 3 } };
-
+            user.UserRoles = new List<UserRole> { new UserRole { UserId = user.Id, RoleId = 3, Status = true } };
 
             await _unitOfWork.Repository<User>().InsertAsync(user);
-            var result = await _unitOfWork.CommitAsync();
+            var result = await _unitOfWork.SaveChangesAsync();
 
             if (result <= 0) throw new Exception("Failed to create user");
 
-            return _mapper.Map<UserResponseModel>(user);
+            return user;
         }
 
         // Cập nhật thông tin người dùng
@@ -122,26 +119,23 @@ namespace DianaShop.Service.Services
         }
 
         // Lấy người dùng theo username
-        public async Task<User?> GetUserByUsernameAsync(string username)
+        public async Task<UserResponseModel?> GetUserByUsernameAsync(string username)
         {
             var user = await _unitOfWork.Repository<User>()
                 .GetAll()
                 .Include(u => u.UserRoles)
                 .ThenInclude(ur => ur.Role)
                 .FirstOrDefaultAsync(u => u.Username == username && !u.IsDelete);
-
-            //return _mapper.Map<UserResponseModel?>(user);
-            return user;
+            return _mapper.Map<UserResponseModel>(user);
         }
 
         // Lấy người dùng theo email
-        public async Task<User?> GetUserByEmailAsync(string email)
+        public async Task<UserResponseModel?> GetUserByEmailAsync(string email)
         {
             var user = await _unitOfWork.Repository<User>()
                 .GetAll()
                 .FirstOrDefaultAsync(u => EF.Functions.Collate(u.Email, "utf8mb4_bin") == email && !u.IsDelete);
-            //return _mapper.Map<UserResponseModel?>(user);
-            return user;
+            return _mapper.Map<UserResponseModel>(user);
         }
     }
 }
