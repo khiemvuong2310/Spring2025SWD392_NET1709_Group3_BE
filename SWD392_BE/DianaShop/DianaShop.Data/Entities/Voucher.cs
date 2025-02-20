@@ -9,7 +9,6 @@ namespace DianaShop.Data.Entities
 {
     public class Voucher :BaseEntity
     {
-        public int VoucherStorageID { get; set; }
         public double? DiscountPercentage { get; set; }
         public double? MinimumPurchase { get; set; }
         public int? Quantity { get; set; }

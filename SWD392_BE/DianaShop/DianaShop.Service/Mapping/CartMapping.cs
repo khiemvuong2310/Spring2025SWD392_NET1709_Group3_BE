@@ -17,6 +17,7 @@ namespace DianaShop.Service.Mapping
         {
             CreateMap<CartRequestModel, Cart>();
             CreateMap<Cart, CartResponseModel>()
+                .ForMember(dest => dest.CartID , opt => opt.MapFrom(src => src.Id))
                 .ForMember(dest => dest.Products, opt => opt.MapFrom(src => src.Products));
             CreateMap<Product, ProductResponseModel>();
         }
