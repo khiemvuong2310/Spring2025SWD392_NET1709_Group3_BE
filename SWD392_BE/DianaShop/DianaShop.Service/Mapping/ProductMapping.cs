@@ -22,7 +22,7 @@ namespace DianaShop.Service.Mapping
             .ForMember(dest => dest.Category, opt => opt.MapFrom(src => src.Category.Name))
             .ForMember(dest => dest.Brand, opt => opt.MapFrom(src => src.Brand.Name))
             .ForMember(dest => dest.StockQuantity, opt => opt.MapFrom(src => src.ProductBatches.Sum(pb => pb.Quantity)))
-            .ForMember(dest => dest.ProductBatches, opt => opt.MapFrom(src => src.ProductBatches.Select(pb => pb.Id).ToList()))
+            .ForMember(dest => dest.ProductBatchIds, opt => opt.MapFrom(src => src.ProductBatches.Select(pb => pb.Id).ToList()))
             .ForMember(dest => dest.ProductTags, opt => opt.MapFrom(src => src.ProductTags.Select(pt => pt.Tag.Name).ToList()))
             .ForMember(dest => dest.ProductImages, opt => opt.MapFrom(src => src.ProductImages.Select(pi => pi.Image.Path).ToList()))
             .ForMember(dest => dest.ProductIngredients, opt => opt.MapFrom(src => src.ProductIngredients.Select(pi => pi.Ingredient.Name).ToList()))

@@ -45,6 +45,12 @@ namespace DianaShop.API.AppStarts
             services.AddScoped<IUserRoleService, UserRoleService>();
             services.AddTransient<IPackagingService, PackagingService>();
             services.AddTransient<ISkinTypeTestService, SkinTypeTestService>();
+            services.AddTransient<ICategoryService, CategoryService>();
+            services.AddTransient<IBrandService, BrandService>();
+            services.AddTransient<IFormulationTypeService, FormulationTypeService>();
+            services.AddTransient<IIngredientService, IngredientService>();
+            services.AddTransient<IBatchService, BatchService>();
+            services.AddTransient<ITagService, TagService>();
             //services.AddScoped<IJwtService, JwtService>();
 
             // Thêm AutoMapper vào dịch vụ

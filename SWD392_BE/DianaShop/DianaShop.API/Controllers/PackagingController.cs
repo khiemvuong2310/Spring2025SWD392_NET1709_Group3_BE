@@ -22,7 +22,7 @@ namespace DianaShop.API.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            var response = await _packagingService.GetAllPackagingsAsync();
+            var response = await _packagingService.GetAllAsync();
             return Ok(response);
         }
 
@@ -30,7 +30,7 @@ namespace DianaShop.API.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
-            var response = await _packagingService.GetPackagingByIdAsync(id);
+            var response = await _packagingService.GetByIdAsync(id);
             if (response == null) return NotFound();
             return Ok(response);
         }
@@ -40,7 +40,7 @@ namespace DianaShop.API.Controllers
         public async Task<IActionResult> Create([FromBody] PackagingRequestModel request)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
-            var response = await _packagingService.CreatePackagingAsync(request);
+            var response = await _packagingService.CreateAsync(request);
             return CreatedAtAction(nameof(GetById), new { id = response.Id }, response);
         }
 
@@ -49,10 +49,8 @@ namespace DianaShop.API.Controllers
         public async Task<IActionResult> Update(int id, [FromBody] PackagingRequestModel request)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
-
-            var getResponse = await _packagingService.GetPackagingByIdAsync(id);
-            if (getResponse == null) return NotFound();
-            var updateResponse = await _packagingService.UpdatePackagingAsync(id, request);
+            var updateResponse = await _packagingService.UpdateAsync(id, request);
+            if (updateResponse == null) return NotFound();
             return Ok(updateResponse);
         }
 
@@ -60,7 +58,7 @@ namespace DianaShop.API.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            var response = await _packagingService.DeletePackagingAsync(id);
+            var response = await _packagingService.DeleteAsync(id);
             if (!response) return NotFound();
             return NoContent();
         }

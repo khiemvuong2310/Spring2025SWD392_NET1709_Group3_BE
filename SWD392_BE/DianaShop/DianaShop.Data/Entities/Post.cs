@@ -14,8 +14,8 @@ namespace DianaShop.Data.Entities
         public int UserId { get; set; }
         public bool Status { get; set; }
         public DateTime CreatedDate { get; set; }
-        public DateTime UpdatedDate { get; set; }
-        public DateTime PublishedDate { get; set; }
+        public DateTime? UpdatedDate { get; set; }
+        public DateTime? PublishedDate { get; set; }
         public virtual User User { get; set; }
         public virtual ICollection<Comment> Comments { get; set; }
         public virtual ICollection<PostImage> PostImages { get; set; }

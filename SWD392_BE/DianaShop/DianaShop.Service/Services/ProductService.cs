@@ -33,6 +33,7 @@ namespace DianaShop.Service.Services
                 .Include(p => p.Category)
                 .Include(p => p.Packaging)
                 .Include(p => p.FormulationType)
+                .Include(p => p.ProductBatches)
                 .Include(p => p.ProductTags).ThenInclude(pt => pt.Tag)
                 .Include(p => p.ProductSkinTypes).ThenInclude(ps => ps.SkinType)
                 .Include(p => p.ProductIngredients).ThenInclude(pi => pi.Ingredient)
@@ -111,8 +112,7 @@ namespace DianaShop.Service.Services
 
         public async Task<ProductResponseModel?> GetProductByIdAsync(int id)
         {
-            var product = await _unitOfWork.Repository<Product>()
-                .GetAll()
+            var product = await _unitOfWork.Repository<Product>().AsQueryable()
                 .Include(p => p.Brand)
                 .Include(p => p.Category)
                 .Include(p => p.Packaging)

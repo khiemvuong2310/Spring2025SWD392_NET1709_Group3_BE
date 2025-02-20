@@ -16,7 +16,7 @@ namespace DianaShop.Data.Entities
         public string? Token { get; set; }
         public string? Image { get; set; }
         public bool? Status { get; set; }
-        public int SkinTypeId { get; set; }
+        public int? SkinTypeId { get; set; }
 
         public virtual Cart Cart { get; set; }  
         public virtual SkinType SkinType { get; set; }

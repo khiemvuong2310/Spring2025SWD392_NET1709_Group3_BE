@@ -10,11 +10,11 @@ namespace DianaShop.Service.Interfaces
 {
     public interface IPackagingService
     {
-        Task<IEnumerable<PackagingResponseModel>> GetAllPackagingsAsync();
-        Task<PackagingResponseModel?> GetPackagingByIdAsync(int id);
-        Task<PackagingResponseModel> CreatePackagingAsync(PackagingRequestModel request);
-        Task<PackagingResponseModel?> UpdatePackagingAsync(int id, PackagingRequestModel request);
-        Task<bool> DeletePackagingAsync(int id);
+        Task<IEnumerable<PackagingResponseModel>> GetAllAsync();
+        Task<PackagingResponseModel?> GetByIdAsync(int id);
+        Task<PackagingResponseModel> CreateAsync(PackagingRequestModel request);
+        Task<PackagingResponseModel?> UpdateAsync(int id, PackagingRequestModel request);
+        Task<bool> DeleteAsync(int id);
 
     }
 }

@@ -23,7 +23,7 @@ namespace DianaShop.Service.ReponseModel
         public string AdditionalInformation { get; set; }
         public int StockQuantity { get; set; }
         public bool Status { get; set; } // true: available, false: out of stock
-        public List<string> ProductBatches { get; set; } // List of Batch Codes
+        public List<int> ProductBatchIds { get; set; } // List of Batch Codes
         public List<string> ProductTags { get; set; } // List of tags like "organic", "vegan", etc.
         public List<string> ProductImages { get; set; } // List of image URLs
         public List<string> ProductIngredients { get; set; } // List of ingredients
