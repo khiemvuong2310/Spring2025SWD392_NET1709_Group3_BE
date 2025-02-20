@@ -1,7 +1,10 @@
-using Microsoft.AspNetCore.Diagnostics;
+﻿using Microsoft.AspNetCore.Diagnostics;
 using DianaShop.Repository;
 using DianaShop.Service;
 using DianaShop.API.AppStarts;
+using Microsoft.OpenApi.Models;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using System.Text;
 namespace DianaShop.API
 {
     public class Program
@@ -12,7 +15,9 @@ namespace DianaShop.API
 
             // Add services to the container.
             builder.Services.InstallService(builder.Configuration);
-            builder.Services.AddControllers().AddJsonOptions(options =>{options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve;
+            builder.Services.AddControllers().AddJsonOptions(options =>
+            {
+                options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve;
             });
             builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
             builder.Services.AddProblemDetails();
@@ -29,6 +34,60 @@ namespace DianaShop.API
                           .AllowAnyHeader()
                           .AllowAnyMethod();
                 });
+            });
+            builder.Services.ConfigureAuthService(builder.Configuration);
+            //// Cấu hình JWT Authentication
+            //builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            //    .AddJwtBearer(options =>
+            //    {
+            //        options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+            //        {
+            //            ValidateIssuer = true,
+            //            ValidateAudience = true,
+            //            ValidateLifetime = true,
+            //            ValidateIssuerSigningKey = true,
+            //            ValidIssuer = builder.Configuration["Jwt:Issuer"],  // Cấu hình Issuer
+            //            ValidAudience = builder.Configuration["Jwt:Audience"],  // Cấu hình Audience
+            //            IssuerSigningKey = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))  // Cấu hình Key
+            //        };
+            //    });
+            builder.Services.AddSwaggerGen(c =>
+            {
+                //c.OperationFilter<SnakecasingParameOperationFilter>();
+                c.SwaggerDoc("v1", new OpenApiInfo
+                {
+                    Title = "MySkinCare API",  
+                    Version = "v1"
+                });
+
+
+                var securitySchema = new OpenApiSecurityScheme
+                {
+                    Description = "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
+                    Name = "Authorization",
+                    In = ParameterLocation.Header,
+                    Type = SecuritySchemeType.Http,
+                    Scheme = "bearer",
+                    Reference = new OpenApiReference
+                    {
+                        Type = ReferenceType.SecurityScheme,
+                        Id = "Bearer"
+                    }
+                };
+                c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+                {
+                    Description = "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
+                    Name = "Authorization",
+                    In = ParameterLocation.Header,
+                    Type = SecuritySchemeType.Http,
+                    Scheme = "bearer",
+                    Reference = new OpenApiReference
+                    {
+                        Type = ReferenceType.SecurityScheme,
+                        Id = "Bearer"
+                    }
+                });
+                c.AddSecurityRequirement(new OpenApiSecurityRequirement {{ securitySchema, new string[] { "Bearer" } }});
             });
             var app = builder.Build();
 
