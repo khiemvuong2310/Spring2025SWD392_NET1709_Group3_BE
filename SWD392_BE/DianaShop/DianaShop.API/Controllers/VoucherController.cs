@@ -16,41 +16,40 @@ namespace DianaShop.API.Controllers
             _voucherService = voucherService;
         }
 
-        [HttpPost]
-        public async Task<IActionResult> CreateVoucher([FromBody] VoucherRequestModel request)
+        [HttpGet]
+        public async Task<IActionResult> GetAll()
         {
-            var result = await _voucherService.CreateVoucherAsync(request);
-            return CreatedAtAction(nameof(GetVoucherById), new { id = result.Id }, result);
+            return Ok(await _voucherService.GetAllVouchersAsync());
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetVoucherById(int id)
+        public async Task<IActionResult> GetById(int id)
         {
-            var result = await _voucherService.GetVoucherByIdAsync(id);
-            if (result == null) return NotFound();
-            return Ok(result);
+            var voucher = await _voucherService.GetVoucherByIdAsync(id);
+            if (voucher == null) return NotFound();
+            return Ok(voucher);
         }
 
-        [HttpGet]
-        public async Task<IActionResult> GetAllVouchers()
+        [HttpPost]
+        public async Task<IActionResult> Create(VoucherRequestModel request)
         {
-            var results = await _voucherService.GetAllVouchersAsync();
-            return Ok(results);
+            var voucher = await _voucherService.CreateVoucherAsync(request);
+            return CreatedAtAction(nameof(GetById), new { id = voucher.Id }, voucher);
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateVoucher(int id, [FromBody] VoucherRequestModel request)
+        public async Task<IActionResult> Update(int id, VoucherRequestModel request)
         {
-            var result = await _voucherService.UpdateVoucherAsync(id, request);
-            if (result == null) return NotFound();
-            return Ok(result);
+            var updatedVoucher = await _voucherService.UpdateVoucherAsync(id, request);
+            if (updatedVoucher == null) return NotFound();
+            return Ok(updatedVoucher);
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteVoucher(int id)
+        public async Task<IActionResult> Delete(int id)
         {
-            var success = await _voucherService.DeleteVoucherAsync(id);
-            if (!success) return NotFound();
+            var deleted = await _voucherService.DeleteVoucherAsync(id);
+            if (!deleted) return NotFound();
             return NoContent();
         }
     }

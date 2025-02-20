@@ -5,10 +5,10 @@ namespace DianaShop.Service.Interfaces
 {
     public interface IVoucherStorageService
     {
-        Task<bool> AddVoucherToUserAsync(AddVoucherStorageRequestModel request);
-        Task<VoucherStorageResponseModel> CreateAsync(VoucherStorageRequestModel request);
-        Task<bool> DeleteAsync(int id);
-        Task<IEnumerable<VoucherStorageResponseModel>> GetAllAsync();
-        Task<VoucherStorageResponseModel> GetByIdAsync(int id);
+        Task<List<VoucherStorageResponseModel>> GetAllVoucherStoragesAsync();
+        Task<VoucherStorageResponseModel> GetVoucherStorageByIdAsync(int id);
+        Task<VoucherStorageResponseModel> CreateVoucherStorageAsync(VoucherStorageRequestModel request);
+        Task<bool> DeleteVoucherStorageAsync(int id);
+
     }
 }

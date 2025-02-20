@@ -42,6 +42,8 @@ namespace DianaShop.Data
         public DbSet<Comment> Comments { get; set; }
         public DbSet<Voucher> Vouchers { get; set; }
         public DbSet<VoucherStorage> VoucherStorages { get; set; }
+        public DbSet<Storage> Storages { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<UserRole>()
@@ -133,7 +135,6 @@ namespace DianaShop.Data
                 .HasOne(rst => rst.SkinType)
                 .WithMany(st => st.RoutineSkinTypes)
                 .HasForeignKey(rst => rst.SkinTypeId);
-
 
             //SeedData
             modelBuilder.Entity<Role>().HasData(

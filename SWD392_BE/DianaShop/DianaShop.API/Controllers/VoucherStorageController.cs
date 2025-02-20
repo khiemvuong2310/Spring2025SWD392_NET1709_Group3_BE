@@ -9,42 +9,48 @@ namespace DianaShop.API.Controllers
     [ApiController]
     public class VoucherStorageController : ControllerBase
     {
-        private readonly IVoucherStorageService _service;
+        private readonly IVoucherStorageService _voucherStorageService;
 
-        public VoucherStorageController(IVoucherStorageService service)
+        public VoucherStorageController(IVoucherStorageService voucherStorageService)
         {
-            _service = service;
+            _voucherStorageService = voucherStorageService;
         }
 
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            return Ok(await _service.GetAllAsync());
+            var result = await _voucherStorageService.GetAllVoucherStoragesAsync();
+            return Ok(result);
         }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
-            return Ok(await _service.GetByIdAsync(id));
+            var result = await _voucherStorageService.GetVoucherStorageByIdAsync(id);
+            if (result == null) return NotFound();
+            return Ok(result);
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create(VoucherStorageRequestModel request)
+        public async Task<IActionResult> Create([FromBody] VoucherStorageRequestModel request)
         {
-            return Ok(await _service.CreateAsync(request));
+            var result = await _voucherStorageService.CreateVoucherStorageAsync(request);
+            return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            return Ok(await _service.DeleteAsync(id));
+            var success = await _voucherStorageService.DeleteVoucherStorageAsync(id);
+            if (!success) return NotFound();
+            return NoContent();
         }
 
-        [HttpPost("add-voucher")]
-        public async Task<IActionResult> AddVoucherToUser([FromBody] AddVoucherStorageRequestModel request)
-        {
-            var result = await _service.AddVoucherToUserAsync(request);
-            return result ? Ok("Voucher added successfully.") : BadRequest("Failed to add voucher.");
-        }
+        //[HttpPost("add-voucher")]
+        //public async Task<IActionResult> AddVoucherToUser([FromBody] AddVoucherStorageRequestModel request)
+        //{
+        //    var result = await _service.AddVoucherToUserAsync(request);
+        //    return result ? Ok("Voucher added successfully.") : BadRequest("Failed to add voucher.");
+        //}
     }
 }

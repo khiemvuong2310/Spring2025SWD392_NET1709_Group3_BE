@@ -8,10 +8,9 @@ namespace DianaShop.Data.Entities
 {
     public class VoucherStorage :BaseEntity
     {
-        public int? VoucherID { get; set; }
         public int UserID { get; set; }
 
-        public virtual ICollection<Voucher> Voucher { get; set; }
+        public virtual ICollection<Storage>? Storages { get; set; }
         public virtual User User { get; set; }
     }
 }

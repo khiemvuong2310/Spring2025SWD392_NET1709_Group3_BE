@@ -14,20 +14,28 @@ namespace DianaShop.Service.Mapping
     {
         public VoucherMapping()
         {
-            CreateMap<VoucherRequestModel, Voucher>();
-            CreateMap<Voucher, VoucherResponseModel>();
+            //CreateMap<VoucherRequestModel, Voucher>();
+            //CreateMap<Voucher, VoucherResponseModel>();
 
+            //CreateMap<VoucherStorageRequestModel, VoucherStorage>();
+            //CreateMap<VoucherStorage, VoucherStorageResponseModel>()
+            //    .ForMember(dest => dest.Vouchers, opt => opt.MapFrom(src => src.Voucher.Select(v => new VoucherResponseModel
+            //    {
+            //        Id = v.Id,
+            //        DiscountPercentage = v.DiscountPercentage,
+            //        MinimumPurchase = v.MinimumPurchase,
+            //        Quantity = v.Quantity,
+            //        Value = v.Value,
+            //        Status = v.Status
+            //    }).ToList()));
+            CreateMap<Voucher, VoucherResponseModel>();
+            CreateMap<VoucherRequestModel, Voucher>();
+
+            CreateMap<Storage, StorageResponseModel>();
+            CreateMap<StorageRequestModel, Storage>();
+
+            CreateMap<VoucherStorage, VoucherStorageResponseModel>();
             CreateMap<VoucherStorageRequestModel, VoucherStorage>();
-            CreateMap<VoucherStorage, VoucherStorageResponseModel>()
-                .ForMember(dest => dest.Vouchers, opt => opt.MapFrom(src => src.Voucher.Select(v => new VoucherResponseModel
-                {
-                    Id = v.Id,
-                    DiscountPercentage = v.DiscountPercentage,
-                    MinimumPurchase = v.MinimumPurchase,
-                    Quantity = v.Quantity,
-                    Value = v.Value,
-                    Status = v.Status
-                }).ToList()));
         }
     }
 }

@@ -7,7 +7,7 @@ namespace DianaShop.Service.Interfaces
     {
         Task<VoucherResponseModel> CreateVoucherAsync(VoucherRequestModel request);
         Task<bool> DeleteVoucherAsync(int id);
-        Task<IEnumerable<VoucherResponseModel>> GetAllVouchersAsync();
+        Task<List<VoucherResponseModel>> GetAllVouchersAsync();
         Task<VoucherResponseModel> GetVoucherByIdAsync(int id);
         Task<VoucherResponseModel> UpdateVoucherAsync(int id, VoucherRequestModel request);
     }

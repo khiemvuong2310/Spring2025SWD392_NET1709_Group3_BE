@@ -10,8 +10,23 @@ namespace DianaShop.Service.RequestModel
     {
         public double? DiscountPercentage { get; set; }
         public double? MinimumPurchase { get; set; }
-        public int? Quantity { get; set; }
         public double? Value { get; set; }
         public bool? Status { get; set; }
     }
+    public class CreateVoucherRequest
+    {
+        public double? DiscountPercentage { get; set; }
+        public double? MinimumPurchase { get; set; }
+        public double? Value { get; set; }
+        public bool? Status { get; set; }
+    }
+
+    public class UpdateVoucherRequest
+    {
+        public double? DiscountPercentage { get; set; }
+        public double? MinimumPurchase { get; set; }
+        public double? Value { get; set; }
+        public bool? Status { get; set; }
+    }
+
 }

@@ -25,12 +25,10 @@ namespace DianaShop.Service.Services
             _mapper = mapper;
         }
 
-        public async Task<VoucherResponseModel> CreateVoucherAsync(VoucherRequestModel request)
+        public async Task<List<VoucherResponseModel>> GetAllVouchersAsync()
         {
-            var voucher = _mapper.Map<Voucher>(request);
-            _context.Vouchers.Add(voucher);
-            await _context.SaveChangesAsync();
-            return _mapper.Map<VoucherResponseModel>(voucher);
+            var vouchers = await _context.Vouchers.ToListAsync();
+            return _mapper.Map<List<VoucherResponseModel>>(vouchers);
         }
 
         public async Task<VoucherResponseModel> GetVoucherByIdAsync(int id)
@@ -39,15 +37,19 @@ namespace DianaShop.Service.Services
             return _mapper.Map<VoucherResponseModel>(voucher);
         }
 
-        public async Task<IEnumerable<VoucherResponseModel>> GetAllVouchersAsync()
+        public async Task<VoucherResponseModel> CreateVoucherAsync(VoucherRequestModel request)
         {
-            var vouchers = await _context.Vouchers.ToListAsync();
-            return _mapper.Map<IEnumerable<VoucherResponseModel>>(vouchers);
+            var voucher = _mapper.Map<Voucher>(request);
+            _context.Vouchers.Add(voucher);
+            await _context.SaveChangesAsync();
+            return _mapper.Map<VoucherResponseModel>(voucher);
         }
 
         public async Task<VoucherResponseModel> UpdateVoucherAsync(int id, VoucherRequestModel request)
         {
             var voucher = await _context.Vouchers.FindAsync(id);
+            if (voucher == null) return null;
+
             _mapper.Map(request, voucher);
             await _context.SaveChangesAsync();
             return _mapper.Map<VoucherResponseModel>(voucher);
@@ -57,6 +59,7 @@ namespace DianaShop.Service.Services
         {
             var voucher = await _context.Vouchers.FindAsync(id);
             if (voucher == null) return false;
+
             _context.Vouchers.Remove(voucher);
             await _context.SaveChangesAsync();
             return true;

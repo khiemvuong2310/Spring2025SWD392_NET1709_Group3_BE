@@ -9,7 +9,7 @@ namespace DianaShop.Service.ReponseModel
     public class VoucherStorageResponseModel
     {
         public int Id { get; set; }
-        public int? UserID { get; set; }
-        public List<VoucherResponseModel> Vouchers { get; set; }
+        public int UserID { get; set; }
+        public List<StorageResponseModel>? Storages { get; set; }
     }
 }

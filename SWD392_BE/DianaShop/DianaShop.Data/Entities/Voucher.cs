@@ -11,12 +11,10 @@ namespace DianaShop.Data.Entities
     {
         public double? DiscountPercentage { get; set; }
         public double? MinimumPurchase { get; set; }
-        public int? Quantity { get; set; }
         public double? Value { get; set; }
         public bool? Status { get; set; }
 
-        // Navigation properties
-        public virtual VoucherStorage VoucherStorage { get; set; }
+        public virtual ICollection<Storage> Storages { get; set; }
 
     }
 }

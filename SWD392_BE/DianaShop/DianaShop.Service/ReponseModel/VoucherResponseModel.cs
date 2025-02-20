@@ -11,8 +11,8 @@ namespace DianaShop.Service.ReponseModel
         public int Id { get; set; }
         public double? DiscountPercentage { get; set; }
         public double? MinimumPurchase { get; set; }
-        public int? Quantity { get; set; }
         public double? Value { get; set; }
         public bool? Status { get; set; }
+        public List<StorageResponseModel> Storages { get; set; }
     }
 }

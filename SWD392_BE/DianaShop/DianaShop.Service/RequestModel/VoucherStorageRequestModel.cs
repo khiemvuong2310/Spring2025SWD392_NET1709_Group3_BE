@@ -9,8 +9,6 @@ namespace DianaShop.Service.RequestModel
     public class VoucherStorageRequestModel
     {
         public int UserID { get; set; }
-
-        public int? VoucherID { get; set; } // Cho phép null
     }
 
     public class AddVoucherStorageRequestModel
