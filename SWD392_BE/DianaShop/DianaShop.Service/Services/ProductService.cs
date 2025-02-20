@@ -42,7 +42,7 @@ namespace DianaShop.Service.Services
             return _mapper.Map<IEnumerable<ProductResponseModel>>(products);
         }
 
-        public async Task<ProductResponseModel> AddProductAsync(ProductRequestModel model)
+        private async Task<Product> HandleValidation(ProductRequestModel model)
         {
             // Validate required foreign keys
             var brand = await _unitOfWork.Repository<Brand>().GetById(model.BrandId);
@@ -96,7 +96,11 @@ namespace DianaShop.Service.Services
                     await _unitOfWork.Repository<ProductImage>().InsertAsync(new ProductImage { ProductId = product.Id, ImageId = imageUrl });
                 }
             }
-
+            return product;
+        }
+        public async Task<ProductResponseModel> AddProductAsync(ProductRequestModel model)
+        {
+            var product = await HandleValidation(model);
             // Add to DB
             await _unitOfWork.Repository<Product>().InsertAsync(product);
             await _unitOfWork.CommitAsync();
@@ -113,13 +117,33 @@ namespace DianaShop.Service.Services
                 .Include(p => p.Category)
                 .Include(p => p.Packaging)
                 .Include(p => p.FormulationType)
+                .Include(p => p.ProductBatches)
                 .Include(p => p.ProductTags).ThenInclude(pt => pt.Tag)
                 .Include(p => p.ProductSkinTypes).ThenInclude(ps => ps.SkinType)
                 .Include(p => p.ProductIngredients).ThenInclude(pi => pi.Ingredient)
                 .Include(p => p.ProductImages).ThenInclude(pi => pi.Image)
                 .FirstOrDefaultAsync(p => p.Id == id);
+            if (product != null) return _mapper.Map<ProductResponseModel>(product);
+             else return null;
+        }
+
+        public async Task UpdateProductAsync(int id, ProductRequestModel model)
+        {
+            var product = await _unitOfWork.Repository<Product>().GetById(id);
+            if (product == null) throw new ("Product not found");
+            _mapper.Map(model, product);
+            // Update to DB
+            await _unitOfWork.Repository<Product>().Update(product, id);
+            await _unitOfWork.CommitAsync();
+        }
+
+        public async Task DeleteProductAsync(int id)
+        {
+            var product = await _unitOfWork.Repository<Product>().GetById(id);
             if (product == null) throw new Exception("Product not found");
-            return _mapper.Map<ProductResponseModel>(product);
+            product.IsDelete = true;
+            await _unitOfWork.Repository<Product>().Update(product, id);
+            await _unitOfWork.CommitAsync();
         }
     }
 }

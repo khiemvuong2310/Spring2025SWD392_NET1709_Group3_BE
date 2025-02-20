@@ -16,5 +16,7 @@ namespace DianaShop.Service.Interfaces
         Task<ProductResponseModel> AddProductAsync(ProductRequestModel model);
         Task<IEnumerable<ProductResponseModel>> GetAllProductsAsync();
         Task<ProductResponseModel?> GetProductByIdAsync(int id);
+        Task UpdateProductAsync(int id, ProductRequestModel model);
+        Task DeleteProductAsync(int id);
     }
 }

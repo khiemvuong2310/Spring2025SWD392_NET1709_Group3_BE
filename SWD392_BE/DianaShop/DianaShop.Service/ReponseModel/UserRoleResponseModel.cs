@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DianaShop.Data.Entities;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,7 +10,7 @@ namespace DianaShop.Service.ReponseModel
     public class UserRoleResponseModel
     {
         public int UserId { get; set; }
-        public List<string> Roles { get; set; }
+        public string RoleName { get; set; }
     }
 
     public class RoleDetailResponseModel : UserRoleResponseModel

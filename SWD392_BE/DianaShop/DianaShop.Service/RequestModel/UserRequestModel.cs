@@ -12,7 +12,7 @@ namespace DianaShop.Service.RequestModel
         [RegularExpression(@"^[a-zA-Z0-9\s]*$", ErrorMessage = "Username cannot contain special characters.")]
         [Required(ErrorMessage = "Username is required.")]
         [StringLength(50, ErrorMessage = "Username cannot exceed 50 characters.")]
-        public string Username { get; set; } = null;
+        public string Username { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Email is required.")]
         [EmailAddress(ErrorMessage = "Invalid email format.")]
@@ -24,7 +24,7 @@ namespace DianaShop.Service.RequestModel
 
         [Required(ErrorMessage = "Phone number is required.")]
         [RegularExpression(@"^\d{10,15}$", ErrorMessage = "Phone number must be between 10 and 15 digits.")]
-        public string Phone { get; set; } = null!;
+        public string Phone { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Location is required.")]
         [StringLength(100, ErrorMessage = "Location cannot exceed 100 characters.")]
@@ -32,12 +32,12 @@ namespace DianaShop.Service.RequestModel
 
         public string? Image { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "Skin type is required.")]
         public int SkinTypeId { get; set; }
 
+        public bool Status { get; set; } = true; // Mặc định là true
 
-        [Required(ErrorMessage = "At least one role is required.")]
-        public List<int> RoleIds { get; set; } = new List<int>();
+        //public List<int>? RoleIds { get; set; } 
     }
 
     public class UserUpdateRequest
@@ -64,4 +64,11 @@ namespace DianaShop.Service.RequestModel
         public List<int>? RoleIds { get; set; }
 
     }
+
+    public class UpdatePasswordRequest
+    {
+        public string OldPassword { get; set; }
+        public string NewPassword { get; set; }
+    }
+
 }

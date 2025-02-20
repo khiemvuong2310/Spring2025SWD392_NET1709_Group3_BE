@@ -8,8 +8,8 @@ namespace DianaShop.Data.Enum
 {
     public enum Role
     {
-        User=1,
-        Staff=2,
-        Customer =3,
+        Manager= 1,
+        Staff = 2,
+        Customer = 3,
     }
 }

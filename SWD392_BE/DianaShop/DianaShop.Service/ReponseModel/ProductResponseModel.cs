@@ -21,6 +21,7 @@ namespace DianaShop.Service.ReponseModel
         public string Precaution { get; set; }
         public string Storage { get; set; }
         public string AdditionalInformation { get; set; }
+        public int StockQuantity { get; set; }
         public bool Status { get; set; } // true: available, false: out of stock
         public List<string> ProductBatches { get; set; } // List of Batch Codes
         public List<string> ProductTags { get; set; } // List of tags like "organic", "vegan", etc.

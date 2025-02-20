@@ -34,7 +34,7 @@ namespace DianaShop.Data.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<bool?>("IsDelete")
+                    b.Property<bool>("IsDelete")
                         .HasColumnType("tinyint(1)");
 
                     b.Property<int>("QuestionId")
@@ -63,7 +63,7 @@ namespace DianaShop.Data.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("longtext");
 
-                    b.Property<bool?>("IsDelete")
+                    b.Property<bool>("IsDelete")
                         .HasColumnType("tinyint(1)");
 
                     b.Property<string>("Name")
@@ -79,6 +79,34 @@ namespace DianaShop.Data.Migrations
                     b.ToTable("Brands");
                 });
 
+            modelBuilder.Entity("DianaShop.Data.Entities.Cart", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("IsDelete")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<int>("ProductID")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UserID")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserID")
+                        .IsUnique();
+
+                    b.ToTable("Carts");
+                });
+
             modelBuilder.Entity("DianaShop.Data.Entities.Category", b =>
                 {
                     b.Property<int>("Id")
@@ -90,7 +118,7 @@ namespace DianaShop.Data.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("longtext");
 
-                    b.Property<bool?>("IsDelete")
+                    b.Property<bool>("IsDelete")
                         .HasColumnType("tinyint(1)");
 
                     b.Property<string>("Name")
@@ -117,7 +145,7 @@ namespace DianaShop.Data.Migrations
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<bool?>("IsDelete")
+                    b.Property<bool>("IsDelete")
                         .HasColumnType("tinyint(1)");
 
                     b.Property<int>("LikeCount")
@@ -138,7 +166,45 @@ namespace DianaShop.Data.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Comment");
+                    b.ToTable("Comments");
+                });
+
+            modelBuilder.Entity("DianaShop.Data.Entities.FeedBack", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Comment")
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime?>("CreatedDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<bool>("IsDelete")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<int>("ProductID")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("Rating")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("ReplyOn")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UserID")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductID");
+
+                    b.HasIndex("UserID");
+
+                    b.ToTable("FeedBacks");
                 });
 
             modelBuilder.Entity("DianaShop.Data.Entities.FormulationType", b =>
@@ -152,7 +218,7 @@ namespace DianaShop.Data.Migrations
                     b.Property<bool>("IsAlcoholFree")
                         .HasColumnType("tinyint(1)");
 
-                    b.Property<bool?>("IsDelete")
+                    b.Property<bool>("IsDelete")
                         .HasColumnType("tinyint(1)");
 
                     b.Property<bool>("IsEssentialOilFree")
@@ -187,7 +253,7 @@ namespace DianaShop.Data.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<bool?>("IsDelete")
+                    b.Property<bool>("IsDelete")
                         .HasColumnType("tinyint(1)");
 
                     b.Property<string>("Path")
@@ -211,7 +277,7 @@ namespace DianaShop.Data.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<bool?>("IsDelete")
+                    b.Property<bool>("IsDelete")
                         .HasColumnType("tinyint(1)");
 
                     b.Property<string>("Name")
@@ -223,6 +289,27 @@ namespace DianaShop.Data.Migrations
                     b.ToTable("Ingredients");
                 });
 
+            modelBuilder.Entity("DianaShop.Data.Entities.Order", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("IsDelete")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<int?>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Orders");
+                });
+
             modelBuilder.Entity("DianaShop.Data.Entities.Packaging", b =>
                 {
                     b.Property<int>("Id")
@@ -231,7 +318,7 @@ namespace DianaShop.Data.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<bool?>("IsDelete")
+                    b.Property<bool>("IsDelete")
                         .HasColumnType("tinyint(1)");
 
                     b.Property<bool>("IsRefillable")
@@ -269,7 +356,7 @@ namespace DianaShop.Data.Migrations
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<bool?>("IsDelete")
+                    b.Property<bool>("IsDelete")
                         .HasColumnType("tinyint(1)");
 
                     b.Property<DateTime>("PublishedDate")
@@ -343,6 +430,9 @@ namespace DianaShop.Data.Migrations
                     b.Property<int>("BrandId")
                         .HasColumnType("int");
 
+                    b.Property<int?>("CartId")
+                        .HasColumnType("int");
+
                     b.Property<int>("CategoryId")
                         .HasColumnType("int");
 
@@ -356,7 +446,7 @@ namespace DianaShop.Data.Migrations
                     b.Property<int>("FormulationTypeId")
                         .HasColumnType("int");
 
-                    b.Property<bool?>("IsDelete")
+                    b.Property<bool>("IsDelete")
                         .HasColumnType("tinyint(1)");
 
                     b.Property<string>("Name")
@@ -388,6 +478,8 @@ namespace DianaShop.Data.Migrations
 
                     b.HasIndex("BrandId");
 
+                    b.HasIndex("CartId");
+
                     b.HasIndex("CategoryId");
 
                     b.HasIndex("FormulationTypeId");
@@ -411,7 +503,7 @@ namespace DianaShop.Data.Migrations
                     b.Property<DateTime?>("ImportDate")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<bool?>("IsDelete")
+                    b.Property<bool>("IsDelete")
                         .HasColumnType("tinyint(1)");
 
                     b.Property<DateTime?>("ManufactureDate")
@@ -508,7 +600,7 @@ namespace DianaShop.Data.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<bool?>("IsDelete")
+                    b.Property<bool>("IsDelete")
                         .HasColumnType("tinyint(1)");
 
                     b.HasKey("Id");
@@ -524,7 +616,7 @@ namespace DianaShop.Data.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<bool?>("IsDelete")
+                    b.Property<bool>("IsDelete")
                         .HasColumnType("tinyint(1)");
 
                     b.Property<string>("Name")
@@ -563,7 +655,7 @@ namespace DianaShop.Data.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<bool?>("IsDelete")
+                    b.Property<bool>("IsDelete")
                         .HasColumnType("tinyint(1)");
 
                     b.Property<int>("Order")
@@ -598,7 +690,7 @@ namespace DianaShop.Data.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<bool?>("IsDelete")
+                    b.Property<bool>("IsDelete")
                         .HasColumnType("tinyint(1)");
 
                     b.Property<string>("Name")
@@ -622,7 +714,7 @@ namespace DianaShop.Data.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<bool?>("IsDelete")
+                    b.Property<bool>("IsDelete")
                         .HasColumnType("tinyint(1)");
 
                     b.Property<string>("Name")
@@ -642,7 +734,7 @@ namespace DianaShop.Data.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<bool?>("IsDelete")
+                    b.Property<bool>("IsDelete")
                         .HasColumnType("tinyint(1)");
 
                     b.Property<string>("Name")
@@ -669,7 +761,7 @@ namespace DianaShop.Data.Migrations
                     b.Property<string>("Image")
                         .HasColumnType("longtext");
 
-                    b.Property<bool?>("IsDelete")
+                    b.Property<bool>("IsDelete")
                         .HasColumnType("tinyint(1)");
 
                     b.Property<string>("Location")
@@ -723,6 +815,63 @@ namespace DianaShop.Data.Migrations
                     b.ToTable("UserRoles");
                 });
 
+            modelBuilder.Entity("DianaShop.Data.Entities.Voucher", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<double?>("DiscountPercentage")
+                        .HasColumnType("double");
+
+                    b.Property<bool>("IsDelete")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<double?>("MinimumPurchase")
+                        .HasColumnType("double");
+
+                    b.Property<int?>("Quantity")
+                        .HasColumnType("int");
+
+                    b.Property<bool?>("Status")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<double?>("Value")
+                        .HasColumnType("double");
+
+                    b.Property<int>("VoucherStorageID")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("VoucherStorageID");
+
+                    b.ToTable("Vouchers");
+                });
+
+            modelBuilder.Entity("DianaShop.Data.Entities.VoucherStorage", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("IsDelete")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<int?>("UserID")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserID");
+
+                    b.ToTable("VoucherStorages");
+                });
+
             modelBuilder.Entity("DianaShop.Data.Entities.Answer", b =>
                 {
                     b.HasOne("DianaShop.Data.Entities.Question", "Question")
@@ -742,6 +891,17 @@ namespace DianaShop.Data.Migrations
                     b.Navigation("SkinType");
                 });
 
+            modelBuilder.Entity("DianaShop.Data.Entities.Cart", b =>
+                {
+                    b.HasOne("DianaShop.Data.Entities.User", "User")
+                        .WithOne("Cart")
+                        .HasForeignKey("DianaShop.Data.Entities.Cart", "UserID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("DianaShop.Data.Entities.Comment", b =>
                 {
                     b.HasOne("DianaShop.Data.Entities.Post", "Post")
@@ -759,6 +919,32 @@ namespace DianaShop.Data.Migrations
                     b.Navigation("Post");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("DianaShop.Data.Entities.FeedBack", b =>
+                {
+                    b.HasOne("DianaShop.Data.Entities.Product", "Product")
+                        .WithMany()
+                        .HasForeignKey("ProductID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DianaShop.Data.Entities.User", "User")
+                        .WithMany("FeedBacks")
+                        .HasForeignKey("UserID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("DianaShop.Data.Entities.Order", b =>
+                {
+                    b.HasOne("DianaShop.Data.Entities.User", null)
+                        .WithMany("Orders")
+                        .HasForeignKey("UserId");
                 });
 
             modelBuilder.Entity("DianaShop.Data.Entities.Post", b =>
@@ -817,6 +1003,10 @@ namespace DianaShop.Data.Migrations
                         .HasForeignKey("BrandId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("DianaShop.Data.Entities.Cart", null)
+                        .WithMany("Products")
+                        .HasForeignKey("CartId");
 
                     b.HasOne("DianaShop.Data.Entities.Category", "Category")
                         .WithMany("Products")
@@ -992,7 +1182,32 @@ namespace DianaShop.Data.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("DianaShop.Data.Entities.Voucher", b =>
+                {
+                    b.HasOne("DianaShop.Data.Entities.VoucherStorage", "VoucherStorage")
+                        .WithMany()
+                        .HasForeignKey("VoucherStorageID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("VoucherStorage");
+                });
+
+            modelBuilder.Entity("DianaShop.Data.Entities.VoucherStorage", b =>
+                {
+                    b.HasOne("DianaShop.Data.Entities.User", "User")
+                        .WithMany("VoucherStorage")
+                        .HasForeignKey("UserID");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("DianaShop.Data.Entities.Brand", b =>
+                {
+                    b.Navigation("Products");
+                });
+
+            modelBuilder.Entity("DianaShop.Data.Entities.Cart", b =>
                 {
                     b.Navigation("Products");
                 });
@@ -1083,7 +1298,16 @@ namespace DianaShop.Data.Migrations
 
             modelBuilder.Entity("DianaShop.Data.Entities.User", b =>
                 {
+                    b.Navigation("Cart")
+                        .IsRequired();
+
+                    b.Navigation("FeedBacks");
+
+                    b.Navigation("Orders");
+
                     b.Navigation("UserRoles");
+
+                    b.Navigation("VoucherStorage");
                 });
 #pragma warning restore 612, 618
         }

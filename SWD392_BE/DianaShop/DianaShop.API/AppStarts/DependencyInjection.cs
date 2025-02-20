@@ -1,7 +1,9 @@
 ﻿using DianaShop.Data;
 using DianaShop.Repository.Repositories;
 using DianaShop.Repository.UnitOfWork;
+using DianaShop.Service.Interfaces;
 using DianaShop.Service.Mapping;
+using DianaShop.Service.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System;
@@ -31,16 +33,26 @@ namespace DianaShop.API.AppStarts
             });
             services.AddSingleton<ITwilioRestClient>(new TwilioRestClient("ACCOUNT_SID", "AUTH_TOKEN"));
 
+            //Add Scoped
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
-
+            services.AddScoped<IUserService,UserService>();
+            services.AddScoped<IAuthServices, AuthServices>();
+            services.AddScoped<ICartService, CartService>();    
+            services.AddScoped<IFeedBackService, FeedBackService>();
+            services.AddScoped<IProductService, ProductService>();
+            services.AddScoped<IPackagingService, PackagingService>();
+            services.AddScoped<IUserRoleService, UserRoleService>();
+            services.AddTransient<IPackagingService, PackagingService>();
+            services.AddTransient<ISkinTypeTestService, SkinTypeTestService>();
             //services.AddScoped<IJwtService, JwtService>();
 
             // Thêm AutoMapper vào dịch vụ
-            services.AddAutoMapper(typeof(CategoryMapping));  // Đảm bảo bạn truyền đúng assembly
+            services.AddAutoMapper(typeof(CategoryMapping));  
             services.AddAutoMapper(typeof(PackagingMapping));
             services.AddAutoMapper(typeof(ProductMapping));
-
+            services.AddAutoMapper(typeof(FeedBackMapping));
+            services.AddAutoMapper(typeof(CartMapping));
         }
     }
 }
