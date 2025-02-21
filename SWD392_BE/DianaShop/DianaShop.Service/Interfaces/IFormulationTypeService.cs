@@ -15,8 +15,5 @@ namespace DianaShop.Service.Interfaces
         Task<FormulationTypeResponseModel> CreateAsync(FormulationTypeRequestModel request);
         Task<FormulationTypeResponseModel?> UpdateAsync(int id, FormulationTypeRequestModel request);
         Task<bool> DeleteAsync(int id);
-        Task<IEnumerable<FormulationTypeResponse>> GetAllAsync();
-        Task<FormulationTypeResponse> GetByIdAsync(int id);
-        Task<FormulationTypeResponse> UpdateAsync(int id, FormulationTypeRequest request);
     }
 }

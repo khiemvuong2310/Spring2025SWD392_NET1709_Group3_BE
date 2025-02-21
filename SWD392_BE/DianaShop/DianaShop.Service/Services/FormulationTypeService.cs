@@ -7,12 +7,6 @@ using DianaShop.Service.ReponseModel;
 using DianaShop.Service.RequestModel;
 using Google;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 namespace DianaShop.Service.Services
 {
     public class FormulationTypeService : IFormulationTypeService
@@ -75,9 +69,6 @@ namespace DianaShop.Service.Services
             if (type == null) return false;
             type.IsDelete = true;
             await _unitOfWork.SaveChangesAsync();
-
-            _context.FormulationTypes.Remove(entity);
-            await _context.SaveChangesAsync();
             return true;
         }
     }
