@@ -1,14 +1,19 @@
 ﻿using DianaShop.Service.ReponseModel;
 using DianaShop.Service.RequestModel;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace DianaShop.Service.Interfaces
 {
     public interface IFormulationTypeService
     {
-        Task<FormulationTypeResponse> CreateAsync(FormulationTypeRequest request);
+        Task<IEnumerable<FormulationTypeResponseModel>> GetAllAsync();
+        Task<FormulationTypeResponseModel?> GetByIdAsync(int id);
+        Task<FormulationTypeResponseModel> CreateAsync(FormulationTypeRequestModel request);
+        Task<FormulationTypeResponseModel?> UpdateAsync(int id, FormulationTypeRequestModel request);
         Task<bool> DeleteAsync(int id);
-        Task<IEnumerable<FormulationTypeResponse>> GetAllAsync();
-        Task<FormulationTypeResponse> GetByIdAsync(int id);
-        Task<FormulationTypeResponse> UpdateAsync(int id, FormulationTypeRequest request);
     }
 }

@@ -5,51 +5,51 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace DianaShop.API.Controllers
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class FormulationTypeController : ControllerBase
+    public class FormulationTypeController : BaseController
     {
-        private readonly IFormulationTypeService _service;
-
-        public FormulationTypeController(IFormulationTypeService service)
+        private readonly IFormulationTypeService _formulationTypeService;
+        public FormulationTypeController(IFormulationTypeService formulationTypeService)
         {
-            _service = service;
+            _formulationTypeService = formulationTypeService;
         }
 
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            return Ok(await _service.GetAllAsync());
+            var response = await _formulationTypeService.GetAllAsync();
+            return Ok(response);
         }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
-            var result = await _service.GetByIdAsync(id);
-            if (result == null) return NotFound();
-            return Ok(result);
+            var response = await _formulationTypeService.GetByIdAsync(id);
+            if (response == null) return NotFound();
+            return Ok(response);
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create(FormulationTypeRequest request)
+        public async Task<IActionResult> Create([FromBody] FormulationTypeRequestModel request)
         {
-            var result = await _service.CreateAsync(request);
-            return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+            var response = await _formulationTypeService.CreateAsync(request);
+            return CreatedAtAction(nameof(GetById), new { id = response.Id }, response);
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, FormulationTypeRequest request)
+        public async Task<IActionResult> Update(int id, [FromBody] FormulationTypeRequestModel request)
         {
-            var result = await _service.UpdateAsync(id, request);
-            if (result == null) return NotFound();
-            return Ok(result);
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+            var updateResponse = await _formulationTypeService.UpdateAsync(id, request);
+            if (updateResponse == null) return NotFound();
+            return Ok(updateResponse);
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            var success = await _service.DeleteAsync(id);
-            if (!success) return NotFound();
+            var response = await _formulationTypeService.DeleteAsync(id);
+            if (!response) return NotFound();
             return NoContent();
         }
     }

@@ -1,67 +1,74 @@
 ﻿using AutoMapper;
 using DianaShop.Data;
 using DianaShop.Data.Entities;
+using DianaShop.Repository.UnitOfWork;
 using DianaShop.Service.Interfaces;
 using DianaShop.Service.ReponseModel;
 using DianaShop.Service.RequestModel;
 using Google;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 namespace DianaShop.Service.Services
 {
     public class FormulationTypeService : IFormulationTypeService
     {
-        private readonly AppDbContext _context;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
 
-        public FormulationTypeService(AppDbContext context, IMapper mapper)
+        public FormulationTypeService(IUnitOfWork unitOfWork, IMapper mapper)
         {
-            _context = context;
+            _unitOfWork = unitOfWork;
             _mapper = mapper;
         }
 
-        public async Task<IEnumerable<FormulationTypeResponse>> GetAllAsync()
+        public async Task<IEnumerable<FormulationTypeResponseModel>> GetAllAsync()
         {
-            var entities = await _context.FormulationTypes.Include(ft => ft.Products).ToListAsync();
-            return _mapper.Map<IEnumerable<FormulationTypeResponse>>(entities);
+            var types = await _unitOfWork.Repository<FormulationType>().GetAll()
+                .Where(f => !f.IsDelete)
+                .Include(f => f.Products).ThenInclude(pr => pr.Brand)
+                .Include(f => f.Products).ThenInclude(pr => pr.Packaging)
+                .Include(f => f.Products).ThenInclude(pr => pr.Category)
+                .ToListAsync();
+            types = types.Where(p => !p.IsDelete).ToList();
+            return _mapper.Map<IEnumerable<FormulationTypeResponseModel>>(types);
         }
 
-        public async Task<FormulationTypeResponse> GetByIdAsync(int id)
+        public async Task<FormulationTypeResponseModel?> GetByIdAsync(int id)
         {
-            var entity = await _context.FormulationTypes.Include(ft => ft.Products).FirstOrDefaultAsync(ft => ft.Id == id);
-            return _mapper.Map<FormulationTypeResponse>(entity);
+            var type = await _unitOfWork.Repository<FormulationType>().AsQueryable()
+                .Include(f => f.Products).ThenInclude(pr => pr.Brand)
+                .Include(f => f.Products).ThenInclude(pr => pr.Packaging)
+                .Include(f => f.Products).ThenInclude(pr => pr.Category)
+                .FirstOrDefaultAsync(p => p.Id == id);
+            return type == null ? null : _mapper.Map<FormulationTypeResponseModel>(type);
         }
 
-        public async Task<FormulationTypeResponse> CreateAsync(FormulationTypeRequest request)
+        public async Task<FormulationTypeResponseModel> CreateAsync(FormulationTypeRequestModel request)
         {
-            var entity = _mapper.Map<FormulationType>(request);
-            _context.FormulationTypes.Add(entity);
-            await _context.SaveChangesAsync();
-            return _mapper.Map<FormulationTypeResponse>(entity);
+            var type = _mapper.Map<FormulationType>(request);
+            await _unitOfWork.Repository<FormulationType>().InsertAsync(type);
+            var result = await _unitOfWork.SaveChangesAsync();
+            if (result <= 0) throw new Exception("Failed to create brand");
+            return _mapper.Map<FormulationTypeResponseModel>(type);
         }
 
-        public async Task<FormulationTypeResponse> UpdateAsync(int id, FormulationTypeRequest request)
+        public async Task<FormulationTypeResponseModel?> UpdateAsync(int id, FormulationTypeRequestModel request)
         {
-            var entity = await _context.FormulationTypes.FindAsync(id);
-            if (entity == null) return null;
+            var existingType = await _unitOfWork.Repository<FormulationType>().GetById(id);
+            if (existingType == null) return null;
 
-            _mapper.Map(request, entity);
-            await _context.SaveChangesAsync();
-            return _mapper.Map<FormulationTypeResponse>(entity);
+            _mapper.Map(request, existingType);
+            await _unitOfWork.Repository<FormulationType>().Update(existingType, id);
+            await _unitOfWork.SaveChangesAsync();
+
+            return _mapper.Map<FormulationTypeResponseModel>(existingType);
         }
 
         public async Task<bool> DeleteAsync(int id)
         {
-            var entity = await _context.FormulationTypes.FindAsync(id);
-            if (entity == null) return false;
-
-            _context.FormulationTypes.Remove(entity);
-            await _context.SaveChangesAsync();
+            var type = await _unitOfWork.Repository<FormulationType>().GetById(id);
+            if (type == null) return false;
+            type.IsDelete = true;
+            await _unitOfWork.SaveChangesAsync();
             return true;
         }
     }
