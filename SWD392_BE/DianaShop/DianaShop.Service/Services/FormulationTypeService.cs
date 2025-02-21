@@ -1,9 +1,11 @@
 ﻿using AutoMapper;
+using DianaShop.Data;
 using DianaShop.Data.Entities;
 using DianaShop.Repository.UnitOfWork;
 using DianaShop.Service.Interfaces;
 using DianaShop.Service.ReponseModel;
 using DianaShop.Service.RequestModel;
+using Google;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -74,6 +76,8 @@ namespace DianaShop.Service.Services
             type.IsDelete = true;
             await _unitOfWork.SaveChangesAsync();
 
+            _context.FormulationTypes.Remove(entity);
+            await _context.SaveChangesAsync();
             return true;
         }
     }

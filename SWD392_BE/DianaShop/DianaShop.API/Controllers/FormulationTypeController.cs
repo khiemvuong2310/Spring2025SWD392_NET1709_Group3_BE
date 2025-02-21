@@ -1,5 +1,6 @@
 ﻿using DianaShop.Service.Interfaces;
 using DianaShop.Service.RequestModel;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DianaShop.API.Controllers
