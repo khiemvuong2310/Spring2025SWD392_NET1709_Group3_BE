@@ -136,6 +136,17 @@ namespace DianaShop.Data
                 .WithMany(st => st.RoutineSkinTypes)
                 .HasForeignKey(rst => rst.SkinTypeId);
 
+            modelBuilder.Entity<Storage>()
+                .HasKey(s => new { s.VoucherId, s.VoucherStorageId });
+            modelBuilder.Entity<Storage>()
+                .HasOne(s => s.Voucher)
+                .WithMany(v => v.Storages)
+                .HasForeignKey(s => s.VoucherId);
+            modelBuilder.Entity<Storage>()
+                .HasOne(s => s.VoucherStorage)
+                .WithMany(vs => vs.Storages)
+                .HasForeignKey(s => s.VoucherStorageId);
+
             //SeedData
             modelBuilder.Entity<Role>().HasData(
                 new Role { Id = 1, Name = "Manager" },

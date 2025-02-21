@@ -746,6 +746,30 @@ namespace DianaShop.Data.Migrations
                     b.ToTable("Routines");
                 });
 
+            modelBuilder.Entity("DianaShop.Data.Entities.Storage", b =>
+                {
+                    b.Property<int>("VoucherId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("VoucherStorageId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<int?>("Quantity")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("Status")
+                        .HasColumnType("tinyint(1)");
+
+                    b.HasKey("VoucherId", "VoucherStorageId");
+
+                    b.HasIndex("VoucherStorageId");
+
+                    b.ToTable("Storages");
+                });
+
             modelBuilder.Entity("DianaShop.Data.Entities.Tag", b =>
                 {
                     b.Property<int>("Id")
@@ -852,21 +876,13 @@ namespace DianaShop.Data.Migrations
                     b.Property<double?>("MinimumPurchase")
                         .HasColumnType("double");
 
-                    b.Property<int?>("Quantity")
-                        .HasColumnType("int");
-
                     b.Property<bool?>("Status")
                         .HasColumnType("tinyint(1)");
 
                     b.Property<double?>("Value")
                         .HasColumnType("double");
 
-                    b.Property<int>("VoucherStorageId")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
-
-                    b.HasIndex("VoucherStorageId");
 
                     b.ToTable("Vouchers");
                 });
@@ -883,9 +899,6 @@ namespace DianaShop.Data.Migrations
                         .HasColumnType("tinyint(1)");
 
                     b.Property<int>("UserID")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("VoucherID")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -1175,6 +1188,25 @@ namespace DianaShop.Data.Migrations
                     b.Navigation("SkincareRoutine");
                 });
 
+            modelBuilder.Entity("DianaShop.Data.Entities.Storage", b =>
+                {
+                    b.HasOne("DianaShop.Data.Entities.Voucher", "Voucher")
+                        .WithMany("Storages")
+                        .HasForeignKey("VoucherId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DianaShop.Data.Entities.VoucherStorage", "VoucherStorage")
+                        .WithMany("Storages")
+                        .HasForeignKey("VoucherStorageId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Voucher");
+
+                    b.Navigation("VoucherStorage");
+                });
+
             modelBuilder.Entity("DianaShop.Data.Entities.User", b =>
                 {
                     b.HasOne("DianaShop.Data.Entities.SkinType", "SkinType")
@@ -1203,17 +1235,6 @@ namespace DianaShop.Data.Migrations
                     b.Navigation("Role");
 
                     b.Navigation("User");
-                });
-
-            modelBuilder.Entity("DianaShop.Data.Entities.Voucher", b =>
-                {
-                    b.HasOne("DianaShop.Data.Entities.VoucherStorage", "VoucherStorage")
-                        .WithMany("Voucher")
-                        .HasForeignKey("VoucherStorageId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("VoucherStorage");
                 });
 
             modelBuilder.Entity("DianaShop.Data.Entities.VoucherStorage", b =>
@@ -1335,9 +1356,14 @@ namespace DianaShop.Data.Migrations
                     b.Navigation("VoucherStorage");
                 });
 
+            modelBuilder.Entity("DianaShop.Data.Entities.Voucher", b =>
+                {
+                    b.Navigation("Storages");
+                });
+
             modelBuilder.Entity("DianaShop.Data.Entities.VoucherStorage", b =>
                 {
-                    b.Navigation("Voucher");
+                    b.Navigation("Storages");
                 });
 #pragma warning restore 612, 618
         }
