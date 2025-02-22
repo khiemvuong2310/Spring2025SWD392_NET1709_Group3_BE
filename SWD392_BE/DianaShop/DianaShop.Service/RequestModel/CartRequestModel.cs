@@ -13,11 +13,11 @@ namespace DianaShop.Service.RequestModel
         public int UserID { get; set; }
 
         [Required]
-        public int ProductID { get; set; }
-
-        [Required]
         [Range(1, int.MaxValue, ErrorMessage = "Quantity must be greater than 0.")]
         public int Quantity { get; set; }
+
+        public List<int> ProductIDs { get; set; } = new List<int>(); 
+
     }
 
 }

@@ -6,17 +6,13 @@ using System.Threading.Tasks;
 
 namespace DianaShop.Data.Entities
 {
-    public class Cart :BaseEntity
+    public class Cart : BaseEntity
     {
         public int UserID { get; set; }
-
-        public int ProductID { get; set; }
-
-        public int Quantity {  get; set; }  
+        public int Quantity { get; set; }
 
         public virtual User User { get; set; }
-
-        public virtual ICollection<Product> Products { get; set; }
-
+        public virtual ICollection<Product> Products { get; set; } = new List<Product>();
     }
+
 }
