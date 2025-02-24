@@ -25,15 +25,10 @@ namespace DianaShop.Service.Services
             _mapper = mapper;
         }
 
-        //public async Task<PackagingResponseModel?> GetPackagingAsync(int id)
-        //{
-        //    var packaging = await _unitOfWork.Repository<Packaging>().GetInclude();
-        //    return packaging == null ? null : _mapper.Map<PackagingResponseModel>(packaging);
-        //}
-
-        public async Task<IEnumerable<PackagingResponseModel>> GetAllPackagingsAsync()
+        public async Task<IEnumerable<PackagingResponseModel>> GetAllAsync()
         {
             var packagings = await _unitOfWork.Repository<Packaging>().GetAll()
+                .Where(p => !p.IsDelete)
                 .Include(p => p.Products).ThenInclude(pr => pr.Brand)
                 .Include(p => p.Products).ThenInclude(pr => pr.Category)
                 .Include(p => p.Products).ThenInclude(pr => pr.FormulationType)
@@ -42,13 +37,17 @@ namespace DianaShop.Service.Services
             return _mapper.Map<IEnumerable<PackagingResponseModel>>(packagings);
         }
 
-        public async Task<PackagingResponseModel?> GetPackagingByIdAsync(int id)
+        public async Task<PackagingResponseModel?> GetByIdAsync(int id)
         {
-            var packaging = await _unitOfWork.Repository<Packaging>().GetById(id);
+            var packaging = await _unitOfWork.Repository<Packaging>().AsQueryable()
+                .Include(p => p.Products).ThenInclude(pr => pr.Brand)
+                .Include(p => p.Products).ThenInclude(pr => pr.Category)
+                .Include(p => p.Products).ThenInclude(pr => pr.FormulationType)
+                .FirstOrDefaultAsync(p => p.Id == id);
             return packaging == null ? null : _mapper.Map<PackagingResponseModel>(packaging);
         }
 
-        public async Task<PackagingResponseModel> CreatePackagingAsync(PackagingRequestModel request)
+        public async Task<PackagingResponseModel> CreateAsync(PackagingRequestModel request)
         {
             var packaging = _mapper.Map<Packaging>(request);
             await _unitOfWork.Repository<Packaging>().InsertAsync(packaging);          
@@ -57,7 +56,7 @@ namespace DianaShop.Service.Services
             return _mapper.Map<PackagingResponseModel>(packaging);
         }
 
-        public async Task<PackagingResponseModel?> UpdatePackagingAsync(int id, PackagingRequestModel request)
+        public async Task<PackagingResponseModel?> UpdateAsync(int id, PackagingRequestModel request)
         {
             var existingPackaging = await _unitOfWork.Repository<Packaging>().GetById(id);
             if (existingPackaging == null) return null;
@@ -69,7 +68,7 @@ namespace DianaShop.Service.Services
             return _mapper.Map<PackagingResponseModel>(existingPackaging);
         }
 
-        public async Task<bool> DeletePackagingAsync(int id)
+        public async Task<bool> DeleteAsync(int id)
         {
             var packaging = await _unitOfWork.Repository<Packaging>().GetById(id);
             if (packaging == null) return false;
