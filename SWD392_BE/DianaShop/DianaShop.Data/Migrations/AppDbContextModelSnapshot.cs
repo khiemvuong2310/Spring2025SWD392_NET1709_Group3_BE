@@ -90,9 +90,6 @@ namespace DianaShop.Data.Migrations
                     b.Property<bool>("IsDelete")
                         .HasColumnType("tinyint(1)");
 
-                    b.Property<int>("ProductID")
-                        .HasColumnType("int");
-
                     b.Property<int>("Quantity")
                         .HasColumnType("int");
 
@@ -359,7 +356,7 @@ namespace DianaShop.Data.Migrations
                     b.Property<bool>("IsDelete")
                         .HasColumnType("tinyint(1)");
 
-                    b.Property<DateTime>("PublishedDate")
+                    b.Property<DateTime?>("PublishedDate")
                         .HasColumnType("datetime(6)");
 
                     b.Property<bool>("Status")
@@ -369,7 +366,7 @@ namespace DianaShop.Data.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<DateTime>("UpdatedDate")
+                    b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime(6)");
 
                     b.Property<int>("UserId")
@@ -818,7 +815,7 @@ namespace DianaShop.Data.Migrations
                     b.Property<string>("Phone")
                         .HasColumnType("longtext");
 
-                    b.Property<int>("SkinTypeId")
+                    b.Property<int?>("SkinTypeId")
                         .HasColumnType("int");
 
                     b.Property<bool?>("Status")
@@ -1211,9 +1208,7 @@ namespace DianaShop.Data.Migrations
                 {
                     b.HasOne("DianaShop.Data.Entities.SkinType", "SkinType")
                         .WithMany("Users")
-                        .HasForeignKey("SkinTypeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("SkinTypeId");
 
                     b.Navigation("SkinType");
                 });
