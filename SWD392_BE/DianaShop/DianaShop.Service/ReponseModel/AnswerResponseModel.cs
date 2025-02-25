@@ -10,6 +10,7 @@ namespace DianaShop.Service.ReponseModel
     {
         public int Id { get; set; }
         public string Content { get; set; }
+        public int SkinTypeId { get; set; }
         public string SkinType { get; set; } // Instead of ID, return SkinType name
     }
 }

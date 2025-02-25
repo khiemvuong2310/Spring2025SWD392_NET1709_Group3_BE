@@ -5,6 +5,7 @@ using DianaShop.API.AppStarts;
 using Microsoft.OpenApi.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using System.Text;
+using System.Text.Json.Serialization;
 namespace DianaShop.API
 {
     public class Program
@@ -18,6 +19,7 @@ namespace DianaShop.API
             builder.Services.AddControllers().AddJsonOptions(options =>
             {
                 options.JsonSerializerOptions.ReferenceHandler = null;
+                options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
             });
             builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
             builder.Services.AddProblemDetails();
