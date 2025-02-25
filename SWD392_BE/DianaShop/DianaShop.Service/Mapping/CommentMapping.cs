@@ -16,13 +16,12 @@ namespace DianaShop.Service.Mapping
         {
             CreateMap<CommentRequestModel, Comment>()
     .ForMember(dest => dest.CreatedDate, opt => opt.MapFrom(_ => DateTime.UtcNow))
-    .ForMember(dest => dest.UpdatedDate, opt => opt.MapFrom(_ => DateTime.UtcNow))
-    .ForMember(dest => dest.LikeCount, opt => opt.MapFrom(_ => 0));
+    .ForMember(dest => dest.UpdatedDate, opt => opt.MapFrom(_ => DateTime.UtcNow));
 
             CreateMap<CommentUpdateRequestModel, Comment>()
                 .ForMember(dest => dest.UpdatedDate, opt => opt.MapFrom(_ => DateTime.UtcNow));
 
-            CreateMap<Comment, CommentResponseModel>();
+            CreateMap<Comment, CommentResponseModel>().ForMember(dest => dest.Username, opt => opt.MapFrom(src => src.User.Username));
         }
     }
 }

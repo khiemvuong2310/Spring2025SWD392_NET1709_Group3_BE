@@ -13,7 +13,6 @@ namespace DianaShop.Data.Entities
         public int PostId { get; set; }
         public DateTime CreatedDate { get; set; }
         public DateTime UpdatedDate { get; set; }
-        public int LikeCount { get; set; }
         public virtual User User { get; set; }
         public virtual Post Post { get; set; }
     }
