@@ -30,13 +30,13 @@ namespace DianaShop.Service.Services
         {
             var users = await _unitOfWork.Repository<User>()
                 .Include(u => u.SkinType)
-                .Include(u => u.Cart)
                 .Include(u => u.VoucherStorage)
                 .Include(u => u.UserRoles)
-                .Include(u => u.FeedBacks)
+                    .ThenInclude(ur => ur.Role)
                 .Include(u => u.Orders)
                 .Where(u => !u.IsDelete)
                 .ToListAsync();
+
             return _mapper.Map<IEnumerable<UserResponseModel>>(users);
         }
 
@@ -45,12 +45,12 @@ namespace DianaShop.Service.Services
         {
             var user = await _unitOfWork.Repository<User>()
                 .Include(u => u.SkinType)
-                .Include(u => u.Cart)
                 .Include(u => u.VoucherStorage)
                 .Include(u => u.UserRoles)
-                .Include(u => u.FeedBacks)
+                    .ThenInclude(ur => ur.Role) 
                 .Include(u => u.Orders)
                 .FirstOrDefaultAsync(u => u.Id == id && !u.IsDelete);
+
             return _mapper.Map<UserResponseModel>(user);
         }
 

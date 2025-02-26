@@ -19,10 +19,10 @@ namespace DianaShop.Service.ReponseModel
         public int SkinTypeId { get; set; }
         public string SkinTypeName { get; set; }
 
-        public CartResponseModel? Cart { get; set; }
+        //public CartResponseModel? Cart { get; set; }
         public List<VoucherStorageResponseModel>? VoucherStorage { get; set; }
         public List<UserRoleResponseModel>? UserRoles { get; set; }
-        public List<FeedBackResponseModel>? FeedBacks { get; set; }
+        //public List<FeedBackResponseModel>? FeedBacks { get; set; }
         public List<OrderResponseModel>? Orders { get; set; }
 
     }

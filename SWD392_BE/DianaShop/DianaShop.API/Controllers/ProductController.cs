@@ -14,7 +14,7 @@ namespace DianaShop.API.Controllers
 
         // GET: api/product
         [HttpGet]
-        public async Task<IActionResult> GetAll([FromQuery]ProductQueryRequest request)
+        public async Task<IActionResult> GetAll([FromQuery] ProductQueryRequest request)
         {
             var response = await _productService.GetAllProductsAsync(request);
             return Ok(response);

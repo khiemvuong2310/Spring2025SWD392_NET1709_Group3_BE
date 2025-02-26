@@ -15,7 +15,7 @@ namespace DianaShop.Service.Mapping
         {
             // Mapping UserRole -> UserRoleResponseModel
             CreateMap<UserRole, UserRoleResponseModel>()
-                .ForMember(dest => dest.RoleName, opt => opt.MapFrom(src => src.Role.Name))
+                .ForMember(dest => dest.RoleName, opt => opt.MapFrom(src => src.Role != null ? src.Role.Name : string.Empty))
                 .ForMember(dest => dest.UserId, opt => opt.MapFrom(src => src.UserId));
         }
     }

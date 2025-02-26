@@ -88,7 +88,7 @@ namespace DianaShop.Service.Services
             var product = await _unitOfWork.Repository<Product>().GetById(productId);
             var existingProductImage = await _unitOfWork.Repository<ProductImage>().GetAll()
                 .FirstOrDefaultAsync(pi => pi.ProductId == productId && pi.ImageId == imageId);
-            if (image == null || product == null || existingProductImage != null) return null;
+            if (image == null || product == null || existingProductImage != null) return;
             var productImage = new ProductImage { ProductId = productId, ImageId = imageId };
             await _unitOfWork.Repository<ProductImage>().InsertAsync(productImage);
             await _unitOfWork.CommitAsync();
