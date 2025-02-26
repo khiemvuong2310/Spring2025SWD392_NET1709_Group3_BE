@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using DianaShop.Data.Entities;
 using DianaShop.Repository.UnitOfWork;
 using DianaShop.Service.Interfaces;
@@ -26,24 +27,18 @@ namespace DianaShop.Service.Services
 
         public async Task<IEnumerable<BrandResponseModel>> GetAllAsync()
         {
-            var brands = await _unitOfWork.Repository<Brand>().GetAll()
+            return await _unitOfWork.Repository<Brand>().GetAll()
                 .Where(b => !b.IsDelete)
-                .Include(b => b.Products).ThenInclude(pr => pr.Packaging)
-                .Include(b => b.Products).ThenInclude(pr => pr.Category)
-                .Include(b => b.Products).ThenInclude(pr => pr.FormulationType)
+                .ProjectTo<BrandResponseModel>(_mapper.ConfigurationProvider)
                 .ToListAsync();
-            brands = brands.Where(p => !p.IsDelete).ToList();
-            return _mapper.Map<IEnumerable<BrandResponseModel>>(brands);
         }
 
         public async Task<BrandResponseModel?> GetByIdAsync(int id)
         {
-            var brand = await _unitOfWork.Repository<Brand>().AsQueryable()
-                .Include(b => b.Products).ThenInclude(pr => pr.Packaging)
-                .Include(b => b.Products).ThenInclude(pr => pr.Category)
-                .Include(b => b.Products).ThenInclude(pr => pr.FormulationType)
-                .FirstOrDefaultAsync(p => p.Id == id);
-            return brand == null ? null : _mapper.Map<BrandResponseModel>(brand);
+            return await _unitOfWork.Repository<Brand>().AsQueryable()
+                .Where(b => b.Id == id)
+                .ProjectTo<BrandResponseModel>(_mapper.ConfigurationProvider)
+                .FirstOrDefaultAsync();
         }
 
         public async Task<BrandResponseModel> CreateAsync(BrandRequestModel request)

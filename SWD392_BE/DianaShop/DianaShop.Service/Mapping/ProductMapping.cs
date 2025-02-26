@@ -24,7 +24,7 @@ namespace DianaShop.Service.Mapping
             .ForMember(dest => dest.StockQuantity, opt => opt.MapFrom(src => src.ProductBatches.Sum(pb => pb.Quantity)))
             .ForMember(dest => dest.ProductBatchIds, opt => opt.MapFrom(src => src.ProductBatches.Select(pb => pb.Id).ToList()))
             .ForMember(dest => dest.ProductTags, opt => opt.MapFrom(src => src.ProductTags.Select(pt => pt.Tag.Name).ToList()))
-            .ForMember(dest => dest.ProductImages, opt => opt.MapFrom(src => src.ProductImages.Select(pi => pi.Image.Path).ToList()))
+            .ForMember(dest => dest.ProductImages, opt => opt.MapFrom(src => src.ProductImages.Select(pi => pi.Image.ImageUrl).ToList()))
             .ForMember(dest => dest.ProductIngredients, opt => opt.MapFrom(src => src.ProductIngredients.Select(pi => pi.Ingredient.Name).ToList()))
             .ForMember(dest => dest.ProductSkinTypes, opt => opt.MapFrom(src => src.ProductSkinTypes.Select(ps => ps.SkinType.Name).ToList())); ;
         }

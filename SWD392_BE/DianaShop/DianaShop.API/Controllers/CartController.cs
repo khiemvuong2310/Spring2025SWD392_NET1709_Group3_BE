@@ -24,6 +24,7 @@ namespace DianaShop.API.Controllers
             return Ok(carts);
         }
 
+        // Get a specific cart by ID
         [HttpGet("{cartId}")]
         public async Task<ActionResult<CartResponseModel>> GetCartById(int cartId)
         {
@@ -32,6 +33,7 @@ namespace DianaShop.API.Controllers
             return Ok(cart);
         }
 
+        // Create a new cart
         [HttpPost]
         public async Task<ActionResult<CartResponseModel>> CreateCart([FromBody] CartRequestModel request)
         {
@@ -39,6 +41,7 @@ namespace DianaShop.API.Controllers
             return CreatedAtAction(nameof(GetCartById), new { cartId = createdCart.CartID }, createdCart);
         }
 
+        // Update cart quantity
         [HttpPut("{cartId}")]
         public async Task<ActionResult<CartResponseModel>> UpdateCart(int cartId, [FromBody] CartRequestModel request)
         {
@@ -47,8 +50,9 @@ namespace DianaShop.API.Controllers
             return Ok(updatedCart);
         }
 
+        // Remove a cart
         [HttpDelete("{cartId}")]
-        public async Task<ActionResult> RemoveProductFromCart(int cartId)
+        public async Task<ActionResult> RemoveCart(int cartId)
         {
             var success = await _cartService.RemoveProductFromCartAsync(cartId);
             if (!success) return NotFound();

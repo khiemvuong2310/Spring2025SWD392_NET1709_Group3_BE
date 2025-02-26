@@ -15,6 +15,8 @@ namespace DianaShop.Repository.Repositories
     {
         Task InsertAsync(TEntity entity);
 
+        void Remove(TEntity entity);
+
         Task InsertRangeAsync(IQueryable<TEntity> entities);
 
         Task AddRangeAsync(IEnumerable<TEntity> entities);

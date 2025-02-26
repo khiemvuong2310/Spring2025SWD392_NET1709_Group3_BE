@@ -17,12 +17,15 @@ namespace DianaShop.Service.Mapping
             // Mapping User -> UserResponseModel
             CreateMap<User, UserResponseModel>()
                 .ForMember(dest => dest.SkinTypeName, opt => opt.MapFrom(src => src.SkinType.Name))
-                .ForMember(dest => dest.Cart, opt => opt.MapFrom(src => src.Cart))
+                //.ForMember(dest => dest.Cart, opt => opt.MapFrom(src => src.Cart))
                 .ForMember(dest => dest.VoucherStorage, opt => opt.MapFrom(src => src.VoucherStorage))
-                .ForMember(dest => dest.UserRoles, opt => opt.MapFrom(src => src.UserRoles.Select(ur => ur.Role.Name))) // Chỉ lấy tên role
-                .ForMember(dest => dest.FeedBacks, opt => opt.MapFrom(src => src.FeedBacks))
+                //.ForMember(dest => dest.FeedBacks, opt => opt.MapFrom(src => src.FeedBacks))
                 .ForMember(dest => dest.Orders, opt => opt.MapFrom(src => src.Orders))
-                .ForMember(dest => dest.UserRoles, opt => opt.MapFrom(src => src.UserRoles));
+            .ForMember(dest => dest.UserRoles, opt => opt.MapFrom(src => src.UserRoles.Select(ur => new UserRoleResponseModel
+            {
+                UserId = ur.UserId,
+                RoleName = ur.Role != null ? ur.Role.Name : string.Empty
+            }))); // Sửa lại để map đúng danh sách UserRoles
 
             // Mapping UserCreateRequest -> User
             CreateMap<UserCreateRequest, User>()

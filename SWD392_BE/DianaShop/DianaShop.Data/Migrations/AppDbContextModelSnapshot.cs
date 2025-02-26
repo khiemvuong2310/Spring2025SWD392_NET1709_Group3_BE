@@ -90,9 +90,6 @@ namespace DianaShop.Data.Migrations
                     b.Property<bool>("IsDelete")
                         .HasColumnType("tinyint(1)");
 
-                    b.Property<int>("ProductID")
-                        .HasColumnType("int");
-
                     b.Property<int>("Quantity")
                         .HasColumnType("int");
 
@@ -250,12 +247,12 @@ namespace DianaShop.Data.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<bool>("IsDelete")
-                        .HasColumnType("tinyint(1)");
-
-                    b.Property<string>("Path")
+                    b.Property<string>("ImageUrl")
                         .IsRequired()
                         .HasColumnType("longtext");
+
+                    b.Property<bool>("IsDelete")
+                        .HasColumnType("tinyint(1)");
 
                     b.HasKey("Id");
 
@@ -386,9 +383,6 @@ namespace DianaShop.Data.Migrations
 
                     b.Property<int>("ImageId")
                         .HasColumnType("int");
-
-                    b.Property<string>("Caption")
-                        .HasColumnType("longtext");
 
                     b.HasKey("PostId", "ImageId");
 
@@ -529,9 +523,6 @@ namespace DianaShop.Data.Migrations
 
                     b.Property<int>("ImageId")
                         .HasColumnType("int");
-
-                    b.Property<bool>("Status")
-                        .HasColumnType("tinyint(1)");
 
                     b.HasKey("ProductId", "ImageId");
 

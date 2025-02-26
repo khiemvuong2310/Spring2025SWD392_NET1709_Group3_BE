@@ -36,10 +36,6 @@ namespace DianaShop.Service.Services
                 .Where(p => request.MaxCreatedDate == null || p.CreatedDate <= request.MaxCreatedDate)
                 .Where(p => request.MinPublishedDate == null || p.UpdatedDate >= request.MinPublishedDate)
                 .Where(p => request.MaxPublishedDate == null || p.UpdatedDate <= request.MaxPublishedDate)
-                .Include(p => p.User)
-                .Include(p => p.Comments).ThenInclude(c => c.User)
-                .Include(p => p.PostImages).ThenInclude(pi => pi.Image)
-                .Include(p => p.PostTags).ThenInclude(pt => pt.Tag)
                 .ProjectTo<PostResponseModel>(_mapper.ConfigurationProvider);
             postsQuery = request.SortBy switch
             {
@@ -82,14 +78,10 @@ namespace DianaShop.Service.Services
 
         public async Task<PostResponseModel?> GetByIdAsync(int id)
         {
-            var post = await _unitOfWork.Repository<Post>().AsQueryable()
-                .Include(p => p.User)
-                .Include(p => p.Comments).ThenInclude(c => c.User)
-                .Include(p => p.PostImages).ThenInclude(pi => pi.Image)
-                .Include(p => p.PostTags).ThenInclude(pt => pt.Tag)
-                .FirstOrDefaultAsync(p => p.Id == id);
-
-            return post != null ? _mapper.Map<PostResponseModel>(post) : null;
+            return await _unitOfWork.Repository<Post>().AsQueryable()
+                .Where(p => p.Id == id)
+                .ProjectTo<PostResponseModel>(_mapper.ConfigurationProvider)
+                .FirstOrDefaultAsync();
         }
 
         public async Task UpdatePublicationStatusAsync(int id)
