@@ -40,15 +40,6 @@ namespace DianaShop.Service.Services
                 .Where(p => !request.TagIds.Any() || p.ProductTags.Any(pt => request.TagIds.Contains(pt.TagId)))
                 .Where(p => !request.SkinTypeIds.Any() || p.ProductSkinTypes.Any(ps => request.SkinTypeIds.Contains(ps.SkinTypeId)))
                 .Where(p => !request.IngredientIds.Any() || p.ProductIngredients.Any(pi => request.IngredientIds.Contains(pi.IngredientId)))
-                .Include(p => p.Brand)
-                .Include(p => p.Category)
-                .Include(p => p.Packaging)
-                .Include(p => p.FormulationType)
-                .Include(p => p.ProductBatches)
-                .Include(p => p.ProductTags).ThenInclude(pt => pt.Tag)                
-                .Include(p => p.ProductSkinTypes).ThenInclude(ps => ps.SkinType)               
-                .Include(p => p.ProductIngredients).ThenInclude(pi => pi.Ingredient)              
-                .Include(p => p.ProductImages).ThenInclude(pi => pi.Image)
                 .ProjectTo<ProductResponseModel>(_mapper.ConfigurationProvider);
             switch (request.SortBy)
             {
@@ -141,19 +132,10 @@ namespace DianaShop.Service.Services
 
         public async Task<ProductResponseModel?> GetProductByIdAsync(int id)
         {
-            var product = await _unitOfWork.Repository<Product>().AsQueryable()
-                .Include(p => p.Brand)
-                .Include(p => p.Category)
-                .Include(p => p.Packaging)
-                .Include(p => p.FormulationType)
-                .Include(p => p.ProductBatches)
-                .Include(p => p.ProductTags).ThenInclude(pt => pt.Tag)
-                .Include(p => p.ProductSkinTypes).ThenInclude(ps => ps.SkinType)
-                .Include(p => p.ProductIngredients).ThenInclude(pi => pi.Ingredient)
-                .Include(p => p.ProductImages).ThenInclude(pi => pi.Image)
-                .FirstOrDefaultAsync(p => p.Id == id);
-            if (product != null) return _mapper.Map<ProductResponseModel>(product);
-             else return null;
+            return await _unitOfWork.Repository<Product>().AsQueryable()
+                .Where(i => i.Id == id)
+                .ProjectTo<ProductResponseModel>(_mapper.ConfigurationProvider)
+                .FirstOrDefaultAsync();
         }
 
         public async Task UpdateProductAsync(int id, ProductRequestModel model)

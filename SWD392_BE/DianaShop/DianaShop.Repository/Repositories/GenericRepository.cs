@@ -66,7 +66,10 @@ namespace DianaShop.Repository.Repositories
             var rs = await GetByIdGuid(key);
             Table.Remove(rs);
         }
-
+        public void Remove(T entity)
+        {
+            Table.Remove(entity);
+        }
         public async Task HardDelete(int key)
         {
             var rs = await GetById(key);
