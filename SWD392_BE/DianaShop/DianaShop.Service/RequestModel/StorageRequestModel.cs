@@ -10,7 +10,7 @@ namespace DianaShop.Service.RequestModel
     {
         public int VoucherId { get; set; }
         public int VoucherStorageId { get; set; }
-        public int? Quantity { get; set; }
+        //public int? Quantity { get; set; }
         public bool Status { get; set; }
     }
 }

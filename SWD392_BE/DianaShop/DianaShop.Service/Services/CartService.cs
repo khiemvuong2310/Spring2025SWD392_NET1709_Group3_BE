@@ -28,22 +28,26 @@ namespace DianaShop.Service.Services
         public async Task<IEnumerable<CartResponseModel>> GetAllCartsAsync(int userId)
         {
             var carts = await _unitOfWork.Repository<Cart>()
-                .GetAll().Where(c => c.UserID == userId)
-                .Include(c => c.Products)
+                .GetAll()
+                .Where(c => c.UserID == userId)
+                .Include(c => c.Products) 
                 .ToListAsync();
 
             return _mapper.Map<IEnumerable<CartResponseModel>>(carts);
         }
 
+
         // Get cart by ID
         public async Task<CartResponseModel?> GetCartByIdAsync(int cartId)
         {
             var cart = await _unitOfWork.Repository<Cart>()
-                .Include(c => c.Products)
+                .GetAll()
+                .Include(c => c.Products) 
                 .FirstOrDefaultAsync(c => c.Id == cartId);
 
             return cart == null ? null : _mapper.Map<CartResponseModel>(cart);
         }
+
 
         // Create a new cart item
         public async Task<CartResponseModel> CreateCartAsync(CartRequestModel request)
