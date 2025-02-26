@@ -17,8 +17,7 @@ namespace DianaShop.API.Controllers
             _cartService = cartService;
         }
 
-        // Get all carts for a user
-        [HttpGet("user/{userId}")]
+        [HttpGet]
         public async Task<ActionResult<IEnumerable<CartResponseModel>>> GetAllCarts(int userId)
         {
             var carts = await _cartService.GetAllCartsAsync(userId);

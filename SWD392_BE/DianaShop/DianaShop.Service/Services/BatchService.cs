@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using DianaShop.Data.Entities;
 using DianaShop.Repository.Repositories;
 using DianaShop.Repository.UnitOfWork;
@@ -26,17 +27,18 @@ namespace DianaShop.Service.Services
 
         public async Task<IEnumerable<BatchResponseModel>> GetAllAsync()
         {
-            var batches = await _unitOfWork.Repository<ProductBatch>().GetAll()
+            return await _unitOfWork.Repository<ProductBatch>().GetAll()
                 .Where(b => !b.IsDelete)
-                .Include(b => b.Product)
+                .ProjectTo<BatchResponseModel>(_mapper.ConfigurationProvider)
                 .ToListAsync();
-            return _mapper.Map<IEnumerable<BatchResponseModel>>(batches);
         }
 
         public async Task<BatchResponseModel?> GetByIdAsync(int id)
         {
-            var batch = await _unitOfWork.Repository<ProductBatch>().Include(b => b.Product).FirstOrDefaultAsync(b => b.Id == id);
-            return batch == null ? null : _mapper.Map<BatchResponseModel>(batch);
+            return await _unitOfWork.Repository<ProductBatch>().AsQueryable()
+                .Where(b => b.Id == id)
+                .ProjectTo<BatchResponseModel>(_mapper.ConfigurationProvider)
+                .FirstOrDefaultAsync();
         }
 
         public async Task<BatchResponseModel> CreateAsync(BatchRequestModel request)

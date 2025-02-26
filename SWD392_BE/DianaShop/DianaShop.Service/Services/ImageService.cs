@@ -1,0 +1,145 @@
+﻿using AutoMapper;
+using AutoMapper.QueryableExtensions;
+using Azure.Core;
+using DianaShop.Data.Entities;
+using DianaShop.Repository.UnitOfWork;
+using DianaShop.Service.Interfaces;
+using DianaShop.Service.ReponseModel;
+using DianaShop.Service.RequestModel;
+using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace DianaShop.Service.Services
+{
+    public class ImageService : IImageService
+    {
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly IMapper _mapper;
+        private readonly IBlobService _blobService;
+        public ImageService(IUnitOfWork unitOfWork, IBlobService blobService, IMapper mapper)
+        {
+            _unitOfWork = unitOfWork;
+            _blobService = blobService;
+            _mapper = mapper;
+        }
+
+        public async Task<List<ImageResponseModel>> GetAllAsync(ImageQueryRequest request)
+        {
+            var images = _unitOfWork.Repository<Image>().GetAll()
+                .Where(i => !i.IsDelete)
+                .Where(i => request.ImageUrl == null || i.ImageUrl.Contains(request.ImageUrl))
+                .ProjectTo<ImageResponseModel>(_mapper.ConfigurationProvider);
+            return await images.Skip((request.PageNumber - 1) * request.PageSize).Take(request.PageSize).ToListAsync();
+        }
+
+        public async Task<ImageResponseModel?> GetByIdAsync(int id)
+        {
+
+            return await _unitOfWork.Repository<Image>().GetAll()
+                        .Where(i => i.Id == id)
+                        .ProjectTo<ImageResponseModel>(_mapper.ConfigurationProvider)
+                        .FirstOrDefaultAsync();
+        }
+        public async Task<List<ImageResponseModel>> AddAsync(List<IFormFile> files)
+        {
+            var images = new List<Image>();
+            foreach (var file in files)
+            {
+                if (file.Length <= 0) continue;
+                var imageUrl = await _blobService.UploadImageAsync(file);
+                var image = new Image { ImageUrl = imageUrl };
+                await _unitOfWork.Repository<Image>().InsertAsync(image);
+                images.Add(image);
+            }
+            await _unitOfWork.CommitAsync();
+            return _mapper.Map<List<ImageResponseModel>>(images);
+        }
+
+        public async Task<ImageResponseModel?> UpdateAsync(int id, IFormFile file)
+        {
+            var image = await _unitOfWork.Repository<Image>().GetById(id);
+            if (image == null) return null;
+            await _blobService.DeleteImageAsync(image.ImageUrl);
+            var imageUrl = await _blobService.UploadImageAsync(file);
+            image.ImageUrl = imageUrl;
+            await _unitOfWork.Repository<Image>().Update(image, id);
+            await _unitOfWork.CommitAsync();
+            return _mapper.Map<ImageResponseModel>(image);
+        }
+
+        public async Task DeleteAsync(int id)
+        {
+            var image = await _unitOfWork.Repository<Image>().GetById(id);
+            if (image == null) return;
+            var fileName = Path.GetFileName(new Uri(image.ImageUrl).LocalPath);
+            await _blobService.DeleteImageAsync(fileName);
+            await _unitOfWork.Repository<Image>().HardDelete(id);
+            await _unitOfWork.CommitAsync();
+        }
+
+        public async Task AddImageToProductAsync(int productId, int imageId)
+        {
+            var image = await GetByIdAsync(imageId);
+            var product = await _unitOfWork.Repository<Product>().GetById(productId);
+            var existingProductImage = await _unitOfWork.Repository<ProductImage>().GetAll()
+                .FirstOrDefaultAsync(pi => pi.ProductId == productId && pi.ImageId == imageId);
+            if (image == null || product == null || existingProductImage != null) return null;
+            var productImage = new ProductImage { ProductId = productId, ImageId = imageId };
+            await _unitOfWork.Repository<ProductImage>().InsertAsync(productImage);
+            await _unitOfWork.CommitAsync();
+        }
+
+        public async Task RemoveImageFromProductAsync(int productId, int imageId)
+        {
+            var productImage = await _unitOfWork.Repository<ProductImage>().GetAll()
+                .FirstOrDefaultAsync(pi => pi.ProductId == productId && pi.ImageId == imageId);
+            if (productImage == null) return;
+            _unitOfWork.Repository<ProductImage>().Remove(productImage);
+            await _unitOfWork.CommitAsync();
+        }
+
+        public async Task<List<ImageResponseModel>> GetImagesByProductIdAsync(int productId)
+        {
+            return await _unitOfWork.Repository<ProductImage>().GetAll()
+                .Where(pi => pi.ProductId == productId)
+                .Select(pi => pi.Image)
+                .ProjectTo<ImageResponseModel>(_mapper.ConfigurationProvider)
+                .ToListAsync();
+        }
+
+        public async Task AddImageToPostAsync(int postId, int imageId)
+        {
+            var image = await GetByIdAsync(imageId);
+            var post = await _unitOfWork.Repository<Post>().GetById(postId);
+            var existingPostImage = await _unitOfWork.Repository<PostImage>().GetAll()
+                .FirstOrDefaultAsync(pi => pi.PostId == postId && pi.ImageId == imageId);
+            if (image == null || post == null || existingPostImage != null) return;
+            var postImage = new PostImage { PostId = postId, ImageId = imageId };
+            await _unitOfWork.Repository<PostImage>().InsertAsync(postImage);
+            await _unitOfWork.CommitAsync();
+        }
+
+        public async Task RemoveImageFromPostAsync(int postId, int imageId)
+        {
+            var postImage = await _unitOfWork.Repository<PostImage>().GetAll()
+                .FirstOrDefaultAsync(pi => pi.PostId == postId && pi.ImageId == imageId);
+            if (postImage == null) return;
+            _unitOfWork.Repository<PostImage>().Remove(postImage);
+            await _unitOfWork.CommitAsync();
+        }
+
+        public async Task<List<ImageResponseModel>> GetImagesByPostIdAsync(int postId)
+        {
+            return await _unitOfWork.Repository<PostImage>().GetAll()
+                .Where(pi => pi.PostId == postId)
+                .Select(pi => pi.Image)
+                .ProjectTo<ImageResponseModel>(_mapper.ConfigurationProvider)
+                .ToListAsync();
+        }
+    }
+}
