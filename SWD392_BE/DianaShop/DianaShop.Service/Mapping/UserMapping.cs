@@ -25,15 +25,15 @@ namespace DianaShop.Service.Mapping
             {
                 UserId = ur.UserId,
                 RoleName = ur.Role != null ? ur.Role.Name : string.Empty
-            }))); // Sửa lại để map đúng danh sách UserRoles
+            }))); 
 
             // Mapping UserCreateRequest -> User
             CreateMap<UserCreateRequest, User>()
-                .ForMember(dest => dest.Token, opt => opt.Ignore()) // Không map Token
-                .ForMember(dest => dest.Cart, opt => opt.Ignore()) // Không tạo giỏ hàng ngay khi đăng ký
-                .ForMember(dest => dest.VoucherStorage, opt => opt.Ignore()) // Không có voucher khi tạo mới
-                .ForMember(dest => dest.FeedBacks, opt => opt.Ignore()) // Không có feedback khi tạo mới
-                .ForMember(dest => dest.Orders, opt => opt.Ignore()) // Không có đơn hàng khi tạo mới
+                .ForMember(dest => dest.Token, opt => opt.Ignore()) 
+                .ForMember(dest => dest.Cart, opt => opt.Ignore()) 
+                .ForMember(dest => dest.VoucherStorage, opt => opt.Ignore()) 
+                .ForMember(dest => dest.FeedBacks, opt => opt.Ignore()) 
+                .ForMember(dest => dest.Orders, opt => opt.Ignore()) 
                 .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status)); // Ánh xạ Status
         }
     }

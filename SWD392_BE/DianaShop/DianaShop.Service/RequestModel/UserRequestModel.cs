@@ -23,7 +23,7 @@ namespace DianaShop.Service.RequestModel
         public string Password { get; set; }
 
         [Required(ErrorMessage = "Phone number is required.")]
-        [RegularExpression(@"^\d{10,15}$", ErrorMessage = "Phone number must be between 10 and 15 digits.")]
+        [RegularExpression(@"^\+?[0-9]{10,15}$", ErrorMessage = "Phone number must be between 10 and 15 digits and may start with a '+' sign.")]
         public string Phone { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Location is required.")]
@@ -36,10 +36,7 @@ namespace DianaShop.Service.RequestModel
         public int SkinTypeId { get; set; }
 
         public bool Status { get; set; } = true; // Mặc định là true
-
-        //public List<int>? RoleIds { get; set; } 
     }
-
     public class UserUpdateRequest
     {
         [RegularExpression(@"^[a-zA-Z0-9\s]*$", ErrorMessage = "Username cannot contain special characters.")] public string? Username { get; set; }

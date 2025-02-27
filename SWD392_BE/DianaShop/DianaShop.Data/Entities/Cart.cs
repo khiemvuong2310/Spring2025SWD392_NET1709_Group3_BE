@@ -12,7 +12,7 @@ namespace DianaShop.Data.Entities
         public int Quantity { get; set; }
 
         public virtual User User { get; set; }
-        public virtual ICollection<Product> Products { get; set; } = new List<Product>();
+        public virtual ICollection<CartProduct> CartProducts { get; set; }
     }
 
 }

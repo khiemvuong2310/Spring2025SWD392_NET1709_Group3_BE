@@ -44,7 +44,15 @@ namespace DianaShop.Repository.Repositories
 
         void UpdateRange(IQueryable<TEntity> entities);
 
+        Task UpdateRangeAsync(IEnumerable<TEntity> entities);
+
+
+        Task UpdateAsync(TEntity entity);
+
+        // Xóa một entity
+        Task DeleteAsync(TEntity entity);
         Task HardDelete(int key);
+
 
         Task HardDeleteGuid(Guid key);
 
