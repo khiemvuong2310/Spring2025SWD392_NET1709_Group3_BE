@@ -11,6 +11,7 @@ using System.Linq;
 using System.Text;
 using System.Data;
 using System.Threading.Tasks;
+using AutoMapper.QueryableExtensions;
 
 namespace DianaShop.Service.Services
 {
@@ -45,17 +46,17 @@ namespace DianaShop.Service.Services
         {
             var questions = await _unitOfWork.Repository<Question>().GetAll()
                 .Where(q => !q.IsDelete)
-                .Include(q => q.Answers).ThenInclude(a => a.SkinType)
+                .ProjectTo<QuestionResponseModel>(_mapper.ConfigurationProvider)
                 .ToListAsync();
-            return _mapper.Map<List<QuestionResponseModel>>(questions);
+            return questions;
         }
         public async Task<List<AnswerResponseModel>> GetAllAnswerByQuestionIdAsync(int questionId)
         {
             var answers = await _unitOfWork.Repository<Answer>().GetAll()
                 .Where(a => a.QuestionId == questionId && !a.IsDelete)
-                .Include(a => a.SkinType)
+                .ProjectTo<AnswerResponseModel>(_mapper.ConfigurationProvider)
                 .ToListAsync();
-            return _mapper.Map<List<AnswerResponseModel>>(answers);
+            return answers;
         }
         public async Task<QuestionResponseModel> AddQuestionAsync(QuestionRequestModel questionRequestModel)
         {

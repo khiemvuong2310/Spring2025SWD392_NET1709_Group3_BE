@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using DianaShop.Data;
 using DianaShop.Data.Entities;
 using DianaShop.Repository.UnitOfWork;
@@ -24,22 +25,18 @@ namespace DianaShop.Service.Services
         {
             var types = await _unitOfWork.Repository<FormulationType>().GetAll()
                 .Where(f => !f.IsDelete)
-                .Include(f => f.Products).ThenInclude(pr => pr.Brand)
-                .Include(f => f.Products).ThenInclude(pr => pr.Packaging)
-                .Include(f => f.Products).ThenInclude(pr => pr.Category)
+                .ProjectTo<FormulationTypeResponseModel>(_mapper.ConfigurationProvider)
                 .ToListAsync();
-            types = types.Where(p => !p.IsDelete).ToList();
-            return _mapper.Map<IEnumerable<FormulationTypeResponseModel>>(types);
+            return types;
         }
 
         public async Task<FormulationTypeResponseModel?> GetByIdAsync(int id)
         {
             var type = await _unitOfWork.Repository<FormulationType>().AsQueryable()
-                .Include(f => f.Products).ThenInclude(pr => pr.Brand)
-                .Include(f => f.Products).ThenInclude(pr => pr.Packaging)
-                .Include(f => f.Products).ThenInclude(pr => pr.Category)
-                .FirstOrDefaultAsync(p => p.Id == id);
-            return type == null ? null : _mapper.Map<FormulationTypeResponseModel>(type);
+                .Where(f => f.Id == id)
+                .ProjectTo<FormulationTypeResponseModel>(_mapper.ConfigurationProvider)
+                .FirstOrDefaultAsync();
+            return type;
         }
 
         public async Task<FormulationTypeResponseModel> CreateAsync(FormulationTypeRequestModel request)
