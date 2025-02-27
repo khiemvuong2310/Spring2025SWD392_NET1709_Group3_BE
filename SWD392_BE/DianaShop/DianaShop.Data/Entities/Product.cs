@@ -16,6 +16,7 @@ namespace DianaShop.Data.Entities
         public int BrandId { get; set; }
         public int CategoryId { get; set; }
         public int PackagingId { get; set; }
+        [Column(TypeName = "decimal(18, 2)")]
         public decimal? Price { get; set; }
         public int FormulationTypeId { get; set; }
         public string Direction { get; set; }

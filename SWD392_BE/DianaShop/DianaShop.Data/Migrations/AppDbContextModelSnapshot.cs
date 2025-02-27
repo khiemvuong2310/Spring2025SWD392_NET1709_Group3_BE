@@ -456,7 +456,7 @@ namespace DianaShop.Data.Migrations
                         .HasColumnType("longtext");
 
                     b.Property<decimal?>("Price")
-                        .HasColumnType("decimal(65,30)");
+                        .HasColumnType("decimal(18, 2)");
 
                     b.Property<bool>("Status")
                         .HasColumnType("tinyint(1)");
