@@ -20,7 +20,6 @@ namespace DianaShop.Service.Mapping
                 //.ForMember(dest => dest.Cart, opt => opt.MapFrom(src => src.Cart))
                 .ForMember(dest => dest.VoucherStorage, opt => opt.MapFrom(src => src.VoucherStorage))
                 //.ForMember(dest => dest.FeedBacks, opt => opt.MapFrom(src => src.FeedBacks))
-                .ForMember(dest => dest.Orders, opt => opt.MapFrom(src => src.Orders))
             .ForMember(dest => dest.UserRoles, opt => opt.MapFrom(src => src.UserRoles.Select(ur => new UserRoleResponseModel
             {
                 UserId = ur.UserId,
@@ -33,7 +32,6 @@ namespace DianaShop.Service.Mapping
                 .ForMember(dest => dest.Cart, opt => opt.Ignore()) 
                 .ForMember(dest => dest.VoucherStorage, opt => opt.Ignore()) 
                 .ForMember(dest => dest.FeedBacks, opt => opt.Ignore()) 
-                .ForMember(dest => dest.Orders, opt => opt.Ignore()) 
                 .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status)); // Ánh xạ Status
         }
     }

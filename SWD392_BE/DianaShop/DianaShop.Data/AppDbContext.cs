@@ -38,11 +38,11 @@ namespace DianaShop.Data
         public DbSet<Answer> Answers { get; set; }
         public DbSet<Cart> Carts { get; set; }
         public DbSet<FeedBack> FeedBacks { get; set; }
-        public DbSet<Order> Orders { get; set; }
         public DbSet<Comment> Comments { get; set; }
         public DbSet<Voucher> Vouchers { get; set; }
         public DbSet<VoucherStorage> VoucherStorages { get; set; }
         public DbSet<Storage> Storages { get; set; }
+        public DbSet<CartProduct> CartProducts { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -147,6 +147,16 @@ namespace DianaShop.Data
                 .WithMany(vs => vs.Storages)
                 .HasForeignKey(s => s.VoucherStorageId);
 
+            modelBuilder.Entity<CartProduct>()
+                .HasKey(cp => new { cp.CartId, cp.ProductId });
+            modelBuilder.Entity<CartProduct>()
+                .HasOne(cp => cp.Cart)
+                .WithMany(c => c.CartProducts)
+                .HasForeignKey(cp => cp.CartId);
+            modelBuilder.Entity<CartProduct>()
+                .HasOne(cp => cp.Product)
+                .WithMany(p => p.CartProducts)
+                .HasForeignKey(cp => cp.ProductId);
             //SeedData
             modelBuilder.Entity<Role>().HasData(
                 new Role { Id = 1, Name = "Manager" },

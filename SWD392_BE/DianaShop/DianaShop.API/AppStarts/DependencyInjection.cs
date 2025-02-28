@@ -38,7 +38,7 @@ namespace DianaShop.API.AppStarts
             services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
             services.AddScoped<IUserService,UserService>();
             services.AddScoped<IAuthServices, AuthServices>();
-            services.AddScoped<ICartService, CartService>();    
+            // services.AddScoped<ICartService, CartService>();    
             services.AddScoped<IFeedBackService, FeedBackService>();
             services.AddScoped<IProductService, ProductService>();
             services.AddScoped<IPackagingService, PackagingService>();

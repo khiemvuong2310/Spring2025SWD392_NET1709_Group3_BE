@@ -34,7 +34,6 @@ namespace DianaShop.Service.Services
                 .Include(u => u.VoucherStorage)
                 .Include(u => u.UserRoles)
                     .ThenInclude(ur => ur.Role)
-                .Include(u => u.Orders)
                 .Where(u => !u.IsDelete)
                 .ToListAsync();
 
@@ -48,8 +47,7 @@ namespace DianaShop.Service.Services
                 .Include(u => u.SkinType)
                 .Include(u => u.VoucherStorage)
                 .Include(u => u.UserRoles)
-                    .ThenInclude(ur => ur.Role) 
-                .Include(u => u.Orders)
+                    .ThenInclude(ur => ur.Role)
                 .FirstOrDefaultAsync(u => u.Id == id && !u.IsDelete);
 
             return _mapper.Map<UserResponseModel>(user);

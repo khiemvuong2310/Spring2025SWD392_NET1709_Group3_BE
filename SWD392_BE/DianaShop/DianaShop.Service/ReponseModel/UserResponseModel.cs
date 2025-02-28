@@ -23,7 +23,6 @@ namespace DianaShop.Service.ReponseModel
         public List<VoucherStorageResponseModel>? VoucherStorage { get; set; }
         public List<UserRoleResponseModel>? UserRoles { get; set; }
         //public List<FeedBackResponseModel>? FeedBacks { get; set; }
-        public List<OrderResponseModel>? Orders { get; set; }
 
     }
 }
