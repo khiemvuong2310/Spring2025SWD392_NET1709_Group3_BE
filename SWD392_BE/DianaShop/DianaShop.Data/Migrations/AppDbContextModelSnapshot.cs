@@ -104,6 +104,24 @@ namespace DianaShop.Data.Migrations
                     b.ToTable("Carts");
                 });
 
+            modelBuilder.Entity("DianaShop.Data.Entities.CartProduct", b =>
+                {
+                    b.Property<int>("CartId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.HasKey("CartId", "ProductId");
+
+                    b.HasIndex("ProductId");
+
+                    b.ToTable("CartProducts");
+                });
+
             modelBuilder.Entity("DianaShop.Data.Entities.Category", b =>
                 {
                     b.Property<int>("Id")
@@ -283,27 +301,6 @@ namespace DianaShop.Data.Migrations
                     b.ToTable("Ingredients");
                 });
 
-            modelBuilder.Entity("DianaShop.Data.Entities.Order", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<bool>("IsDelete")
-                        .HasColumnType("tinyint(1)");
-
-                    b.Property<int?>("UserId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("Orders");
-                });
-
             modelBuilder.Entity("DianaShop.Data.Entities.Packaging", b =>
                 {
                     b.Property<int>("Id")
@@ -421,9 +418,6 @@ namespace DianaShop.Data.Migrations
                     b.Property<int>("BrandId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("CartId")
-                        .HasColumnType("int");
-
                     b.Property<int>("CategoryId")
                         .HasColumnType("int");
 
@@ -456,7 +450,7 @@ namespace DianaShop.Data.Migrations
                         .HasColumnType("longtext");
 
                     b.Property<decimal?>("Price")
-                        .HasColumnType("decimal(65,30)");
+                        .HasColumnType("decimal(18, 2)");
 
                     b.Property<bool>("Status")
                         .HasColumnType("tinyint(1)");
@@ -468,8 +462,6 @@ namespace DianaShop.Data.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("BrandId");
-
-                    b.HasIndex("CartId");
 
                     b.HasIndex("CategoryId");
 
@@ -926,6 +918,25 @@ namespace DianaShop.Data.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("DianaShop.Data.Entities.CartProduct", b =>
+                {
+                    b.HasOne("DianaShop.Data.Entities.Cart", "Cart")
+                        .WithMany("CartProducts")
+                        .HasForeignKey("CartId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DianaShop.Data.Entities.Product", "Product")
+                        .WithMany("CartProducts")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Cart");
+
+                    b.Navigation("Product");
+                });
+
             modelBuilder.Entity("DianaShop.Data.Entities.Comment", b =>
                 {
                     b.HasOne("DianaShop.Data.Entities.Post", "Post")
@@ -962,13 +973,6 @@ namespace DianaShop.Data.Migrations
                     b.Navigation("Product");
 
                     b.Navigation("User");
-                });
-
-            modelBuilder.Entity("DianaShop.Data.Entities.Order", b =>
-                {
-                    b.HasOne("DianaShop.Data.Entities.User", null)
-                        .WithMany("Orders")
-                        .HasForeignKey("UserId");
                 });
 
             modelBuilder.Entity("DianaShop.Data.Entities.Post", b =>
@@ -1027,10 +1031,6 @@ namespace DianaShop.Data.Migrations
                         .HasForeignKey("BrandId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.HasOne("DianaShop.Data.Entities.Cart", null)
-                        .WithMany("Products")
-                        .HasForeignKey("CartId");
 
                     b.HasOne("DianaShop.Data.Entities.Category", "Category")
                         .WithMany("Products")
@@ -1241,7 +1241,7 @@ namespace DianaShop.Data.Migrations
 
             modelBuilder.Entity("DianaShop.Data.Entities.Cart", b =>
                 {
-                    b.Navigation("Products");
+                    b.Navigation("CartProducts");
                 });
 
             modelBuilder.Entity("DianaShop.Data.Entities.Category", b =>
@@ -1282,6 +1282,8 @@ namespace DianaShop.Data.Migrations
 
             modelBuilder.Entity("DianaShop.Data.Entities.Product", b =>
                 {
+                    b.Navigation("CartProducts");
+
                     b.Navigation("ProductBatches");
 
                     b.Navigation("ProductImages");
@@ -1334,8 +1336,6 @@ namespace DianaShop.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("FeedBacks");
-
-                    b.Navigation("Orders");
 
                     b.Navigation("UserRoles");
 

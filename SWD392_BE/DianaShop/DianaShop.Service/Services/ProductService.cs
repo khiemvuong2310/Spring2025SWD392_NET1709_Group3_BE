@@ -25,7 +25,7 @@ namespace DianaShop.Service.Services
             _mapper = mapper;
         }
 
-        public async Task<IEnumerable<ProductResponseModel>> GetAllProductsAsync(ProductQueryRequest request)
+        public async Task<PaginatedResponse<ProductResponseModel>> GetAllProductsAsync(ProductQueryRequest request)
         {
             var productsQuery = _unitOfWork.Repository<Product>()
                 .GetAll()
@@ -59,8 +59,7 @@ namespace DianaShop.Service.Services
                     break;
             }
 
-
-            return await productsQuery.Skip((request.PageNumber - 1) * request.PageSize).Take(request.PageSize).ToListAsync();
+            return await PaginatedResponse<ProductResponseModel>.CreateAsync(productsQuery, request.PageNumber, request.PageSize);
         }
 
         private async Task<Product> HandleValidation(ProductRequestModel model)

@@ -198,5 +198,47 @@ namespace DianaShop.Repository.Repositories
 
             return query;
         }
+
+        public async Task UpdateAsync(T entity)
+        {
+            Table.Attach(entity); // Đính kèm entity vào DbContext nếu chưa có
+            Context.Entry(entity).State = EntityState.Modified; // Đánh dấu entity đã bị sửa đổi
+            await Context.SaveChangesAsync();
+        }
+
+        public async Task UpdateRangeAsync(IEnumerable<T> entities)
+        {
+            foreach (var entity in entities)
+            {
+                Table.Attach(entity);
+                Context.Entry(entity).State = EntityState.Modified;
+            }
+            await Context.SaveChangesAsync();
+        }
+
+        public async Task DeleteAsync(T entity)
+        {
+            if (Context.Entry(entity).State == EntityState.Detached)
+            {
+                Table.Attach(entity);
+            }
+            Table.Remove(entity);
+            await Context.SaveChangesAsync();
+        }
+
+        public async Task<IEnumerable<T>> FindAllRangeAsync(Expression<Func<T, bool>> predicate, params Expression<Func<T, object>>[] includeProperties)
+        {
+            IQueryable<T> query = Table.Where(predicate);
+            foreach (var includeProperty in includeProperties)
+            {
+                query = query.Include(includeProperty);
+            }
+            return await query.ToListAsync();
+        }
+        public IQueryable<T> GetQueryable()
+        {
+            return Context.Set<T>();
+        }
+
     }
 }

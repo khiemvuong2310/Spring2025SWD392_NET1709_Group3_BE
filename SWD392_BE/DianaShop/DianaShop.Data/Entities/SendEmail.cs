@@ -4,9 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DianaShop.Service.ReponseModel
+namespace DianaShop.Data.Entities
 {
-    public class OrderResponseModel
+    public class SendEmail :BaseEntity
     {
+        
     }
 }

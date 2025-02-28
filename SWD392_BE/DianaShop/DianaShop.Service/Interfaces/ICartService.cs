@@ -5,10 +5,13 @@ namespace DianaShop.Service.Interfaces
 {
     public interface ICartService
     {
-        Task<CartResponseModel> CreateCartAsync(CartRequestModel request);
-        Task<IEnumerable<CartResponseModel>> GetAllCartsAsync(int userId);
-        Task<CartResponseModel?> GetCartByIdAsync(int cartId);
-        Task<bool> RemoveProductFromCartAsync(int cartId);
-        Task<CartResponseModel?> UpdateCartAsync(int cartId, CartRequestModel request);
+        Task<CartResponseModel> AddProductToCart(int userId, int productId, int quantity);
+        Task<bool> ClearCart(int userId);
+        Task<CartResponseModel> CreateCart(CartRequestModel request);
+        Task<CartResponseModel> GetCartByUser(int userId);
+        Task<CartResponseModel> RemoveProductFromCart(int userId, int productId);
+        Task<CartResponseModel> UpdateCartProduct(int userId, int productId, int quantity);
+
+        Task<CartResponseModel> CreateCarts(CartRequestModel request);
     }
 }

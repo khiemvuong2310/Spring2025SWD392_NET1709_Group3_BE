@@ -12,6 +12,7 @@ using DianaShop.Service.RequestModel;
 using System.Security.Cryptography;
 using DianaShop.Service.Interfaces;
 using DianaShop.Repository.Utils;
+using System.Text.RegularExpressions;
 namespace DianaShop.Service.Services
 {
     public class UserService : IUserService
@@ -33,7 +34,6 @@ namespace DianaShop.Service.Services
                 .Include(u => u.VoucherStorage)
                 .Include(u => u.UserRoles)
                     .ThenInclude(ur => ur.Role)
-                .Include(u => u.Orders)
                 .Where(u => !u.IsDelete)
                 .ToListAsync();
 
@@ -47,16 +47,20 @@ namespace DianaShop.Service.Services
                 .Include(u => u.SkinType)
                 .Include(u => u.VoucherStorage)
                 .Include(u => u.UserRoles)
-                    .ThenInclude(ur => ur.Role) 
-                .Include(u => u.Orders)
+                    .ThenInclude(ur => ur.Role)
                 .FirstOrDefaultAsync(u => u.Id == id && !u.IsDelete);
 
             return _mapper.Map<UserResponseModel>(user);
         }
 
-        // Tạo mới người dùng
+        // Tạo người dùng mới
         public async Task<User> CreateUserAsync(UserCreateRequest request)
         {
+            if (!Regex.IsMatch(request.Phone, "^\\+?[0-9]{10,15}$"))
+            {
+                throw new ArgumentException("Invalid phone number format.");
+            }
+
             var user = _mapper.Map<User>(request);
             user.Password = PasswordTools.HashPassword(user.Password);
             user.UserRoles = new List<UserRole> { new UserRole { UserId = user.Id, RoleId = 3, Status = true } };
@@ -72,6 +76,10 @@ namespace DianaShop.Service.Services
         // Cập nhật thông tin người dùng
         public async Task<UserResponseModel?> UpdateUserAsync(int id, UserCreateRequest request)
         {
+            if (!Regex.IsMatch(request.Phone, "^\\+?[0-9]{10,15}$"))
+            {
+                throw new ArgumentException("Invalid phone number format.");
+            }
             var existingUser = await _unitOfWork.Repository<User>().GetById(id);
 
             if (existingUser == null) return null;

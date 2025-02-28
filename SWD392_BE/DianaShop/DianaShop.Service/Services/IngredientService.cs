@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using DianaShop.Data.Entities;
 using DianaShop.Repository.UnitOfWork;
 using DianaShop.Service.Interfaces;
@@ -27,16 +28,18 @@ namespace DianaShop.Service.Services
         {
             var ingredients = await _unitOfWork.Repository<Ingredient>().GetAll()
                 .Where(i => !i.IsDelete)
-                .Include(i => i.ProductIngredients).ThenInclude(pi => pi.Product).ToListAsync();
-            return _mapper.Map<IEnumerable<IngredientResponseModel>>(ingredients);
+                .ProjectTo<IngredientResponseModel>(_mapper.ConfigurationProvider)
+                .ToListAsync();
+            return ingredients;
         }
 
         public async Task<IngredientResponseModel?> GetByIdAsync(int id)
         {
             var ingredient = await _unitOfWork.Repository<Ingredient>().AsQueryable()
-                .Include(i => i.ProductIngredients).ThenInclude(pi => pi.Product)
-                .FirstOrDefaultAsync(i => i.Id == id);
-            return ingredient == null ? null : _mapper.Map<IngredientResponseModel>(ingredient);
+                .Where(i => i.Id == id)
+                .ProjectTo<IngredientResponseModel>(_mapper.ConfigurationProvider)
+                .FirstOrDefaultAsync();
+            return ingredient;
         }
 
         public async Task<IngredientResponseModel> CreateAsync(IngredientRequestModel request)

@@ -17,46 +17,69 @@ namespace DianaShop.API.Controllers
             _cartService = cartService;
         }
 
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<CartResponseModel>>> GetAllCarts(int userId)
+        /// 🛒 Lấy giỏ hàng của User
+        [HttpGet("{userId}")]
+        public async Task<IActionResult> GetCart(int userId)
         {
-            var carts = await _cartService.GetAllCartsAsync(userId);
-            return Ok(carts);
+            var response = await _cartService.GetCartByUser(userId);
+            return Ok(response);
         }
 
-        // Get a specific cart by ID
-        [HttpGet("{cartId}")]
-        public async Task<ActionResult<CartResponseModel>> GetCartById(int cartId)
+        /// ➕ Thêm sản phẩm vào giỏ hàng
+        [HttpPost("add-product")]
+        public async Task<IActionResult> AddProductToCart([FromBody] AddProductToCartRequest request)
         {
-            var cart = await _cartService.GetCartByIdAsync(cartId);
-            if (cart == null) return NotFound();
+            var response = await _cartService.AddProductToCart(request.UserId, request.ProductId, request.Quantity);
+            return Ok(response);
+        }
+
+        /// 🛒 API tạo giỏ hàng mới cho User
+        [HttpPost("create")]
+        public async Task<IActionResult> CreateCart([FromBody] CartRequestModel request)
+        {
+            if (request == null || request.UserID <= 0)
+            {
+                return BadRequest("Invalid user ID.");
+            }
+
+            var cart = await _cartService.CreateCarts(request);
             return Ok(cart);
         }
 
-        // Create a new cart
-        [HttpPost]
-        public async Task<ActionResult<CartResponseModel>> CreateCart([FromBody] CartRequestModel request)
+        /// ✏️ Cập nhật số lượng sản phẩm trong giỏ hàng
+        [HttpPut("update-product")]
+        public async Task<IActionResult> UpdateCartProduct([FromBody] UpdateCartProductRequest request)
         {
-            var createdCart = await _cartService.CreateCartAsync(request);
-            return CreatedAtAction(nameof(GetCartById), new { cartId = createdCart.CartID }, createdCart);
+            var response = await _cartService.UpdateCartProduct(request.UserId, request.ProductId, request.Quantity);
+            return Ok(response);
         }
 
-        // Update cart quantity
-        [HttpPut("{cartId}")]
-        public async Task<ActionResult<CartResponseModel>> UpdateCart(int cartId, [FromBody] CartRequestModel request)
+        /// ❌ Xóa sản phẩm khỏi giỏ hàng
+        [HttpDelete("remove-product")]
+        public async Task<IActionResult> RemoveProductFromCart([FromBody] RemoveProductFromCartRequest request)
         {
-            var updatedCart = await _cartService.UpdateCartAsync(cartId, request);
-            if (updatedCart == null) return NotFound();
-            return Ok(updatedCart);
+            var response = await _cartService.RemoveProductFromCart(request.UserId, request.ProductId);
+            return Ok(response);
         }
 
-        // Remove a cart
-        [HttpDelete("{cartId}")]
-        public async Task<ActionResult> RemoveCart(int cartId)
+        /// 🗑️ Xóa toàn bộ giỏ hàng
+        [HttpDelete("clear/{userId}")]
+        public async Task<IActionResult> ClearCart(int userId)
         {
-            var success = await _cartService.RemoveProductFromCartAsync(cartId);
-            if (!success) return NotFound();
-            return NoContent();
+            var success = await _cartService.ClearCart(userId);
+            if (!success)
+                return BadRequest("Cart is already empty or does not exist.");
+            return Ok(new { Message = "Cart cleared successfully" });
         }
+
+        /// ✅ Thanh toán giỏ hàng
+        //[HttpPost("checkout/{userId}")]
+        //public async Task<IActionResult> Checkout(int userId)
+        //{
+        //    var success = await _cartService.Checkout(userId);
+        //    if (!success)
+        //        return BadRequest("Checkout failed.");
+        //    return Ok(new { Message = "Order placed successfully" });
+        //}
     }
 }

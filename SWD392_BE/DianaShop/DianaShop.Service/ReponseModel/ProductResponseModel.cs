@@ -29,4 +29,12 @@ namespace DianaShop.Service.ReponseModel
         public List<string> ProductIngredients { get; set; } // List of ingredients
         public List<string> ProductSkinTypes { get; set; } // List of compatible skin types
     }
+
+    public class ProductResponseCart
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public string? Description { get; set; }
+        public decimal? Price { get; set; }
+    }
 }
