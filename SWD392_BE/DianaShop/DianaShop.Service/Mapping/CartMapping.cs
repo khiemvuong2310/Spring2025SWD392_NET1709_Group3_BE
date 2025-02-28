@@ -16,21 +16,11 @@ namespace DianaShop.Service.Mapping
         public CartMapping()
         {
             CreateMap<CartRequestModel, Cart>();
-            //CreateMap<Cart, CartResponseModel>()
-            //    .ForMember(dest => dest.CartID, opt => opt.MapFrom(src => src.Id))
-            //    .ForMember(dest => dest.Products, opt => opt.MapFrom(src => src.Products.Select(p => new ProductResponseCart
-            //    {
-            //        Id = p.Id,
-            //        Name = p.Name,
-            //        Description = p.Description,
-            //        Price = p.Price
-            //    })));
 
-            //CreateMap<Product, ProductResponseCart>();
-            
             // Mapping từ Cart -> CartResponse
             CreateMap<Cart, CartResponseModel>()
-                .ForMember(dest => dest.CartProducts, opt => opt.MapFrom(src => src.CartProducts));
+            .ForMember(dest => dest.CartProducts, opt => opt.MapFrom(src => src.CartProducts))
+            .ForMember(dest => dest.Quantity, opt => opt.MapFrom(src => src.CartProducts.Sum(cp => cp.Quantity)));
 
             // Mapping từ CartProduct -> CartProductResponse
             CreateMap<CartProduct, CartProductResponseModel>()

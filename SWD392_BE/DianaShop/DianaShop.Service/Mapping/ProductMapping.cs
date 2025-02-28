@@ -15,6 +15,7 @@ namespace DianaShop.Service.Mapping
         public ProductMapping()
         {
             CreateMap<ProductRequestModel, Product>();
+
             CreateMap<Product, ProductResponseModel>()
             .ForMember(dest => dest.FormulationType, opt => opt.MapFrom(src => src.FormulationType.Texture))
             .ForMember(dest => dest.Packaging, opt => opt.MapFrom(

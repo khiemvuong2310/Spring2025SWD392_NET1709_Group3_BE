@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using DianaShop.Data.Entities;
 using DianaShop.Repository.UnitOfWork;
 using DianaShop.Service.Interfaces;
@@ -47,8 +48,8 @@ namespace DianaShop.Service.Services
             var cart = await _unitOfWork.Repository<Cart>()
                 .GetQueryable()
                 .Where(c => c.UserID == userId)
-                .Include(c => c.CartProducts)
-                .ThenInclude(cp => cp.Product)
+                .ProjectTo<CartResponseModel>
+                (_mapper.ConfigurationProvider)
                 .FirstOrDefaultAsync();
 
             if (cart == null)
@@ -102,7 +103,7 @@ namespace DianaShop.Service.Services
             if (cartProduct != null)
             {
                 cartProduct.Quantity += quantity;
-                _unitOfWork.Repository<CartProduct>().UpdateAsync(cartProduct);
+                await _unitOfWork.Repository<CartProduct>().UpdateAsync(cartProduct);
             }
             else
             {
@@ -116,7 +117,7 @@ namespace DianaShop.Service.Services
             }
 
             cart.Quantity += quantity;
-            _unitOfWork.Repository<Cart>().UpdateAsync(cart);
+            await _unitOfWork.Repository<Cart>().UpdateAsync(cart);
 
             await _unitOfWork.SaveChangesAsync();
             return _mapper.Map<CartResponseModel>(cart);
@@ -141,8 +142,8 @@ namespace DianaShop.Service.Services
             cartProduct.Quantity = quantity;
             cart.Quantity += quantity; // Cộng số lượng mới
 
-            _unitOfWork.Repository<CartProduct>().UpdateAsync(cartProduct);
-            _unitOfWork.Repository<Cart>().UpdateAsync(cart);
+            await _unitOfWork.Repository<CartProduct>().UpdateAsync(cartProduct);
+            await _unitOfWork.Repository<Cart>().UpdateAsync(cart);
 
             await _unitOfWork.SaveChangesAsync();
             return _mapper.Map<CartResponseModel>(cart);
@@ -165,7 +166,7 @@ namespace DianaShop.Service.Services
 
             cart.Quantity -= cartProduct.Quantity;
             _unitOfWork.Repository<CartProduct>().Delete(cartProduct);
-            _unitOfWork.Repository<Cart>().UpdateAsync(cart);
+            await _unitOfWork.Repository<Cart>().UpdateAsync(cart);
 
             await _unitOfWork.SaveChangesAsync();
             return _mapper.Map<CartResponseModel>(cart);
@@ -189,7 +190,7 @@ namespace DianaShop.Service.Services
 
             _unitOfWork.Repository<CartProduct>().DeleteRange(cartProducts);
             cart.Quantity = 0;
-            _unitOfWork.Repository<Cart>().UpdateAsync(cart);
+            await _unitOfWork.Repository<Cart>().UpdateAsync(cart);
 
             await _unitOfWork.SaveChangesAsync();
             return true;
