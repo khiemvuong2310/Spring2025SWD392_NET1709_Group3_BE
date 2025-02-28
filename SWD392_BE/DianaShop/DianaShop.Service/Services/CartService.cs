@@ -4,6 +4,7 @@ using DianaShop.Repository.UnitOfWork;
 using DianaShop.Service.Interfaces;
 using DianaShop.Service.ReponseModel;
 using DianaShop.Service.RequestModel;
+using Google.Apis.Storage.v1.Data;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -13,138 +14,189 @@ using System.Threading.Tasks;
 
 namespace DianaShop.Service.Services
 {
-    public class CartService 
-        //: ICartService
+    public class CartService : ICartService
     {
-        //private readonly IUnitOfWork _unitOfWork;
-        //private readonly IMapper _mapper;
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly IMapper _mapper;
 
-        //public CartService(IUnitOfWork unitOfWork, IMapper mapper)
-        //{
-        //    _unitOfWork = unitOfWork;
-        //    _mapper = mapper;
-        //}
+        public CartService(IUnitOfWork unitOfWork, IMapper mapper)
+        {
+            _unitOfWork = unitOfWork;
+            _mapper = mapper;
+        }
 
-        //// Get all carts for a user
-        //public async Task<IEnumerable<CartResponseModel>> GetAllCartsAsync(int userId)
-        //{
-        //    var carts = await _unitOfWork.Repository<Cart>()
-        //        .GetAll()
-        //        .Where(c => c.UserID == userId)
-        //        .Include(c => c.Products)
-        //        .ToListAsync();
+        // 🛒 Tạo giỏ hàng mới cho User
+        public async Task<CartResponseModel> CreateCart(CartRequestModel request)
+        {
+            var cart = new Cart
+            {
+                UserID = request.UserID,
+                Quantity = 0,
+                CartProducts = new List<CartProduct>()
+            };
 
-        //    return _mapper.Map<IEnumerable<CartResponseModel>>(carts);
-        //}
+            await _unitOfWork.Repository<Cart>().InsertAsync(cart);
+            await _unitOfWork.SaveChangesAsync();
 
-        //// Get cart by ID
-        //public async Task<CartResponseModel?> GetCartByIdAsync(int cartId)
+            return _mapper.Map<CartResponseModel>(cart);
+        }
+
+        // 🔍 Lấy thông tin giỏ hàng theo UserID
+        public async Task<CartResponseModel> GetCartByUser(int userId)
+        {
+            var cart = await _unitOfWork.Repository<Cart>()
+                .GetQueryable()
+                .Where(c => c.UserID == userId)
+                .Include(c => c.CartProducts)
+                .ThenInclude(cp => cp.Product)
+                .FirstOrDefaultAsync();
+
+            if (cart == null)
+                throw new Exception("Cart not found");
+
+            return _mapper.Map<CartResponseModel>(cart);
+        }
+
+        // ➕ Thêm sản phẩm vào giỏ hàng
+        public async Task<CartResponseModel> AddProductToCart(int userId, int productId, int quantity)
+        {
+            var cart = await _unitOfWork.Repository<Cart>()
+                .FindAsync(c => c.UserID == userId);
+
+            if (cart == null)
+                throw new Exception("Cart not found");
+
+            var product = await _unitOfWork.Repository<Product>().GetById(productId);
+            if (product == null)
+                throw new Exception("Product not found");
+
+            var cartProduct = await _unitOfWork.Repository<CartProduct>()
+                .FindAsync(cp => cp.CartId == cart.Id && cp.ProductId == productId);
+
+            if (cartProduct != null)
+            {
+                cartProduct.Quantity += quantity;
+                _unitOfWork.Repository<CartProduct>().UpdateAsync(cartProduct);
+            }
+            else
+            {
+                cartProduct = new CartProduct
+                {
+                    CartId = cart.Id,
+                    ProductId = productId,
+                    Quantity = quantity
+                };
+                await _unitOfWork.Repository<CartProduct>().InsertAsync(cartProduct);
+            }
+
+            cart.Quantity += quantity;
+            _unitOfWork.Repository<Cart>().UpdateAsync(cart);
+
+            await _unitOfWork.SaveChangesAsync();
+            return _mapper.Map<CartResponseModel>(cart);
+        }
+
+        // ✏️ Cập nhật số lượng sản phẩm trong giỏ hàng
+        public async Task<CartResponseModel> UpdateCartProduct(int userId, int productId, int quantity)
+        {
+            var cart = await _unitOfWork.Repository<Cart>()
+                .FindAsync(c => c.UserID == userId);
+
+            if (cart == null)
+                throw new Exception("Cart not found");
+
+            var cartProduct = await _unitOfWork.Repository<CartProduct>()
+                .FindAsync(cp => cp.CartId == cart.Id && cp.ProductId == productId);
+
+            if (cartProduct == null)
+                throw new Exception("Product not found in cart");
+
+            cart.Quantity -= cartProduct.Quantity; // Trừ số lượng cũ
+            cartProduct.Quantity = quantity;
+            cart.Quantity += quantity; // Cộng số lượng mới
+
+            _unitOfWork.Repository<CartProduct>().UpdateAsync(cartProduct);
+            _unitOfWork.Repository<Cart>().UpdateAsync(cart);
+
+            await _unitOfWork.SaveChangesAsync();
+            return _mapper.Map<CartResponseModel>(cart);
+        }
+
+        // ❌ Xóa sản phẩm khỏi giỏ hàng
+        public async Task<CartResponseModel> RemoveProductFromCart(int userId, int productId)
+        {
+            var cart = await _unitOfWork.Repository<Cart>()
+                .FindAsync(c => c.UserID == userId);
+
+            if (cart == null)
+                throw new Exception("Cart not found");
+
+            var cartProduct = await _unitOfWork.Repository<CartProduct>()
+                .FindAsync(cp => cp.CartId == cart.Id && cp.ProductId == productId);
+
+            if (cartProduct == null)
+                throw new Exception("Product not found in cart");
+
+            cart.Quantity -= cartProduct.Quantity;
+            _unitOfWork.Repository<CartProduct>().Delete(cartProduct);
+            _unitOfWork.Repository<Cart>().UpdateAsync(cart);
+
+            await _unitOfWork.SaveChangesAsync();
+            return _mapper.Map<CartResponseModel>(cart);
+        }
+
+        // 🗑️ Xóa toàn bộ giỏ hàng
+        public async Task<bool> ClearCart(int userId)
+        {
+            var cart = await _unitOfWork.Repository<Cart>()
+                .FindAsync(c => c.UserID == userId);
+
+            if (cart == null)
+                return false;
+
+            var cartProducts = _unitOfWork.Repository<CartProduct>()
+                .GetQueryable()
+                .Where(cp => cp.CartId == cart.Id);
+
+            if (!await cartProducts.AnyAsync())
+                return false;
+
+            _unitOfWork.Repository<CartProduct>().DeleteRange(cartProducts);
+            cart.Quantity = 0;
+            _unitOfWork.Repository<Cart>().UpdateAsync(cart);
+
+            await _unitOfWork.SaveChangesAsync();
+            return true;
+        }
+
+        // ✅ Thanh toán giỏ hàng (chuyển trạng thái đơn hàng, tạo Order)
+        //public async Task<bool> Checkout(int userId)
         //{
         //    var cart = await _unitOfWork.Repository<Cart>()
-        //        .GetAll()
-        //        .Include(c => c.Products)
-        //        .FirstOrDefaultAsync(c => c.Id == cartId);
+        //        .FindAsync(c => c.UserID == userId);
 
-        //    return cart == null ? null : _mapper.Map<CartResponseModel>(cart);
-        //}
+        //    if (cart == null || cart.Quantity == 0)
+        //        throw new Exception("Cart is empty or not found");
 
-        //// Create a new cart
-        //public async Task<CartResponseModel> CreateCartAsync(CartRequestModel request)
-        //{
-        //    var cart = _mapper.Map<Cart>(request);
+        //    var order = new Order
+        //    {
+        //        UserID = userId,
+        //        OrderDate = DateTime.UtcNow,
+        //        Status = "Processing",
+        //        TotalAmount = cart.CartProducts.Sum(cp => cp.Quantity * cp.Product.Price),
+        //        OrderDetails = cart.CartProducts.Select(cp => new OrderDetail
+        //        {
+        //            ProductId = cp.ProductId,
+        //            Quantity = cp.Quantity,
+        //            Price = cp.Product.Price
+        //        }).ToList()
+        //    };
 
-        //    cart.Products = await _unitOfWork.Repository<Product>()
-        //        .GetAll()
-        //        .Where(p => request.ProductIDs.Contains(p.Id))
-        //        .ToListAsync();
+        //    await _unitOfWork.Repository<Order>().InsertAsync(order);
+        //    await ClearCart(userId);
 
-        //    await _unitOfWork.Repository<Cart>().InsertAsync(cart);
         //    await _unitOfWork.SaveChangesAsync();
-
-        //    return _mapper.Map<CartResponseModel>(cart);
-        //}
-
-        //// Update cart
-        //public async Task<CartResponseModel?> UpdateCartAsync(int cartId, CartRequestModel request)
-        //{
-        //    var cart = await _unitOfWork.Repository<Cart>().GetById(cartId);
-        //    if (cart == null) return null;
-
-        //    cart.Quantity = request.Quantity;
-        //    cart.Products = await _unitOfWork.Repository<Product>()
-        //        .GetAll()
-        //        .Where(p => request.ProductIDs.Contains(p.Id))
-        //        .ToListAsync();
-
-        //    await _unitOfWork.Repository<Cart>().UpdateAsync(cart);
-        //    await _unitOfWork.SaveChangesAsync();
-
-        //    return _mapper.Map<CartResponseModel>(cart);
-        //}
-
-        //// Delete cart
-        //public async Task<bool> DeleteCartAsync(int cartId)
-        //{
-        //    var cart = await _unitOfWork.Repository<Cart>().GetById(cartId);
-        //    if (cart == null) return false;
-
-        //    await _unitOfWork.Repository<Cart>().DeleteAsync(cart);
-        //    await _unitOfWork.SaveChangesAsync();
-
         //    return true;
-        //}
-
-        //// Add products to cart
-        //public async Task<CartResponseModel?> AddProductsToCartAsync(int cartId, List<int> productIds)
-        //{
-        //    var cart = await _unitOfWork.Repository<Cart>()
-        //        .GetAll()
-        //        .Include(c => c.Products)
-        //        .FirstOrDefaultAsync(c => c.Id == cartId);
-        //    if (cart == null) return null;
-
-        //    var products = await _unitOfWork.Repository<Product>()
-        //        .GetAll()
-        //        .Where(p => productIds.Contains(p.Id))
-        //        .ToListAsync();
-
-        //    if (cart.Products == null)
-        //    {
-        //        cart.Products = new List<Product>();
-        //    }
-
-        //    foreach (var product in products)
-        //    {
-        //        cart.Products.Add(product);
-        //    }
-        //    await _unitOfWork.Repository<Cart>().UpdateAsync(cart);
-        //    await _unitOfWork.SaveChangesAsync();
-
-        //    return _mapper.Map<CartResponseModel>(cart);
-        //}
-
-        //// Add a single product to cart
-        //public async Task<CartResponseModel?> AddProductToCartAsync(int cartId, int productId)
-        //{
-        //    var cart = await _unitOfWork.Repository<Cart>()
-        //        .GetAll()
-        //        .Include(c => c.Products)
-        //        .FirstOrDefaultAsync(c => c.Id == cartId);
-
-        //    if (cart == null) return null;
-
-        //    var product = await _unitOfWork.Repository<Product>().GetById(productId);
-        //    if (product == null) return null;
-
-        //    if (cart.Products == null)
-        //        cart.Products = new List<Product>();
-
-        //    cart.Products.Add(product);
-
-        //    await _unitOfWork.Repository<Cart>().UpdateAsync(cart);
-        //    await _unitOfWork.SaveChangesAsync();
-
-        //    return _mapper.Map<CartResponseModel>(cart);
         //}
     }
 }

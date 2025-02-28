@@ -26,7 +26,15 @@ namespace DianaShop.Service.Mapping
             //        Price = p.Price
             //    })));
 
-            CreateMap<Product, ProductResponseCart>();
+            //CreateMap<Product, ProductResponseCart>();
+            
+            // Mapping từ Cart -> CartResponse
+            CreateMap<Cart, CartResponseModel>()
+                .ForMember(dest => dest.CartProducts, opt => opt.MapFrom(src => src.CartProducts));
+
+            // Mapping từ CartProduct -> CartProductResponse
+            CreateMap<CartProduct, CartProductResponseModel>()
+                .ForMember(dest => dest.ProductName, opt => opt.MapFrom(src => src.Product.Name));
         }
     }
 }

@@ -29,6 +29,8 @@ namespace DianaShop.Repository.Repositories
 
         IQueryable<TEntity> FindAll(Func<TEntity, bool> predicate);
 
+        Task<IEnumerable<TEntity>> FindAllRangeAsync(Expression<Func<TEntity, bool>> predicate, params Expression<Func<TEntity, object>>[] includeProperties);
+
         IEnumerable<TEntity> Find(Expression<Func<TEntity, bool>> predicate);
         Task<TEntity?> FindAsync(Expression<Func<TEntity, bool>> predicate);
         Task<bool> AnyAsync(Expression<Func<TEntity, bool>> predicate);
@@ -74,5 +76,9 @@ namespace DianaShop.Repository.Repositories
             Expression<Func<TEntity, bool>> predicate = null,
             Func<IQueryable<TEntity>, IIncludableQueryable<TEntity, object>> include = null);
         IQueryable<TEntity> Include(params Expression<Func<TEntity, object>>[] includes);
+
+
+        IQueryable<TEntity> GetQueryable();
+
     }
 }

@@ -12,5 +12,21 @@ namespace DianaShop.Service.RequestModel
         public int ProductId { get; set; }
         public int Quantity { get; set; }
     }
-
+    public class AddProductToCartRequest
+    {
+        public int UserId { get; set; }
+        public int ProductId { get; set; }
+        public int Quantity { get; set; }
+    }
+    public class UpdateCartProductRequest
+    {
+        public int UserId { get; set; }
+        public int ProductId { get; set; }
+        public int Quantity { get; set; }
+    }
+    public class RemoveProductFromCartRequest
+    {
+        public int UserId { get; set; }
+        public int ProductId { get; set; }
+    }
 }

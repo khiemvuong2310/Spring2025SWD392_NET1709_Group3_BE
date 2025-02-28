@@ -225,5 +225,20 @@ namespace DianaShop.Repository.Repositories
             Table.Remove(entity);
             await Context.SaveChangesAsync();
         }
+
+        public async Task<IEnumerable<T>> FindAllRangeAsync(Expression<Func<T, bool>> predicate, params Expression<Func<T, object>>[] includeProperties)
+        {
+            IQueryable<T> query = Table.Where(predicate);
+            foreach (var includeProperty in includeProperties)
+            {
+                query = query.Include(includeProperty);
+            }
+            return await query.ToListAsync();
+        }
+        public IQueryable<T> GetQueryable()
+        {
+            return Context.Set<T>();
+        }
+
     }
 }

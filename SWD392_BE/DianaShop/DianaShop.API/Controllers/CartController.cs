@@ -10,63 +10,63 @@ namespace DianaShop.API.Controllers
     [ApiController]
     public class CartController : ControllerBase
     {
-        //private readonly ICartService _cartService;
+        private readonly ICartService _cartService;
 
-        //public CartController(ICartService cartService)
-        //{
-        //    _cartService = cartService;
-        //}
+        public CartController(ICartService cartService)
+        {
+            _cartService = cartService;
+        }
 
-        //// Lấy tất cả giỏ hàng của người dùng
-        //[HttpGet("user/{userId}")]
-        //public async Task<ActionResult<IEnumerable<CartResponseModel>>> GetAllCarts(int userId)
-        //{
-        //    var carts = await _cartService.GetAllCartsAsync(userId);
-        //    return Ok(carts);
-        //}
+        /// 🛒 Lấy giỏ hàng của User
+        [HttpGet("{userId}")]
+        public async Task<IActionResult> GetCart(int userId)
+        {
+            var response = await _cartService.GetCartByUser(userId);
+            return Ok(response);
+        }
 
-        //// Lấy giỏ hàng theo ID
-        //[HttpGet("{cartId}")]
-        //public async Task<ActionResult<CartResponseModel>> GetCartById(int cartId)
-        //{
-        //    var cart = await _cartService.GetCartByIdAsync(cartId);
-        //    if (cart == null) return NotFound("Cart not found");
-        //    return Ok(cart);
-        //}
+        /// ➕ Thêm sản phẩm vào giỏ hàng
+        [HttpPost("add-product")]
+        public async Task<IActionResult> AddProductToCart([FromBody] AddProductToCartRequest request)
+        {
+            var response = await _cartService.AddProductToCart(request.UserId, request.ProductId, request.Quantity);
+            return Ok(response);
+        }
 
-        ////Tạo giỏ hàng mới
-        //[HttpPost]
-        //public async Task<ActionResult<CartResponseModel>> CreateCart([FromBody] CartRequestModel request)
-        //{
-        //    var createdCart = await _cartService.CreateCartAsync(request);
-        //    return CreatedAtAction(nameof(GetCartById), new { cartId = createdCart.CartID }, createdCart);
-        //}
+        /// ✏️ Cập nhật số lượng sản phẩm trong giỏ hàng
+        [HttpPut("update-product")]
+        public async Task<IActionResult> UpdateCartProduct([FromBody] UpdateCartProductRequest request)
+        {
+            var response = await _cartService.UpdateCartProduct(request.UserId, request.ProductId, request.Quantity);
+            return Ok(response);
+        }
 
-        ////  Cập nhật giỏ hàng
-        //[HttpPut("{cartId}")]
-        //public async Task<ActionResult<CartResponseModel>> UpdateCart(int cartId, [FromBody] CartRequestModel request)
-        //{
-        //    var updatedCart = await _cartService.UpdateCartAsync(cartId, request);
-        //    if (updatedCart == null) return NotFound("Cart not found");
-        //    return Ok(updatedCart);
-        //}
+        /// ❌ Xóa sản phẩm khỏi giỏ hàng
+        [HttpDelete("remove-product")]
+        public async Task<IActionResult> RemoveProductFromCart([FromBody] RemoveProductFromCartRequest request)
+        {
+            var response = await _cartService.RemoveProductFromCart(request.UserId, request.ProductId);
+            return Ok(response);
+        }
 
-        ////  Xóa giỏ hàng
-        //[HttpDelete("{cartId}")]
-        //public async Task<ActionResult> DeleteCart(int cartId)
-        //{
-        //    var success = await _cartService.DeleteCartAsync(cartId);
-        //    if (!success) return NotFound("Cart not found");
-        //    return NoContent();
-        //}
+        /// 🗑️ Xóa toàn bộ giỏ hàng
+        [HttpDelete("clear/{userId}")]
+        public async Task<IActionResult> ClearCart(int userId)
+        {
+            var success = await _cartService.ClearCart(userId);
+            if (!success)
+                return BadRequest("Cart is already empty or does not exist.");
+            return Ok(new { Message = "Cart cleared successfully" });
+        }
 
-        ////  Thêm một sản phẩm vào giỏ hàng
-        //[HttpPost("{cartId}/add-product/{productId}")]
-        //public async Task<ActionResult<CartResponseModel>> AddProductToCart(int cartId, int productId)
+        /// ✅ Thanh toán giỏ hàng
+        //[HttpPost("checkout/{userId}")]
+        //public async Task<IActionResult> Checkout(int userId)
         //{
-        //    var updatedCart = await _cartService.AddProductToCartAsync(cartId, productId);
-        //    if (updatedCart == null) return NotFound("Cart or product not found");
-        //    return Ok(updatedCart);
+        //    var success = await _cartService.Checkout(userId);
+        //    if (!success)
+        //        return BadRequest("Checkout failed.");
+        //    return Ok(new { Message = "Order placed successfully" });
         //}
     }
 }

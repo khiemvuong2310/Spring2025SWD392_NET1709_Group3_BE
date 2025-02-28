@@ -8,9 +8,10 @@ namespace DianaShop.Service.ReponseModel
 {
     public class CartResponseModel
     {
-        public int CartID { get; set; }
+        public int Id { get; set; }
         public int UserID { get; set; }
-        public IEnumerable<ProductResponseModel> Products { get; set; }
         public int Quantity { get; set; }
+
+        public List<CartProductResponse> CartProducts { get; set; }
     }
 }
