@@ -52,7 +52,33 @@ namespace DianaShop.Service.Services
                 .FirstOrDefaultAsync();
 
             if (cart == null)
-                throw new Exception("Cart not found");
+                throw new KeyNotFoundException("Cart not found for user with ID: " + userId);
+
+            return _mapper.Map<CartResponseModel>(cart);
+        }
+
+        /// 🛒 Tạo giỏ hàng mới cho User
+        public async Task<CartResponseModel> CreateCarts(CartRequestModel request)
+        {
+            if (request == null || request.UserID <= 0)
+                throw new ArgumentException("Invalid request data. UserID must be greater than 0.");
+
+            // Kiểm tra xem User đã có giỏ hàng chưa
+            var existingCart = await _unitOfWork.Repository<Cart>()
+                .FindAsync(c => c.UserID == request.UserID);
+
+            if (existingCart != null)
+                throw new InvalidOperationException("User already has an existing cart.");
+
+            var cart = new Cart
+            {
+                UserID = request.UserID,
+                Quantity = 0,
+                CartProducts = new List<CartProduct>()
+            };
+
+            await _unitOfWork.Repository<Cart>().InsertAsync(cart);
+            await _unitOfWork.SaveChangesAsync();
 
             return _mapper.Map<CartResponseModel>(cart);
         }

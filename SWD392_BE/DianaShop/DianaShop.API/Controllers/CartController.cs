@@ -33,6 +33,19 @@ namespace DianaShop.API.Controllers
             return Ok(response);
         }
 
+        /// 🛒 API tạo giỏ hàng mới cho User
+        [HttpPost("create")]
+        public async Task<IActionResult> CreateCart([FromBody] CartRequestModel request)
+        {
+            if (request == null || request.UserID <= 0)
+            {
+                return BadRequest("Invalid user ID.");
+            }
+
+            var cart = await _cartService.CreateCarts(request);
+            return Ok(cart);
+        }
+
         /// ✏️ Cập nhật số lượng sản phẩm trong giỏ hàng
         [HttpPut("update-product")]
         public async Task<IActionResult> UpdateCartProduct([FromBody] UpdateCartProductRequest request)

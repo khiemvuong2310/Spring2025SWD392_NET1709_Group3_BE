@@ -11,5 +11,7 @@ namespace DianaShop.Service.Interfaces
         Task<CartResponseModel> GetCartByUser(int userId);
         Task<CartResponseModel> RemoveProductFromCart(int userId, int productId);
         Task<CartResponseModel> UpdateCartProduct(int userId, int productId, int quantity);
+
+        Task<CartResponseModel> CreateCarts(CartRequestModel request);
     }
 }

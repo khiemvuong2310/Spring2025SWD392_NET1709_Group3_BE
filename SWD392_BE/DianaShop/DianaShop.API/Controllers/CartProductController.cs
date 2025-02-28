@@ -1,4 +1,5 @@
-﻿using DianaShop.Service.RequestModel;
+﻿using DianaShop.Service.Interfaces;
+using DianaShop.Service.RequestModel;
 using DianaShop.Service.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -9,9 +10,9 @@ namespace DianaShop.API.Controllers
     [ApiController]
     public class CartProductController : ControllerBase
     {
-        private readonly CartProductService _cartProductService;
+        private readonly ICartProductService _cartProductService;
 
-        public CartProductController(CartProductService cartProductService)
+        public CartProductController(ICartProductService cartProductService)
         {
             _cartProductService = cartProductService;
         }
