@@ -12,7 +12,7 @@ namespace DianaShop.Service.Mapping
 {
     public class OrderMapping : Profile
     {
-        protected OrderMapping()
+        public OrderMapping()
         {
             CreateMap<OrderRequestModel, Order>();
             CreateMap<Order, OrderResponseModel>()

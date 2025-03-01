@@ -60,7 +60,7 @@ namespace DianaShop.API.AppStarts
             services.AddTransient<IPostService, PostService>();
             services.AddTransient<IImageService, ImageService>();
             services.AddScoped<IBlobService, BlobService>();
-            //services.AddScoped<IOrderService, OrderService>();
+            services.AddScoped<IOrderService, OrderService>();
             //services.AddScoped<IJwtService, JwtService>();
 
             // Thêm AutoMapper vào dịch vụ

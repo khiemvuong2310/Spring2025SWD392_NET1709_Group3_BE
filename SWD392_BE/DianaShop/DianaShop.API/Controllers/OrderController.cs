@@ -20,15 +20,15 @@ namespace DianaShop.API.Controllers
 
 
         /// 🛒 Lấy tất cả order của User
-        [HttpGet("{userId}")]
+        [HttpGet("user/{userId}")]  // Đổi {userId} thành "user/{userId}"
         public async Task<IActionResult> GetAllOrders(int userId)
         {
             var response = await _orderService.GetAllOrderByUser(userId);
             return Ok(response);
         }
 
-        /// 🛒 Lấy order 
-        [HttpGet("{orderId}")]
+        /// 🛒 Lấy order theo ID
+        [HttpGet("id/{orderId}")]  // Đổi {orderId} thành "id/{orderId}"
         public async Task<IActionResult> GetOrderById(int orderId)
         {
             var response = await _orderService.GetOrderById(orderId);
@@ -36,7 +36,7 @@ namespace DianaShop.API.Controllers
         }
 
         /// 🛒 Lấy tất cả order details của order
-        [HttpGet("{orderId}")]
+        [HttpGet("details/{orderId}")]  // Đổi {orderId} thành "details/{orderId}"
         public async Task<IActionResult> GetAllOrderDetails(int orderId)
         {
             var response = await _orderService.GetOrderDetails(orderId);
