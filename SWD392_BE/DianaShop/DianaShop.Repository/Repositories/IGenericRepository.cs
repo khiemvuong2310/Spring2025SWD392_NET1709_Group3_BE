@@ -44,6 +44,8 @@ namespace DianaShop.Repository.Repositories
 
         void UpdateRange(IQueryable<TEntity> entities);
 
+        Task UpdateAsync(TEntity entity);
+
         Task HardDelete(int key);
 
         Task HardDeleteGuid(Guid key);
@@ -66,5 +68,7 @@ namespace DianaShop.Repository.Repositories
             Expression<Func<TEntity, bool>> predicate = null,
             Func<IQueryable<TEntity>, IIncludableQueryable<TEntity, object>> include = null);
         IQueryable<TEntity> Include(params Expression<Func<TEntity, object>>[] includes);
+
+        IQueryable<TEntity> GetQueryable();
     }
 }

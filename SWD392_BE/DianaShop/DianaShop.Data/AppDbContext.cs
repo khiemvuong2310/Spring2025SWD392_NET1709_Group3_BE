@@ -43,6 +43,7 @@ namespace DianaShop.Data
         public DbSet<Voucher> Vouchers { get; set; }
         public DbSet<VoucherStorage> VoucherStorages { get; set; }
         public DbSet<Storage> Storages { get; set; }
+        public DbSet<OrderDetail> OrderDetails { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

@@ -101,7 +101,12 @@ namespace DianaShop.Repository.Repositories
             }
         }
 
-
+        public async Task UpdateAsync(T entity)
+        {
+            Table.Attach(entity); // Đính kèm entity vào DbContext nếu chưa có
+            Context.Entry(entity).State = EntityState.Modified; // Đánh dấu entity đã bị sửa đổi
+            await Context.SaveChangesAsync();
+        }
         public void UpdateRange(IQueryable<T> entities)
         {
             Table.UpdateRange(entities);
@@ -197,6 +202,10 @@ namespace DianaShop.Repository.Repositories
             }
 
             return query;
+        }
+        public IQueryable<T> GetQueryable()
+        {
+            return Context.Set<T>();
         }
     }
 }
