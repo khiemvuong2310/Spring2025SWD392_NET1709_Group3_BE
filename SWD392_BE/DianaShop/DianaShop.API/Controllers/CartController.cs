@@ -17,6 +17,13 @@ namespace DianaShop.API.Controllers
             _cartService = cartService;
         }
 
+        [HttpGet("get-all")]
+        public async Task<IActionResult> GetAllCarts()
+        {
+            var carts = await _cartService.GetAllCarts();
+            return Ok(carts);
+        }
+
         /// 🛒 Lấy giỏ hàng của User
         [HttpGet("{userId}")]
         public async Task<IActionResult> GetCart(int userId)
@@ -73,13 +80,13 @@ namespace DianaShop.API.Controllers
         }
 
         /// ✅ Thanh toán giỏ hàng
-        //[HttpPost("checkout/{userId}")]
-        //public async Task<IActionResult> Checkout(int userId)
-        //{
-        //    var success = await _cartService.Checkout(userId);
-        //    if (!success)
-        //        return BadRequest("Checkout failed.");
-        //    return Ok(new { Message = "Order placed successfully" });
-        //}
+        [HttpPost("checkout/{userId}")]
+        public async Task<IActionResult> Checkout(int userId)
+        {
+            var success = await _cartService.Checkout(userId);
+            if (!success)
+                return BadRequest("Checkout failed.");
+            return Ok(new { Message = "Order placed successfully" });
+        }
     }
 }
