@@ -17,6 +17,7 @@ namespace DianaShop.API.Controllers
             _paymentService = paymentService;
         }
 
+
         // lấy tất cả
         [HttpGet("all")]
         public async Task<IActionResult> GetAllPayments()
@@ -119,5 +120,6 @@ namespace DianaShop.API.Controllers
                 return BadRequest("Payment does not exist.");
             return Ok(new { Message = "Payment removed successfully!" });
         }
+
     }
 }

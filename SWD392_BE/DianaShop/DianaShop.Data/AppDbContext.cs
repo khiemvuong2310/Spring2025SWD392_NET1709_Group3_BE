@@ -163,14 +163,8 @@ namespace DianaShop.Data
             modelBuilder.Entity<Order>()
                 .HasOne(o => o.User)
                 .WithMany(u => u.Orders)
-                .HasForeignKey(o => o.UserID)
-                .OnDelete(DeleteBehavior.Restrict);
-            //update order 
-            modelBuilder.Entity<Order>()
-                .HasOne(o => o.StageStatus)
-                .WithMany(ss => ss.Orders)
-                .HasForeignKey(o => o.StatusId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .HasForeignKey(o => o.UserID);
+            
 
             modelBuilder.Entity<OrderDetail>()
                 .HasKey(od => od.Id);
@@ -226,6 +220,13 @@ namespace DianaShop.Data
                 .IsRequired()
                 .HasMaxLength(100);
 
+            //update order 
+            modelBuilder.Entity<Order>()
+                .HasOne(o => o.StageStatus)
+                .WithMany(ss => ss.Orders)
+                .HasForeignKey(o => o.StatusId)
+                .OnDelete(DeleteBehavior.Restrict);
+
             // Cấu hình cho StageStatus
             modelBuilder.Entity<StageStatus>()
                 .HasKey(ss => ss.Id);
@@ -237,6 +238,16 @@ namespace DianaShop.Data
 
             modelBuilder.Entity<VnPayTransaction>()
                 .HasKey(i => i.TransactionId);
+
+            modelBuilder.Entity<User>()
+                .Property(a => a.wallet)
+                .HasColumnType("decimal(18, 4)");
+
+            modelBuilder.Entity<VnPayTransaction>()
+                .HasOne(u => u.User)
+                .WithMany(u => u.VnPay)
+                .HasForeignKey(u => u.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
 
             //SeedData
             modelBuilder.Entity<Role>().HasData(

@@ -18,6 +18,7 @@ namespace DianaShop.Service.ReponseModel
         public bool? Status { get; set; }
         public int SkinTypeId { get; set; }
         public string SkinTypeName { get; set; }
+        public decimal? wallet { get; set; }
 
         //public CartResponseModel? Cart { get; set; }
         public List<VoucherStorageResponseModel>? VoucherStorage { get; set; }

@@ -17,6 +17,7 @@ namespace DianaShop.Data.Entities
         public string? Image { get; set; }
         public bool? Status { get; set; }
         public int? SkinTypeId { get; set; }
+        public decimal? wallet { get; set; }
 
         public virtual Cart Cart { get; set; }  
         public virtual SkinType SkinType { get; set; }
@@ -25,5 +26,6 @@ namespace DianaShop.Data.Entities
         public virtual ICollection<FeedBack> FeedBacks { get; set; }
         public virtual ICollection<Order> Orders { get; set; }
         public virtual ICollection<Payment> Payments { get; set; }
+        public virtual ICollection<VnPayTransaction>? VnPay { get; set; }
     }
 }

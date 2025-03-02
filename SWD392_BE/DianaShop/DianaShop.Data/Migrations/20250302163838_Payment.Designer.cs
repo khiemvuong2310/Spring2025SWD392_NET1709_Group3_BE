@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DianaShop.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250302144423_ChangeInStageStatus")]
-    partial class ChangeInStageStatus
+    [Migration("20250302163838_Payment")]
+    partial class Payment
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -325,7 +325,7 @@ namespace DianaShop.Data.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<int>("StatusId")
+                    b.Property<int?>("StatusId")
                         .HasColumnType("int");
 
                     b.Property<decimal?>("TotalAmount")
@@ -1011,6 +1011,9 @@ namespace DianaShop.Data.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
+                    b.Property<decimal?>("wallet")
+                        .HasColumnType("decimal(18, 4)");
+
                     b.HasKey("Id");
 
                     b.HasIndex("SkinTypeId");
@@ -1037,6 +1040,50 @@ namespace DianaShop.Data.Migrations
                     b.HasIndex("RoleId");
 
                     b.ToTable("UserRoles");
+                });
+
+            modelBuilder.Entity("DianaShop.Data.Entities.VnPayTransaction", b =>
+                {
+                    b.Property<int>("TransactionId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("TransactionId"));
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(65,30)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("OrderDescription")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("OrderId")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("PaymentMethod")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Token")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("VnPayResponseCode")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.HasKey("TransactionId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("VnPayTransaction");
                 });
 
             modelBuilder.Entity("DianaShop.Data.Entities.Voucher", b =>
@@ -1180,13 +1227,12 @@ namespace DianaShop.Data.Migrations
                     b.HasOne("DianaShop.Data.Entities.StageStatus", "StageStatus")
                         .WithMany("Orders")
                         .HasForeignKey("StatusId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("DianaShop.Data.Entities.User", "User")
                         .WithMany("Orders")
                         .HasForeignKey("UserID")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("StageStatus");
@@ -1503,6 +1549,17 @@ namespace DianaShop.Data.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("DianaShop.Data.Entities.VnPayTransaction", b =>
+                {
+                    b.HasOne("DianaShop.Data.Entities.User", "User")
+                        .WithMany("VnPay")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("DianaShop.Data.Entities.VoucherStorage", b =>
                 {
                     b.HasOne("DianaShop.Data.Entities.User", "User")
@@ -1644,6 +1701,8 @@ namespace DianaShop.Data.Migrations
                     b.Navigation("Payments");
 
                     b.Navigation("UserRoles");
+
+                    b.Navigation("VnPay");
 
                     b.Navigation("VoucherStorage");
                 });

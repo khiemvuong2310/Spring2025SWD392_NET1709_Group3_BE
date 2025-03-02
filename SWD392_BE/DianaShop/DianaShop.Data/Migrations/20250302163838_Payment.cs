@@ -14,16 +14,17 @@ namespace DianaShop.Data.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropForeignKey(
-                name: "FK_Order_Users_UserID",
-                table: "Order");
+            migrationBuilder.AddColumn<decimal>(
+                name: "wallet",
+                table: "Users",
+                type: "decimal(18,4)",
+                nullable: true);
 
             migrationBuilder.AddColumn<int>(
                 name: "StatusId",
                 table: "Order",
                 type: "int",
-                nullable: false,
-                defaultValue: 0);
+                nullable: true);
 
             migrationBuilder.CreateTable(
                 name: "PaymentMethod",
@@ -58,6 +59,38 @@ namespace DianaShop.Data.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
+                name: "VnPayTransaction",
+                columns: table => new
+                {
+                    TransactionId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    UserId = table.Column<int>(type: "int", nullable: false),
+                    Amount = table.Column<decimal>(type: "decimal(65,30)", nullable: false),
+                    PaymentMethod = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    OrderDescription = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    OrderId = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Token = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    VnPayResponseCode = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    CreatedDate = table.Column<DateTime>(type: "datetime(6)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_VnPayTransaction", x => x.TransactionId);
+                    table.ForeignKey(
+                        name: "FK_VnPayTransaction_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
                 name: "Payment",
                 columns: table => new
                 {
@@ -69,7 +102,7 @@ namespace DianaShop.Data.Migrations
                     Address = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     VoucherID = table.Column<int>(type: "int", nullable: true),
-                    FinalAmount = table.Column<decimal>(type: "decimal(65,30)", nullable: false),
+                    FinalAmount = table.Column<decimal>(type: "decimal(65,30)", nullable: true),
                     CreatedDate = table.Column<DateTime>(type: "datetime(6)", nullable: true),
                     UpdatedDate = table.Column<DateTime>(type: "datetime(6)", nullable: true),
                     StatusId = table.Column<int>(type: "int", nullable: false),
@@ -153,19 +186,16 @@ namespace DianaShop.Data.Migrations
                 table: "Payment",
                 column: "VoucherID");
 
+            migrationBuilder.CreateIndex(
+                name: "IX_VnPayTransaction_UserId",
+                table: "VnPayTransaction",
+                column: "UserId");
+
             migrationBuilder.AddForeignKey(
                 name: "FK_Order_StageStatus_StatusId",
                 table: "Order",
                 column: "StatusId",
                 principalTable: "StageStatus",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Restrict);
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_Order_Users_UserID",
-                table: "Order",
-                column: "UserID",
-                principalTable: "Users",
                 principalColumn: "Id",
                 onDelete: ReferentialAction.Restrict);
         }
@@ -177,12 +207,11 @@ namespace DianaShop.Data.Migrations
                 name: "FK_Order_StageStatus_StatusId",
                 table: "Order");
 
-            migrationBuilder.DropForeignKey(
-                name: "FK_Order_Users_UserID",
-                table: "Order");
-
             migrationBuilder.DropTable(
                 name: "Payment");
+
+            migrationBuilder.DropTable(
+                name: "VnPayTransaction");
 
             migrationBuilder.DropTable(
                 name: "PaymentMethod");
@@ -195,16 +224,12 @@ namespace DianaShop.Data.Migrations
                 table: "Order");
 
             migrationBuilder.DropColumn(
+                name: "wallet",
+                table: "Users");
+
+            migrationBuilder.DropColumn(
                 name: "StatusId",
                 table: "Order");
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_Order_Users_UserID",
-                table: "Order",
-                column: "UserID",
-                principalTable: "Users",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
         }
     }
 }

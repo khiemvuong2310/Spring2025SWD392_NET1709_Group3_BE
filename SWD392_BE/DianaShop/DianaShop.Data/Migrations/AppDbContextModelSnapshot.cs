@@ -322,7 +322,7 @@ namespace DianaShop.Data.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<int>("StatusId")
+                    b.Property<int?>("StatusId")
                         .HasColumnType("int");
 
                     b.Property<decimal?>("TotalAmount")
@@ -1008,6 +1008,9 @@ namespace DianaShop.Data.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
+                    b.Property<decimal?>("wallet")
+                        .HasColumnType("decimal(18, 4)");
+
                     b.HasKey("Id");
 
                     b.HasIndex("SkinTypeId");
@@ -1221,13 +1224,12 @@ namespace DianaShop.Data.Migrations
                     b.HasOne("DianaShop.Data.Entities.StageStatus", "StageStatus")
                         .WithMany("Orders")
                         .HasForeignKey("StatusId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("DianaShop.Data.Entities.User", "User")
                         .WithMany("Orders")
                         .HasForeignKey("UserID")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("StageStatus");
@@ -1547,9 +1549,9 @@ namespace DianaShop.Data.Migrations
             modelBuilder.Entity("DianaShop.Data.Entities.VnPayTransaction", b =>
                 {
                     b.HasOne("DianaShop.Data.Entities.User", "User")
-                        .WithMany()
+                        .WithMany("VnPay")
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("User");
@@ -1696,6 +1698,8 @@ namespace DianaShop.Data.Migrations
                     b.Navigation("Payments");
 
                     b.Navigation("UserRoles");
+
+                    b.Navigation("VnPay");
 
                     b.Navigation("VoucherStorage");
                 });

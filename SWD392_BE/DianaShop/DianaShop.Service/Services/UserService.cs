@@ -98,6 +98,8 @@ namespace DianaShop.Service.Services
             return _mapper.Map<UserResponseModel>(existingUser);
         }
 
+
+
         // Cập nhật mật khẩu người dùng
         public async Task<bool> UpdatePasswordAsync(int id, string oldPassword, string newPassword)
         {
@@ -108,6 +110,21 @@ namespace DianaShop.Service.Services
             }
 
             user.Password = PasswordTools.HashPassword(newPassword);
+            await _unitOfWork.Repository<User>().Update(user, id);
+            await _unitOfWork.SaveChangesAsync();
+
+            return true;
+        }
+
+        // Cập nhật ví người dùng
+        public async Task<bool> UpdateWalletAsync(int id, decimal? wallet)
+        {
+            var user = await _unitOfWork.Repository<User>().GetById(id);
+            if (user == null)
+            {
+                return false;
+            }
+            user.wallet = wallet;
             await _unitOfWork.Repository<User>().Update(user, id);
             await _unitOfWork.SaveChangesAsync();
 

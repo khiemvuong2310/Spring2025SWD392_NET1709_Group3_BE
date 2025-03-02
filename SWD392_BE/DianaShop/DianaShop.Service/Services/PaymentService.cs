@@ -77,8 +77,14 @@ namespace DianaShop.Service.Services
             var existingPayment = await _unitOfWork.Repository<Payment>()
                 .FindAsync(c => c.Id == request.OrderID);
 
-            if(existingPayment != null)
+            if (existingPayment != null)
                 throw new InvalidOperationException($"You have a payment of this order.");
+            var user = await _unitOfWork.Repository<User>()
+                .FindAsync(u => u.Id == existingOrder.UserID);
+            if (user == null)
+                throw new InvalidOperationException("User is not exist.");
+            if (user.wallet == null || user.wallet < existingOrder.TotalAmount)
+                throw new InvalidOperationException("Insufficient wallet balance to make this payment.");
 
             var payment = new Payment
             {
@@ -89,8 +95,10 @@ namespace DianaShop.Service.Services
                 FinalAmount = existingOrder.TotalAmount,
                 CreatedDate = DateTime.Now,
                 UpdatedDate = DateTime.Now,
-                StatusId = 1
+                StatusId = 2
             };
+            user.wallet -= existingOrder.TotalAmount;
+            await _unitOfWork.Repository<User>().UpdateAsync(user);
 
             await _unitOfWork.Repository<Payment>().InsertAsync(payment);
             await _unitOfWork.SaveChangesAsync();

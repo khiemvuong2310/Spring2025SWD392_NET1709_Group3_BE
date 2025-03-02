@@ -13,7 +13,7 @@ namespace DianaShop.Service.Interfaces
         Task<UserResponseModel?> UpdateUserAsync(int id, UserCreateRequest request);
 
         Task<bool> UpdatePasswordAsync(int id, string oldPassword, string newPassword);
-
+        Task<bool> UpdateWalletAsync(int id, decimal? wallet);
         Task<UserResponseModel?> GetUserByUsernameAsync(string username);
         Task<UserResponseModel?> GetUserByEmailAsync(string email);
     }
