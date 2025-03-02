@@ -38,5 +38,6 @@ namespace DianaShop.Data.Entities
         public virtual ICollection<ProductSkinType> ProductSkinTypes { get; set; }
 
         public virtual ICollection<CartProduct> CartProducts { get; set; }
+        public virtual ICollection<OrderDetail> OrderDetails { get; set; }
     }
 }

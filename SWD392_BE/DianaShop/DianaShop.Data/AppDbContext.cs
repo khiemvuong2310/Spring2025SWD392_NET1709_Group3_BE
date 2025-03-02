@@ -157,6 +157,25 @@ namespace DianaShop.Data
                 .HasOne(cp => cp.Product)
                 .WithMany(p => p.CartProducts)
                 .HasForeignKey(cp => cp.ProductId);
+
+            modelBuilder.Entity<Order>()
+                .HasKey(o => o.Id);
+            modelBuilder.Entity<Order>()
+                .HasOne(o => o.User)
+                .WithMany(u => u.Orders)
+                .HasForeignKey(o => o.UserID);
+
+            modelBuilder.Entity<OrderDetail>()
+                .HasKey(od => od.Id);
+            modelBuilder.Entity<OrderDetail>()
+                .HasOne(od => od.Order)
+                .WithMany(o => o.Details)
+                .HasForeignKey(od => od.OrderId);
+            modelBuilder.Entity<OrderDetail>()
+                .HasOne(od => od.Product)
+                .WithMany(p => p.OrderDetails)
+                .HasForeignKey(od => od.ProductId);
+
             //SeedData
             modelBuilder.Entity<Role>().HasData(
                 new Role { Id = 1, Name = "Manager" },
