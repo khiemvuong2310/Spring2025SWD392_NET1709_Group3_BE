@@ -63,6 +63,7 @@ namespace DianaShop.API.AppStarts
             services.AddScoped<ICartProductService, CartProductService>();
             services.AddScoped<IOrderService, OrderService>();
             services.AddScoped<IOrderDetailService, OrderDetailService>();
+            services.AddScoped<IPaymentService, PaymentService>();
             //services.AddScoped<IJwtService, JwtService>();
 
             // Thêm AutoMapper vào dịch vụ
@@ -73,6 +74,7 @@ namespace DianaShop.API.AppStarts
             services.AddAutoMapper(typeof(CartMapping));
             services.AddAutoMapper(typeof (OrderMapping));
             services.AddAutoMapper(typeof(OrderDetailMapping));
+            services.AddAutoMapper(typeof(PaymentMapping));
         }
     }
 }
