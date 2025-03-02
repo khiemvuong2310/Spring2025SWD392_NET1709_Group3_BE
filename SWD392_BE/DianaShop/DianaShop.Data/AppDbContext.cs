@@ -163,7 +163,14 @@ namespace DianaShop.Data
             modelBuilder.Entity<Order>()
                 .HasOne(o => o.User)
                 .WithMany(u => u.Orders)
-                .HasForeignKey(o => o.UserID);
+                .HasForeignKey(o => o.UserID)
+                .OnDelete(DeleteBehavior.Restrict);
+            //update order 
+            modelBuilder.Entity<Order>()
+                .HasOne(o => o.StageStatus)
+                .WithMany(ss => ss.Orders)
+                .HasForeignKey(o => o.StatusId)
+                .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<OrderDetail>()
                 .HasKey(od => od.Id);
@@ -176,6 +183,61 @@ namespace DianaShop.Data
                 .WithMany(p => p.OrderDetails)
                 .HasForeignKey(od => od.ProductId);
 
+            // Cấu hình cho Payment
+            modelBuilder.Entity<Payment>()
+                .HasKey(p => p.Id); // Khóa chính từ BaseEntity
+
+            modelBuilder.Entity<Payment>()
+                .HasOne(p => p.User)
+                .WithMany(u => u.Payments)
+                .HasForeignKey(p => p.UserID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Payment>()
+                .HasOne(p => p.Order)
+                .WithOne(o => o.Payment)
+                .HasForeignKey<Payment>(p => p.OrderID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Payment>()
+                .HasOne(p => p.PaymentMethod)
+                .WithMany(pm => pm.Payments)
+                .HasForeignKey(p => p.PaymentMethodID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Payment>()
+                .HasOne(p => p.Voucher)
+                .WithMany(v => v.Payments)
+                .HasForeignKey(p => p.VoucherID)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            modelBuilder.Entity<Payment>()
+                .HasOne(p => p.StageStatus)
+                .WithMany(ss => ss.Payments)
+                .HasForeignKey(p => p.StatusId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Cấu hình cho PaymentMethod
+            modelBuilder.Entity<PaymentMethod>()
+                .HasKey(pm => pm.Id);
+
+            modelBuilder.Entity<PaymentMethod>()
+                .Property(pm => pm.MethodName)
+                .IsRequired()
+                .HasMaxLength(100);
+
+            // Cấu hình cho StageStatus
+            modelBuilder.Entity<StageStatus>()
+                .HasKey(ss => ss.Id);
+
+            modelBuilder.Entity<StageStatus>()
+                .Property(ss => ss.StatusName)
+                .IsRequired()
+                .HasMaxLength(100);
+
+            modelBuilder.Entity<VnPayTransaction>()
+                .HasKey(i => i.TransactionId);
+
             //SeedData
             modelBuilder.Entity<Role>().HasData(
                 new Role { Id = 1, Name = "Manager" },
@@ -183,6 +245,12 @@ namespace DianaShop.Data
                 new Role { Id = 3, Name = "Customer" }
                 );
 
+            modelBuilder.Entity<StageStatus>().HasData(
+                new StageStatus { Id = 1, StatusName = "Unpaid" },
+                new StageStatus { Id = 2, StatusName = "Paid" },
+                new StageStatus { Id = 3, StatusName = "Shipping" },
+                new StageStatus { Id = 4, StatusName = "Completed" }
+                );
         }
     }
 }

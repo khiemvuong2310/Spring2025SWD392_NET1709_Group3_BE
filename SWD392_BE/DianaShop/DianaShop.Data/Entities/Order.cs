@@ -14,8 +14,11 @@ namespace DianaShop.Data.Entities
         public decimal? TotalAmount { get; set; }
         public DateTime? UpdateDate { get; set; }
         public String Status { get; set; }
+        public int StatusId { get; set; }
 
         public User User { get; set; }
         public virtual ICollection<OrderDetail> Details { get; set; }
+        public Payment Payment { get; set; }
+        public StageStatus StageStatus { get; set; }
     }
 }

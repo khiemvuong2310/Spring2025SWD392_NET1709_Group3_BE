@@ -10,5 +10,10 @@ namespace DianaShop.Data.Enum
     {
         Available = 1,
         Unavalable = 2,
+        Unpaid = 3,
+        Paid = 4,
+        Shipping = 5,
+        Completed = 6,
+        Failed = 7,
     }
 }

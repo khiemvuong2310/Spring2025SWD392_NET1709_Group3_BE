@@ -24,5 +24,6 @@ namespace DianaShop.Data.Entities
         public virtual ICollection<UserRole>? UserRoles { get; set; }
         public virtual ICollection<FeedBack> FeedBacks { get; set; }
         public virtual ICollection<Order> Orders { get; set; }
+        public virtual ICollection<Payment> Payments { get; set; }
     }
 }
