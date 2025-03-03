@@ -10,6 +10,12 @@ namespace DianaShop.API.Controllers
         private readonly IUserService _usersService;
         private readonly IVnPayService _vpnPayService;
 
+        public VNPayController(IUserService usersService, IVnPayService vpnPayService)
+        {
+            _usersService = usersService;
+            _vpnPayService = vpnPayService;
+        }
+
         private static int currentOrderId = 1;
 
         [HttpPost("vnpay")]
@@ -21,7 +27,7 @@ namespace DianaShop.API.Controllers
             // Khởi tạo payload với các giá trị từ requestModel
             var payload = new VnPaymentRequestModel
             {
-                //OrderId = currentOrderId, 
+                OrderId = currentOrderId, 
                 FullName = requestModel.FullName,
                 Description = requestModel.Description,
                 Amount = requestModel.Amount,
@@ -33,6 +39,7 @@ namespace DianaShop.API.Controllers
 
             // Tạo URL thanh toán
             var url = _vpnPayService.CreatePaymentUrl(HttpContext, payload);
+            Console.WriteLine($"Generated VNPay URL: {url}"); // Debug URL
 
 
             // Trả về link thanh toán
