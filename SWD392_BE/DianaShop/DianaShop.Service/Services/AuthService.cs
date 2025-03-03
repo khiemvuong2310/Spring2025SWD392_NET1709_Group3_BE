@@ -292,13 +292,13 @@ namespace DianaShop.Service.Services
                 }
             }
 
-            public async Task<BaseResponse> ForgotPassword(RequestModel.ForgotPasswordRequest request)
+            public async Task<BaseResponse> ForgotPassword(ForgotPasswordRequest request)
             {
                 try
                 {
                     var query = await _unitOfWork.Repository<User>()
                         .AsNoTracking()
-                        .SingleOrDefaultAsync(x => x.Email == request.Email);
+                        .FirstOrDefaultAsync(x => x.Email == request.Email);
 
                     if (query == null || query.Email != request.Email)
                     {

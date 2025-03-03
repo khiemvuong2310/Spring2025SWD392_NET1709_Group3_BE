@@ -61,6 +61,13 @@ namespace DianaShop.Service.Services
                 throw new ArgumentException("Invalid phone number format.");
             }
 
+            // Kiểm tra email đã tồn tại chưa
+            var existingUser = await _unitOfWork.Repository<User>().FindAsync(u => u.Email == request.Email);
+            if (existingUser != null)
+            {
+                throw new InvalidOperationException("Email already exists.");
+            }
+
             var user = _mapper.Map<User>(request);
             user.Password = PasswordTools.HashPassword(user.Password);
             user.UserRoles = new List<UserRole> { new UserRole { UserId = user.Id, RoleId = 3, Status = true } };
@@ -84,6 +91,12 @@ namespace DianaShop.Service.Services
 
             if (existingUser == null) return null;
 
+            var emailUser = await _unitOfWork.Repository<User>().FindAsync(u => u.Email == request.Email && u.Id != id);
+            if (emailUser != null)
+            {
+                throw new InvalidOperationException("Email already exists.");
+            }
+
             _mapper.Map(request, existingUser);
 
             // Nếu thay đổi mật khẩu, mã hóa lại
@@ -97,8 +110,6 @@ namespace DianaShop.Service.Services
 
             return _mapper.Map<UserResponseModel>(existingUser);
         }
-
-
 
         // Cập nhật mật khẩu người dùng
         public async Task<bool> UpdatePasswordAsync(int id, string oldPassword, string newPassword)
