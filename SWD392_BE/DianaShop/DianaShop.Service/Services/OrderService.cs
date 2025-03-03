@@ -75,6 +75,7 @@ namespace DianaShop.Service.Services
                 OrderDate = DateTime.Now,
                 UpdateDate = DateTime.Now,
                 Status = "Unpaid",
+                StatusId = 1,
                 Details = new List<OrderDetail>()
             };
 

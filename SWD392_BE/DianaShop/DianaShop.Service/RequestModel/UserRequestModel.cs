@@ -68,4 +68,9 @@ namespace DianaShop.Service.RequestModel
         public string NewPassword { get; set; }
     }
 
+    public class UserUpdateWallet
+    {
+        public decimal? Wallet {  get; set; }
+    }
+
 }
