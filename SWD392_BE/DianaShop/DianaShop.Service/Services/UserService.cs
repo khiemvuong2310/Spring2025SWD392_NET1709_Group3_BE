@@ -99,7 +99,6 @@ namespace DianaShop.Service.Services
 
             _mapper.Map(request, existingUser);
 
-            // Nếu thay đổi mật khẩu, mã hóa lại
             if (!string.IsNullOrEmpty(request.Password))
             {
                 existingUser.Password = PasswordTools.HashPassword(request.Password);
@@ -115,9 +114,21 @@ namespace DianaShop.Service.Services
         public async Task<bool> UpdatePasswordAsync(int id, string oldPassword, string newPassword)
         {
             var user = await _unitOfWork.Repository<User>().GetById(id);
-            if (user == null || !PasswordTools.VerifyPassword(oldPassword, user.Password))
+            if (user == null)
             {
-                return false;
+                throw new KeyNotFoundException("User not found.");
+            }
+
+            if (!PasswordTools.VerifyPassword(oldPassword, user.Password))
+            {
+                throw new UnauthorizedAccessException("Old password is incorrect.");
+            }
+
+            if (newPassword.Length < 8 ||
+                !Regex.IsMatch(newPassword, @"[A-Z]") ||
+                !Regex.IsMatch(newPassword, @"\d"))
+            {
+                throw new ArgumentException("New password must be at least 8 characters long and contain at least one uppercase letter and one number.");
             }
 
             user.Password = PasswordTools.HashPassword(newPassword);
@@ -126,6 +137,7 @@ namespace DianaShop.Service.Services
 
             return true;
         }
+
 
         // Cập nhật ví người dùng
         public async Task<bool> UpdateWalletAsync(int id, decimal? wallet)
