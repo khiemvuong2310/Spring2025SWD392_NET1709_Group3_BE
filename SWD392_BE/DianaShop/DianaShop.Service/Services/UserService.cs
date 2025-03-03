@@ -13,6 +13,7 @@ using System.Security.Cryptography;
 using DianaShop.Service.Interfaces;
 using DianaShop.Repository.Utils;
 using System.Text.RegularExpressions;
+using AutoMapper.QueryableExtensions;
 namespace DianaShop.Service.Services
 {
     public class UserService : IUserService
@@ -146,12 +147,9 @@ namespace DianaShop.Service.Services
         // Lấy người dùng theo username
         public async Task<UserResponseModel?> GetUserByUsernameAsync(string username)
         {
-            var user = await _unitOfWork.Repository<User>()
-                .GetAll()
-                .Include(u => u.UserRoles)
-                .ThenInclude(ur => ur.Role)
-                .FirstOrDefaultAsync(u => u.Username == username && !u.IsDelete);
-            return _mapper.Map<UserResponseModel>(user);
+            return await _unitOfWork.Repository<User>().AsQueryable()
+                .Where(u => u.Username == username && !u.IsDelete)
+                .ProjectTo<UserResponseModel>(_mapper.ConfigurationProvider).FirstOrDefaultAsync();
         }
 
         // Lấy người dùng theo email
