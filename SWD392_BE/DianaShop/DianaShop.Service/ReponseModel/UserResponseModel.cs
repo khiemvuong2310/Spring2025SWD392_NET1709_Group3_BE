@@ -22,8 +22,8 @@ namespace DianaShop.Service.ReponseModel
 
         //public CartResponseModel? Cart { get; set; }
         public List<VoucherStorageResponseModel>? VoucherStorage { get; set; }
-        public List<UserRoleResponseModel>? UserRoles { get; set; }
-        //public List<FeedBackResponseModel>? FeedBacks { get; set; }
+        public List<UserRoleResponseNameModel>? UserRoles { get; set; }
 
+        //public List<FeedBackResponseModel>? FeedBacks { get; set; }
     }
 }

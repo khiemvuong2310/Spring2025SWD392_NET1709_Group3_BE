@@ -9,7 +9,7 @@ namespace DianaShop.Service.RequestModel
 {
     public class UserCreateRequest
     {
-        [RegularExpression(@"^[a-zA-Z0-9\s]*$", ErrorMessage = "Username cannot contain special characters.")]
+        [RegularExpression(@"^[\p{L}0-9\s]*$", ErrorMessage = "Username cannot contain special characters.")]
         [Required(ErrorMessage = "Username is required.")]
         [StringLength(50, ErrorMessage = "Username cannot exceed 50 characters.")]
         public string Username { get; set; } = string.Empty;
@@ -70,7 +70,7 @@ namespace DianaShop.Service.RequestModel
 
     public class UserUpdateWallet
     {
-        public decimal? Wallet {  get; set; }
+        public decimal? Wallet { get; set; }
     }
 
 }

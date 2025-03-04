@@ -34,66 +34,53 @@ namespace DianaShop.Service.Services
                 _unitOfWork = unitOfWork;
             }
 
-            public async Task<BaseResponseForLogin<LoginResponseModel>> AuthenticateAsync(string email, string password)
+        public async Task<BaseResponseForLogin<LoginResponseModel>> AuthenticateAsync(string email, string password)
+        {
+            var user = await _userService.GetUserByEmailAsync(email);
+
+            if (user != null)
             {
-                var user = await _userService.GetUserByEmailAsync(email);
+                var userWithRole = await _userService.GetUserByUsernameAsync(user.Username);
+                var roleNames = userWithRole.UserRoles.Select(ur => ur.RoleName).ToList();
+                string token = GenerateJwtToken(user.Username, string.Join(",", roleNames), user.Id);
 
-                if (user != null)
+                if (user.Status == false)
                 {
-                    var userWithRole = await _userService.GetUserByUsernameAsync(user.Username);
-                    var roleNames = string.Join(",", userWithRole.UserRoles.Select(ur => ur.RoleName));
-                    string token = GenerateJwtToken(user.Username, roleNames, user.Id);
-
-                    if (user.Status == false)
+                    return new BaseResponseForLogin<LoginResponseModel>
                     {
-                        return new BaseResponseForLogin<LoginResponseModel>()
+                        Code = 404,
+                        Message = "Your Account has been banned. Check email for reason",
+                        Data = new LoginResponseModel
                         {
-                            Code = 404,
-                            Message = "Your Account has been banned. Check email for reason",
-                            Data = new LoginResponseModel()
-                            {
-                                User = new UserResponseModel()
-                                {
-                                    Id = user.Id,
-                                    Username = user.Username,
-                                    Email = user.Email,
-                                    Location = user.Location,
-                                    Phone = user.Phone,
-                                },
-                            },
-                            IsBanned = true,
-                        };
-                    }
-
-                    return new BaseResponseForLogin<LoginResponseModel>()
-                    {
-                        Code = 200,
-                        Message = "",
-                        Data = new LoginResponseModel()
-                        {
-                            Token = token,
-                            User = new UserResponseModel()
-                            {
-                                Id = user.Id,
-                                Username = user.Username,
-                                Email = user.Email,
-                                Location = user.Location,
-                                Phone = user.Phone,
-                            },
+                            User = user,
                         },
-                        IsBanned = false
+                        IsBanned = true,
                     };
                 }
-                return new BaseResponseForLogin<LoginResponseModel>()
+
+                return new BaseResponseForLogin<LoginResponseModel>
                 {
-                    Code = 404,
-                    Message = "Username or Password incorrect",
-                    Data = null,
+                    Code = 200,
+                    Message = "Login successful",
+                    Data = new LoginResponseModel
+                    {
+                        Token = token,
+                        User = user,
+                    },
                     IsBanned = false
                 };
             }
+            return new BaseResponseForLogin<LoginResponseModel>
+            {
+                Code = 404,
+                Message = "Username or Password incorrect",
+                Data = null,
+                IsBanned = false
+            };
+        }
 
-            public string GenerateJwtToken(string username, string roleName, int userId)
+
+        public string GenerateJwtToken(string username, string roleName, int userId)
             {
                 var tokenHandler = new JwtSecurityTokenHandler();
                 var key = Encoding.ASCII.GetBytes(_configuration["Jwt:Key"]);
