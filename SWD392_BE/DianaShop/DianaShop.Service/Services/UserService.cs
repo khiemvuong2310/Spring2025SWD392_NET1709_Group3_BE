@@ -54,7 +54,7 @@ namespace DianaShop.Service.Services
         }
 
         // Tạo người dùng mới
-        public async Task<User> CreateUserAsync(UserCreateRequest request)
+        public async Task<UserResponseModel> CreateUserAsync(UserCreateRequest request)
         {
             if (!Regex.IsMatch(request.Phone, "^\\+?[0-9]{10,15}$"))
             {
@@ -68,17 +68,40 @@ namespace DianaShop.Service.Services
                 throw new InvalidOperationException("Email already exists.");
             }
 
+            // Ánh xạ UserCreateRequest -> User (theo cấu hình trong UserMapping)
             var user = _mapper.Map<User>(request);
             user.Password = PasswordTools.HashPassword(user.Password);
-            user.UserRoles = new List<UserRole> { new UserRole { UserId = user.Id, RoleId = 3, Status = true } };
 
+            // Lưu user vào database trước khi gán UserRoles để tránh lỗi vòng lặp
             await _unitOfWork.Repository<User>().InsertAsync(user);
-            var result = await _unitOfWork.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync();
 
-            if (result <= 0) throw new Exception("Failed to create user");
+            // Gán quyền mặc định (tránh ánh xạ trực tiếp trong UserCreateRequest)
+            var userRole = new UserRole
+            {
+                UserId = user.Id,
+                RoleId = 3,
+                Status = true
+            };
+            await _unitOfWork.Repository<UserRole>().InsertAsync(userRole);
+            await _unitOfWork.SaveChangesAsync();
 
-            return user;
+            var createdUser = await _unitOfWork.Repository<User>()
+                .Include(u => u.SkinType)
+                .Include(u => u.VoucherStorage)
+                .Include(u => u.UserRoles)
+                    .ThenInclude(ur => ur.Role)
+                .FirstOrDefaultAsync(u => u.Id == user.Id);
+
+            if (createdUser == null)
+            {
+                throw new Exception("Failed to retrieve created user.");
+            }
+
+            // Trả về UserResponseModel (tránh vòng lặp)
+            return _mapper.Map<UserResponseModel>(createdUser);
         }
+
 
         // Cập nhật thông tin người dùng
         public async Task<UserResponseModel?> UpdateUserAsync(int id, UserCreateRequest request)
@@ -182,6 +205,10 @@ namespace DianaShop.Service.Services
         {
             var user = await _unitOfWork.Repository<User>()
                 .GetAll()
+                .Include(u => u.SkinType)
+                .Include(u => u.VoucherStorage)
+                .Include(u => u.UserRoles)
+                .ThenInclude(ur => ur.Role)
                 .FirstOrDefaultAsync(u => EF.Functions.Collate(u.Email, "utf8mb4_bin") == email && !u.IsDelete);
             return _mapper.Map<UserResponseModel>(user);
         }

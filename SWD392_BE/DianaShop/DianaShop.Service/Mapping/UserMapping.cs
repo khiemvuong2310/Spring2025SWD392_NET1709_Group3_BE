@@ -19,9 +19,9 @@ namespace DianaShop.Service.Mapping
                 .ForMember(dest => dest.SkinTypeName, opt => opt.MapFrom(src => src.SkinType.Name))
                 .ForMember(dest => dest.VoucherStorage, opt => opt.MapFrom(src => src.VoucherStorage))
                 .ForMember(dest => dest.UserRoles, opt => opt.MapFrom(src => src.UserRoles.Select(ur =>
-                    new UserRoleResponseModel
+                    new UserRoleResponseNameModel
                     {
-                        UserId = ur.UserId,
+                        //UserId = ur.UserId,
                         RoleName = ur.Role != null ? ur.Role.Name : string.Empty
                     })));
                 //.ForMember(dest => dest.Cart, opt => opt.Ignore()) // Tránh vòng lặp
