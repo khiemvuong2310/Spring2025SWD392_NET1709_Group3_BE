@@ -13,6 +13,7 @@ using System.Security.Cryptography;
 using DianaShop.Service.Interfaces;
 using DianaShop.Repository.Utils;
 using System.Text.RegularExpressions;
+using AutoMapper.QueryableExtensions;
 namespace DianaShop.Service.Services
 {
     public class UserService : IUserService
@@ -204,13 +205,16 @@ namespace DianaShop.Service.Services
         public async Task<UserResponseModel?> GetUserByEmailAsync(string email)
         {
             var user = await _unitOfWork.Repository<User>()
-                .GetAll()
-                .Include(u => u.SkinType)
-                .Include(u => u.VoucherStorage)
-                .Include(u => u.UserRoles)
-                .ThenInclude(ur => ur.Role)
-                .FirstOrDefaultAsync(u => EF.Functions.Collate(u.Email, "utf8mb4_bin") == email && !u.IsDelete);
-            return _mapper.Map<UserResponseModel>(user);
+                //.GetAll()
+                //.Include(u => u.SkinType)
+                //.Include(u => u.VoucherStorage)
+                //.Include(u => u.UserRoles)
+                //.ThenInclude(ur => ur.Role)
+                .AsQueryable()
+                .Where(u => u.Email == email)
+                .ProjectTo<UserResponseModel>(_mapper.ConfigurationProvider)
+                .FirstOrDefaultAsync();
+            return user;
         }
     }
 }
