@@ -13,6 +13,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static System.Net.Mime.MediaTypeNames;
+using Image = DianaShop.Data.Entities.Image;
 
 namespace DianaShop.Service.Services
 {
@@ -140,6 +142,22 @@ namespace DianaShop.Service.Services
                 .Select(pi => pi.Image)
                 .ProjectTo<ImageResponseModel>(_mapper.ConfigurationProvider)
                 .ToListAsync();
+        }
+
+        public async Task AddProfileImageAsync(int userId, IFormFile file)
+        {
+            var user = await _unitOfWork.Repository<User>().GetById(userId);
+            if (user !=  null && file.Length > 0)
+            {
+                var imageUrl = await _blobService.UploadImageAsync(file);
+                if (user.Image != null)
+                {
+                    var fileName = Path.GetFileName(new Uri(user.Image).LocalPath);
+                    await _blobService.DeleteImageAsync(fileName);
+                }
+                user.Image = imageUrl;
+                await _unitOfWork.CommitAsync();
+            }
         }
     }
 }
