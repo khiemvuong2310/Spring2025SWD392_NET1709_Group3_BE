@@ -32,8 +32,8 @@ namespace DianaShop.Service.RequestModel
 
         public string? Image { get; set; }
 
-        [Required(ErrorMessage = "Skin type is required.")]
-        public int SkinTypeId { get; set; }
+        //[Required(ErrorMessage = "Skin type is required.")]
+        public int? SkinTypeId { get; set; }
 
         public bool Status { get; set; } = true; // Mặc định là true
     }
