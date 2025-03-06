@@ -72,7 +72,10 @@ namespace DianaShop.Service.Services
             // Ánh xạ UserCreateRequest -> User (theo cấu hình trong UserMapping)
             var user = _mapper.Map<User>(request);
             user.Password = PasswordTools.HashPassword(user.Password);
+            if (request.Image != null)
+            {
 
+            }
             // Lưu user vào database trước khi gán UserRoles để tránh lỗi vòng lặp
             await _unitOfWork.Repository<User>().InsertAsync(user);
             await _unitOfWork.SaveChangesAsync();
@@ -205,11 +208,6 @@ namespace DianaShop.Service.Services
         public async Task<UserResponseModel?> GetUserByEmailAsync(string email)
         {
             var user = await _unitOfWork.Repository<User>()
-                //.GetAll()
-                //.Include(u => u.SkinType)
-                //.Include(u => u.VoucherStorage)
-                //.Include(u => u.UserRoles)
-                //.ThenInclude(ur => ur.Role)
                 .AsQueryable()
                 .Where(u => u.Email == email)
                 .ProjectTo<UserResponseModel>(_mapper.ConfigurationProvider)

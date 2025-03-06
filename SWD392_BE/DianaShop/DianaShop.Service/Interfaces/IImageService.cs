@@ -22,5 +22,6 @@ namespace DianaShop.Service.Interfaces
         Task AddImageToPostAsync(int postId, int imageId);
         Task RemoveImageFromPostAsync(int postId, int imageId);
         Task<List<ImageResponseModel>> GetImagesByPostIdAsync(int postId);
+        Task AddProfileImageAsync(int userId, IFormFile file);
     }
 }
