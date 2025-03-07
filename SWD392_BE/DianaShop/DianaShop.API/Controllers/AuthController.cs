@@ -51,7 +51,7 @@ namespace DianaShop.API.Controllers
         }
 
         [HttpPost("admin-create-account")]
-        [Authorize(Roles = "admin")]
+        [Authorize(Roles = "Manager")]
         public IActionResult AdminGenAcc(AdminCreateAccountModel model)
         {
             // Implement user registration logic here
