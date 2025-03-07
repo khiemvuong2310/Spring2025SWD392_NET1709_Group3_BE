@@ -72,10 +72,6 @@ namespace DianaShop.Service.Services
             // Ánh xạ UserCreateRequest -> User (theo cấu hình trong UserMapping)
             var user = _mapper.Map<User>(request);
             user.Password = PasswordTools.HashPassword(user.Password);
-            if (request.Image != null)
-            {
-
-            }
             // Lưu user vào database trước khi gán UserRoles để tránh lỗi vòng lặp
             await _unitOfWork.Repository<User>().InsertAsync(user);
             await _unitOfWork.SaveChangesAsync();
