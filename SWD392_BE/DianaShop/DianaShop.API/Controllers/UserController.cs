@@ -52,7 +52,7 @@ namespace DianaShop.API.Controllers
 
         // Cập nhật người dùng
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateUser(int id, [FromBody] UserCreateRequest request)
+        public async Task<IActionResult> UpdateUser(int id, [FromBody] UserUpdateRequest request)
         {
             if (!ModelState.IsValid)
             {
@@ -78,7 +78,7 @@ namespace DianaShop.API.Controllers
                 return NotFound("User not found.");
             }
 
-            return NoContent();  // Thành công, trả về HTTP 204
+            return NoContent();  
         }
 
         [HttpPut("UpdatePassword/{id}")]
