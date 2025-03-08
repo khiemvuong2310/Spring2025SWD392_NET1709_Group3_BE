@@ -9,7 +9,7 @@ namespace DianaShop.Service.RequestModel
 {
     public class UserCreateRequest
     {
-        [RegularExpression(@"^[\p{L}0-9\s]*$", ErrorMessage = "Username cannot contain special characters.")]
+        [RegularExpression(@"^[\p{L}0-9\s]+$", ErrorMessage = "Username cannot contain special characters.")]
         [Required(ErrorMessage = "Username is required.")]
         [StringLength(50, ErrorMessage = "Username cannot exceed 50 characters.")]
         public string Username { get; set; } = string.Empty;
@@ -33,19 +33,18 @@ namespace DianaShop.Service.RequestModel
         //[Required(ErrorMessage = "Skin type is required.")]
         public int? SkinTypeId { get; set; }
 
-        public bool Status { get; set; } = true; // Mặc định là true
+        public bool Status { get; set; } = true; 
     }
     public class UserUpdateRequest
     {
-        [RegularExpression(@"^[a-zA-Z0-9\s]*$", ErrorMessage = "Username cannot contain special characters.")] public string? Username { get; set; }
+        [RegularExpression(@"^[\p{L}0-9\s]+$", ErrorMessage = "Username cannot contain special characters.")]
+        [StringLength(50, ErrorMessage = "Username cannot exceed 50 characters.")]
+        public string? Username { get; set; }
 
-        [EmailAddress]
+        [EmailAddress(ErrorMessage = "Invalid email format.")]
         public string? Email { get; set; }
 
-        [MinLength(6)]
-        public string? Password { get; set; }
-
-        [RegularExpression(@"^\d{10,15}$", ErrorMessage = "Phone number must be between 10 and 15 digits.")]
+        [RegularExpression(@"^\+?[0-9]{10,15}$", ErrorMessage = "Phone number must be between 10 and 15 digits and may start with a '+' sign.")]
         public string? Phone { get; set; }
 
         [StringLength(100, ErrorMessage = "Location cannot exceed 100 characters.")]
@@ -56,9 +55,9 @@ namespace DianaShop.Service.RequestModel
         public bool? Status { get; set; }
 
         public int? SkinTypeId { get; set; }
-        public List<int>? RoleIds { get; set; }
-
     }
+
+
 
     public class UpdatePasswordRequest
     {
