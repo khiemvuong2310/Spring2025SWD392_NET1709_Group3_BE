@@ -20,11 +20,13 @@ namespace DianaShop.Service.Services
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly IVoucherStorageService _voucherStorageService; // Inject VoucherService
 
-        public UserService(IUnitOfWork unitOfWork, IMapper mapper)
+        public UserService(IUnitOfWork unitOfWork, IMapper mapper, IVoucherStorageService voucherStorageService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _voucherStorageService = voucherStorageService;
         }
 
         // Lấy tất cả người dùng
@@ -53,16 +55,15 @@ namespace DianaShop.Service.Services
                 throw new ArgumentException("Invalid phone number format.");
             }
 
-            // Kiểm tra email đã tồn tại chưa
             var existingUser = await _unitOfWork.Repository<User>().FindAsync(u => u.Email == request.Email);
             if (existingUser != null)
             {
                 throw new InvalidOperationException("Email already exists.");
             }
 
-            // Ánh xạ UserCreateRequest -> User (theo cấu hình trong UserMapping)
             var user = _mapper.Map<User>(request);
             user.Password = PasswordTools.HashPassword(user.Password);
+
             // Lưu user vào database trước khi gán UserRoles để tránh lỗi vòng lặp
             await _unitOfWork.Repository<User>().InsertAsync(user);
             await _unitOfWork.SaveChangesAsync();
@@ -76,6 +77,12 @@ namespace DianaShop.Service.Services
             };
             await _unitOfWork.Repository<UserRole>().InsertAsync(userRole);
             await _unitOfWork.SaveChangesAsync();
+
+            //Gọi phương thức tạo voucher cho user
+            await _voucherStorageService.CreateVoucherStorageAsync(new VoucherStorageRequestModel
+            {
+                UserID = user.Id
+            });
 
             var createdUser = await _unitOfWork.Repository<User>()
                 .AsQueryable()
