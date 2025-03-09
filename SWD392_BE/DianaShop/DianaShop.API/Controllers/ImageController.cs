@@ -87,6 +87,11 @@ namespace DianaShop.API.Controllers
             var response = await _imageService.GetImagesByPostIdAsync(postId);
             return Ok(response);
         }
-
+        [HttpPost("profile/{userId}")]
+        public async Task<IActionResult> AddProfileImage(int userId, IFormFile file)
+        {
+            await _imageService.AddProfileImageAsync(userId, file);
+            return NoContent();
+        }
     }
 }

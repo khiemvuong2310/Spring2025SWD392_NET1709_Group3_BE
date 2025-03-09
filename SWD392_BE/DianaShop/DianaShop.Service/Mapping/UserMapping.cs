@@ -17,22 +17,37 @@ namespace DianaShop.Service.Mapping
             // Mapping User -> UserResponseModel
             CreateMap<User, UserResponseModel>()
                 .ForMember(dest => dest.SkinTypeName, opt => opt.MapFrom(src => src.SkinType.Name))
-                //.ForMember(dest => dest.Cart, opt => opt.MapFrom(src => src.Cart))
                 .ForMember(dest => dest.VoucherStorage, opt => opt.MapFrom(src => src.VoucherStorage))
-                //.ForMember(dest => dest.FeedBacks, opt => opt.MapFrom(src => src.FeedBacks))
-            .ForMember(dest => dest.UserRoles, opt => opt.MapFrom(src => src.UserRoles.Select(ur => new UserRoleResponseModel
-            {
-                UserId = ur.UserId,
-                RoleName = ur.Role != null ? ur.Role.Name : string.Empty
-            }))); 
+                .ForMember(dest => dest.UserRoles, opt => opt.MapFrom(src => src.UserRoles.Select(ur =>
+                    new UserRoleResponseNameModel
+                    {
+                        //UserId = ur.UserId,
+                        RoleName = ur.Role != null ? ur.Role.Name : string.Empty
+                    })));
+            //.ForMember(dest => dest.Cart, opt => opt.Ignore()) // Tránh vòng lặp
+            //.ForMember(dest => dest.FeedBacks, opt => opt.Ignore()); // Tránh vòng lặp
 
             // Mapping UserCreateRequest -> User
             CreateMap<UserCreateRequest, User>()
-                .ForMember(dest => dest.Token, opt => opt.Ignore()) 
-                .ForMember(dest => dest.Cart, opt => opt.Ignore()) 
-                .ForMember(dest => dest.VoucherStorage, opt => opt.Ignore()) 
-                .ForMember(dest => dest.FeedBacks, opt => opt.Ignore()) 
+                .ForMember(dest => dest.Token, opt => opt.Ignore())
+                .ForMember(dest => dest.Cart, opt => opt.Ignore())
+                .ForMember(dest => dest.VoucherStorage, opt => opt.Ignore())
+                .ForMember(dest => dest.FeedBacks, opt => opt.Ignore())
+                .ForMember(dest => dest.UserRoles, opt => opt.Ignore())
                 .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status)); // Ánh xạ Status
+
+            // Mapping UserUpdateRequest -> User
+            CreateMap<UserUpdateRequest, User>()
+                .ForMember(dest => dest.Token, opt => opt.Ignore())
+                .ForMember(dest => dest.Cart, opt => opt.Ignore())
+                .ForMember(dest => dest.VoucherStorage, opt => opt.Ignore())
+                .ForMember(dest => dest.FeedBacks, opt => opt.Ignore())
+                .ForMember(dest => dest.UserRoles, opt => opt.Ignore())
+                .ForMember(dest => dest.SkinTypeId, opt => opt.MapFrom(src => src.SkinTypeId))
+                .ForMember(dest => dest.Orders, opt => opt.Ignore())
+                .ForMember(dest => dest.Payments, opt => opt.Ignore())
+                .ForMember(dest => dest.VnPay, opt => opt.Ignore());
+
         }
     }
 
