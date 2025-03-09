@@ -69,5 +69,37 @@ namespace DianaShop.Service.Services
             await _unitOfWork.SaveChangesAsync();
             return true;
         }
+
+        public async Task AddTagToProductAsync(int tagId, int productId)
+        {
+            var productTag = new ProductTag { ProductId = productId, TagId = tagId };
+            await _unitOfWork.Repository<ProductTag>().InsertAsync(productTag);
+            await _unitOfWork.SaveChangesAsync();
+        }
+
+        public async Task RemoveTagFromProductAsync(int tagId, int productId)
+        {
+            var productTag = await _unitOfWork.Repository<ProductTag>().AsQueryable()
+                .FirstOrDefaultAsync(pt => pt.ProductId == productId && pt.TagId == tagId);
+            if (productTag == null) return;
+            await _unitOfWork.Repository<ProductTag>().DeleteAsync(productTag);
+            await _unitOfWork.SaveChangesAsync();
+        }
+
+        public async Task AddTagToPostAsync(int tagId, int postId)
+        {
+            var postTag = new PostTag { PostId = postId, TagId = tagId };
+            await _unitOfWork.Repository<PostTag>().InsertAsync(postTag);
+            await _unitOfWork.SaveChangesAsync();
+        }
+
+        public async Task RemoveTagFromPostAsync(int tagId, int postId)
+        {
+            var postTag = await _unitOfWork.Repository<PostTag>().AsQueryable()
+                .FirstOrDefaultAsync(pt => pt.PostId == postId && pt.TagId == tagId);
+            if (postTag == null) return;
+            await _unitOfWork.Repository<PostTag>().DeleteAsync(postTag);
+            await _unitOfWork.SaveChangesAsync();
+        }
     }
 }

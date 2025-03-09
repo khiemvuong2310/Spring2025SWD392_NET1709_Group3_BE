@@ -46,5 +46,33 @@ namespace DianaShop.API.Controllers
             if (!response) return NotFound();
             return NoContent();
         }
+
+        [HttpPost("product/{productId}")]
+        public async Task<IActionResult> AddTagToProduct(int tagId, int productId)
+        {
+            await _tagService.AddTagToProductAsync(tagId, productId);
+            return NoContent();
+        }
+
+        [HttpDelete("product/{productId}")]
+        public async Task<IActionResult> RemoveTagFromProduct(int tagId, int productId)
+        {
+            await _tagService.RemoveTagFromProductAsync(tagId, productId);
+            return NoContent();
+        }
+
+        [HttpPost("post/{postId}")]
+        public async Task<IActionResult> AddTagToPost(int tagId, int postId)
+        {
+            await _tagService.AddTagToPostAsync(tagId, postId);            
+            return NoContent();
+        }
+
+        [HttpDelete("post/{postId}")]
+        public async Task<IActionResult> RemoveTagFromPost(int tagId, int postId)
+        {
+            await _tagService.RemoveTagFromPostAsync(tagId, postId);
+            return NoContent();
+        }
     }
 }

@@ -52,13 +52,14 @@ namespace DianaShop.Service.Services
                                    .ToListAsync();
         }
 
-        public async Task<PostResponseModel> AddAsync(PostRequestModel model, int userId)
+        public async Task<PostResponseModel?> AddAsync(PostRequestModel model, int userId)
         {
             var post = _mapper.Map<Post>(model);
             post.CreatedDate = DateTime.UtcNow;
             post.UserId = userId;
             if (model.TagIds != null)
             {
+                post.PostTags = new List<PostTag>();
                 foreach (var tagId in model.TagIds)
                 {
                     post.PostTags.Add(new PostTag { TagId = tagId });
@@ -66,6 +67,7 @@ namespace DianaShop.Service.Services
             }
             if (model.ImageIds != null)
             {
+                post.PostImages = new List<PostImage>();
                 foreach (var ImageId in model.ImageIds)
                 {
                     post.PostImages.Add(new PostImage { ImageId = ImageId });
@@ -73,7 +75,8 @@ namespace DianaShop.Service.Services
             }
             await _unitOfWork.Repository<Post>().InsertAsync(post);
             await _unitOfWork.CommitAsync();
-            return _mapper.Map<PostResponseModel>(post);
+            var response = await GetByIdAsync(post.Id);
+            return response;
         }
 
         public async Task<PostResponseModel?> GetByIdAsync(int id)

@@ -6,6 +6,8 @@ using Microsoft.OpenApi.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using System.Text;
 using System.Text.Json.Serialization;
+using DianaShop.Service.Interfaces;
+using DianaShop.Service.Services;
 namespace DianaShop.API
 {
     public class Program
@@ -24,6 +26,9 @@ namespace DianaShop.API
             builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
             builder.Services.AddProblemDetails();
 
+            builder.Services.AddScoped<IVnPayService, VnPayService>();
+
+
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
@@ -34,7 +39,8 @@ namespace DianaShop.API
                 {
                     policy.WithOrigins("http://localhost:3000")
                           .AllowAnyHeader()
-                          .AllowAnyMethod();
+                          .AllowAnyMethod()
+                          .AllowCredentials();
                 });
             });
             builder.Services.ConfigureAuthService(builder.Configuration);
@@ -108,7 +114,6 @@ namespace DianaShop.API
             app.UseCors("AllowNextApp");
             app.UseAuthentication();
             app.UseAuthorization();
-
 
             app.MapControllers();
 

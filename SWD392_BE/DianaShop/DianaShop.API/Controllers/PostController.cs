@@ -33,8 +33,7 @@ namespace DianaShop.API.Controllers
         [Authorize(Roles = "Staff,Admin")]
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] PostRequestModel request)
-        {
-            
+        {           
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
             var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
