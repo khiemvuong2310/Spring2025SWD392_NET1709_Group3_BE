@@ -15,5 +15,9 @@ namespace DianaShop.Service.Interfaces
         Task<TagResponseModel> CreateAsync(TagRequestModel request);
         Task<TagResponseModel?> UpdateAsync(int id, TagRequestModel request);
         Task<bool> DeleteAsync(int id);
+        Task AddTagToProductAsync(int tagId, int productId);
+        Task RemoveTagFromProductAsync(int tagId, int productId);
+        Task AddTagToPostAsync(int tagId, int postId);
+        Task RemoveTagFromPostAsync(int tagId, int postId);
     }
 }

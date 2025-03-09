@@ -13,7 +13,7 @@ namespace DianaShop.Service.Interfaces
 {
     public interface IProductService
     {
-        Task<ProductResponseModel> AddProductAsync(ProductRequestModel model);
+        Task<ProductResponseModel?> AddProductAsync(ProductRequestModel model);
         Task<PaginatedResponse<ProductResponseModel>> GetAllProductsAsync(ProductQueryRequest request);
         Task<ProductResponseModel?> GetProductByIdAsync(int id);
         Task UpdateProductAsync(int id, ProductRequestModel model);
