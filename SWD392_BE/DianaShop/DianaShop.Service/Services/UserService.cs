@@ -30,28 +30,19 @@ namespace DianaShop.Service.Services
         // Lấy tất cả người dùng
         public async Task<IEnumerable<UserResponseModel>> GetAllUsersAsync()
         {
-            var users = await _unitOfWork.Repository<User>()
-                .Include(u => u.SkinType)
-                .Include(u => u.VoucherStorage)
-                .Include(u => u.UserRoles)
-                    .ThenInclude(ur => ur.Role)
+            return await _unitOfWork.Repository<User>().AsQueryable()
                 .Where(u => !u.IsDelete)
+                .ProjectTo<UserResponseModel>(_mapper.ConfigurationProvider)
                 .ToListAsync();
-
-            return _mapper.Map<IEnumerable<UserResponseModel>>(users);
         }
 
         // Lấy người dùng theo ID
         public async Task<UserResponseModel?> GetUserByIdAsync(int id)
         {
-            var user = await _unitOfWork.Repository<User>()
-                .Include(u => u.SkinType)
-                .Include(u => u.VoucherStorage)
-                .Include(u => u.UserRoles)
-                    .ThenInclude(ur => ur.Role)
-                .FirstOrDefaultAsync(u => u.Id == id && !u.IsDelete);
-
-            return _mapper.Map<UserResponseModel>(user);
+            return await _unitOfWork.Repository<User>().AsQueryable()
+                .Where(u => u.Id == id && !u.IsDelete)
+                .ProjectTo<UserResponseModel>(_mapper.ConfigurationProvider)
+                .FirstOrDefaultAsync();
         }
 
         // Tạo người dùng mới
@@ -87,11 +78,10 @@ namespace DianaShop.Service.Services
             await _unitOfWork.SaveChangesAsync();
 
             var createdUser = await _unitOfWork.Repository<User>()
-                .Include(u => u.SkinType)
-                .Include(u => u.VoucherStorage)
-                .Include(u => u.UserRoles)
-                    .ThenInclude(ur => ur.Role)
-                .FirstOrDefaultAsync(u => u.Id == user.Id);
+                .AsQueryable()
+                .Where(u => u.Id == user.Id)
+                .ProjectTo<UserResponseModel>(_mapper.ConfigurationProvider)
+                .FirstOrDefaultAsync();
 
             if (createdUser == null)
             {
@@ -99,18 +89,17 @@ namespace DianaShop.Service.Services
             }
 
             // Trả về UserResponseModel (tránh vòng lặp)
-            return _mapper.Map<UserResponseModel>(createdUser);
+            return createdUser;
         }
 
 
         public async Task<UserResponseModel?> UpdateUserAsync(int id, UserUpdateRequest request)
         {
-            var existingUserResponse = await _unitOfWork.Repository<User?>()
-                .Include(u => u.SkinType)
-                .Include(u => u.VoucherStorage)
-                .Include(u => u.UserRoles)
-                    .ThenInclude(ur => ur.Role)
-                .FirstOrDefaultAsync(u => u.Id == id && !u.IsDelete);
+            var existingUserResponse = await _unitOfWork.Repository<User>()
+                .AsQueryable()
+                .Where(u => u.Id == id && !u.IsDelete)
+                .ProjectTo<UserResponseModel>(_mapper.ConfigurationProvider)
+                .FirstOrDefaultAsync();
 
             if (existingUserResponse == null) return null;
 
@@ -218,12 +207,9 @@ namespace DianaShop.Service.Services
         // Lấy người dùng theo username
         public async Task<UserResponseModel?> GetUserByUsernameAsync(string username)
         {
-            var user = await _unitOfWork.Repository<User>()
-                .GetAll()
-                .Include(u => u.UserRoles)
-                .ThenInclude(ur => ur.Role)
-                .FirstOrDefaultAsync(u => u.Username == username && !u.IsDelete);
-            return _mapper.Map<UserResponseModel>(user);
+            return await _unitOfWork.Repository<User>().AsQueryable()
+                .Where(u => u.Username == username && !u.IsDelete)
+                .ProjectTo<UserResponseModel>(_mapper.ConfigurationProvider).FirstOrDefaultAsync();
         }
 
         // Lấy người dùng theo email

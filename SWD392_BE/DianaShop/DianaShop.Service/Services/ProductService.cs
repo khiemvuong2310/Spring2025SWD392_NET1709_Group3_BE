@@ -118,15 +118,15 @@ namespace DianaShop.Service.Services
             }
             return product;
         }
-        public async Task<ProductResponseModel> AddProductAsync(ProductRequestModel model)
+        public async Task<ProductResponseModel?> AddProductAsync(ProductRequestModel model)
         {
             var product = await HandleValidation(model);
             // Add to DB
             await _unitOfWork.Repository<Product>().InsertAsync(product);
             await _unitOfWork.CommitAsync();
-
+            var response = await GetProductByIdAsync(product.Id);
             // Return response
-            return _mapper.Map<ProductResponseModel>(product);
+            return response;
         }
 
         public async Task<ProductResponseModel?> GetProductByIdAsync(int id)
