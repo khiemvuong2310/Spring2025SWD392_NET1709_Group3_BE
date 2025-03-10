@@ -74,7 +74,6 @@ namespace DianaShop.Service.Services
             if (request == null || request.UserID <= 0)
                 throw new ArgumentException("Invalid request data. UserID must be greater than 0.");
 
-            // Kiểm tra xem User đã có giỏ hàng chưa
             var existingCart = await _unitOfWork.Repository<Cart>()
                 .FindAsync(c => c.UserID == request.UserID);
 
@@ -133,7 +132,7 @@ namespace DianaShop.Service.Services
             return _mapper.Map<CartResponseModel>(cart);
         }
 
-        // ✏️ Cập nhật số lượng sản phẩm trong giỏ hàng
+        // ✏️Cập nhật số lượng sản phẩm trong giỏ hàng
         public async Task<CartResponseModel> UpdateCartProduct(int userId, int productId, int quantity)
         {
             var cart = await _unitOfWork.Repository<Cart>()
@@ -212,8 +211,8 @@ namespace DianaShop.Service.Services
             var cart = await _unitOfWork.Repository<Cart>()
                 .GetQueryable()
                 .Where(c => c.UserID == userId)
-                .Include(c => c.CartProducts)         // Include danh sách CartProducts
-                    .ThenInclude(cp => cp.Product)    // Include tiếp Product bên trong CartProduct
+                .Include(c => c.CartProducts)         
+                    .ThenInclude(cp => cp.Product)   
                 .FirstOrDefaultAsync();
 
             if (cart == null || !cart.CartProducts.Any())
