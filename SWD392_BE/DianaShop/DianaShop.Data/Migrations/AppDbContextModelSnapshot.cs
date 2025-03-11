@@ -340,7 +340,7 @@ namespace DianaShop.Data.Migrations
 
                     b.HasIndex("UserID");
 
-                    b.ToTable("Order");
+                    b.ToTable("Orders");
                 });
 
             modelBuilder.Entity("DianaShop.Data.Entities.OrderDetail", b =>
@@ -372,7 +372,7 @@ namespace DianaShop.Data.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("OrderDetail");
+                    b.ToTable("OrderDetails");
                 });
 
             modelBuilder.Entity("DianaShop.Data.Entities.Packaging", b =>
