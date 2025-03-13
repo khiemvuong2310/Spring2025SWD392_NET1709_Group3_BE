@@ -69,36 +69,30 @@ namespace DianaShop.Service.Services
             // Kiểm tra xem User đã có đơn chưa
             var existingOrder = await _unitOfWork.Repository<Order>()
                 .FindAsync(c => c.Id == request.OrderID);
-
             if (existingOrder == null)
                 throw new InvalidOperationException("Order is not exist.");
 
             //Kiểm tra User có thanh toán chưa hoàn thành không
             var existingPayment = await _unitOfWork.Repository<Payment>()
                 .FindAsync(c => c.Id == request.OrderID);
-
             if (existingPayment != null)
                 throw new InvalidOperationException($"You have a payment of this order.");
+
             var user = await _unitOfWork.Repository<User>()
                 .FindAsync(u => u.Id == existingOrder.UserID);
             if (user == null)
                 throw new InvalidOperationException("User is not exist.");
-            if (user.wallet == null || user.wallet < existingOrder.TotalAmount)
-                throw new InvalidOperationException("Insufficient wallet balance to make this payment.");
 
             var payment = new Payment
             {
                 OrderID = request.OrderID,
                 UserID = existingOrder.UserID,
                 PaymentMethodID = request.PaymentMethodID,
-                Address = request.Address,
                 FinalAmount = existingOrder.TotalAmount,
                 CreatedDate = DateTime.Now,
                 UpdatedDate = DateTime.Now,
-                StatusId = 2
+                StatusId = 1
             };
-            user.wallet -= existingOrder.TotalAmount;
-            await _unitOfWork.Repository<User>().UpdateAsync(user);
 
             await _unitOfWork.Repository<Payment>().InsertAsync(payment);
             await _unitOfWork.SaveChangesAsync();
@@ -126,7 +120,7 @@ namespace DianaShop.Service.Services
             if (order == null)
                 throw new Exception("Order not found");
 
-            
+
 
             payment.FinalAmount = order.TotalAmount;
             payment.UpdatedDate = DateTime.Now;

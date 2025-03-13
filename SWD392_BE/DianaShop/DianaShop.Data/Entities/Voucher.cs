@@ -15,7 +15,7 @@ namespace DianaShop.Data.Entities
         public bool? Status { get; set; }
 
         public virtual ICollection<Storage> Storages { get; set; }
-        public virtual ICollection<Payment> Payments { get; set; }
+        public virtual ICollection<Order> Orders { get; set; }
 
     }
 }

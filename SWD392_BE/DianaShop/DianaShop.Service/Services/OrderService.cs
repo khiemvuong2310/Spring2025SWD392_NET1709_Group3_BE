@@ -62,7 +62,7 @@ namespace DianaShop.Service.Services
 
             // Kiểm tra xem User đã có giỏ hàng chưa
             var unpaidOrder = await _unitOfWork.Repository<Order>()
-                .FindAsync(c => c.UserID == request.UserID && c.Status.Equals("Unpaid"));
+                .FindAsync(c => c.UserID == request.UserID && c.StatusId == 1);
 
             if (unpaidOrder != null)
                 throw new InvalidOperationException("User already has an unpaid order.");
@@ -70,12 +70,14 @@ namespace DianaShop.Service.Services
             var order = new Order
             {
                 UserID = request.UserID,
+                Address = request.Address,
                 Quantity = 0,
                 TotalAmount = 0,
+                ShipAmount = 16000,
+                FinalAmount = 0,
                 OrderDate = DateTime.Now,
                 UpdateDate = DateTime.Now,
-                Status = "Unpaid",
-                StatusId = 1,
+                StatusId = 3,
                 Details = new List<OrderDetail>()
             };
 
@@ -99,8 +101,9 @@ namespace DianaShop.Service.Services
                 .Where(cp => cp.OrderId == orderId);
             if (await orderDetails.AnyAsync())
             {
-                _unitOfWork.Repository<OrderDetail>().DeleteRange(orderDetails);
-            } 
+                //_unitOfWork.Repository<OrderDetail>().DeleteRange(orderDetails);
+                throw new ArgumentException("There are order detail isn't delete.");
+            }
 
             _unitOfWork.Repository<Order>().Delete(order);
 
@@ -108,7 +111,7 @@ namespace DianaShop.Service.Services
             return true;
         }
 
-        public async Task<OrderResponseModel> UpdateOrder(int orderId, string status)
+        public async Task<OrderResponseModel> UpdateOrder(int orderId, int status)
         {
             var order = await _unitOfWork.Repository<Order>()
                 .GetQueryable()
@@ -118,7 +121,7 @@ namespace DianaShop.Service.Services
             if (order == null)
                 throw new Exception("Order not found");
 
-            order.Status = status;
+            order.StatusId = status;
             order.UpdateDate = DateTime.Now;
             await _unitOfWork.Repository<Order>().UpdateAsync(order);
 
@@ -126,5 +129,36 @@ namespace DianaShop.Service.Services
             return _mapper.Map<OrderResponseModel>(order);
         }
 
+        public async Task<OrderResponseModel> AddVoucherToOrder(int orderId, int voucherId)
+        {
+            var order = await _unitOfWork.Repository<Order>()
+                .GetQueryable()
+                .Where(cp => cp.Id == orderId)
+                .FirstOrDefaultAsync();
+            if (order == null)
+                throw new Exception("Order not found");
+
+            var storage = await _unitOfWork.Repository<Storage>()
+                .GetQueryable()
+                .Where(cp => cp.VoucherId == voucherId)
+                .FirstOrDefaultAsync();
+            if (storage == null) throw new Exception("User not have this voucher");
+
+            order.VoucherID = voucherId;
+            if (order.VoucherID > 0)
+            {
+                var voucher = await _unitOfWork.Repository<Voucher>()
+                    .FindAsync(cp => cp.Id == order.VoucherID);
+                if (order.TotalAmount >= (decimal)voucher.MinimumPurchase)
+                {
+                    order.FinalAmount -= (order.TotalAmount * (decimal)voucher.DiscountPercentage);
+                }
+            }
+            order.UpdateDate = DateTime.Now;
+            await _unitOfWork.Repository<Order>().UpdateAsync(order);
+
+            await _unitOfWork.SaveChangesAsync();
+            return _mapper.Map<OrderResponseModel>(order);
+        }
     }
 }
