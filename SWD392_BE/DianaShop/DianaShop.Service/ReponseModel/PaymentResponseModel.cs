@@ -15,7 +15,6 @@ namespace DianaShop.Service.ReponseModel
         public int PaymentMethodID { get; set; }
         public string MethodName { get; set; }
         public string Address { get; set; }
-        public int? VoucherID { get; set; }
         public decimal FinalAmount { get; set; }
         public DateTime? CreatedDate { get; set; }
         public DateTime? UpdatedDate { get; set; }

@@ -61,16 +61,36 @@ namespace DianaShop.Service.Services
             }
 
             //cập nhật order sau khi thêm product
-            //var updateOrder = order;
-            //updateOrder.Quantity += request.Quantity;
-            //updateOrder.TotalAmount += (product.Price * request.Quantity);
-            //updateOrder.UpdateDate = DateTime.Now;
 
             order.Quantity += request.Quantity;
             order.TotalAmount += (product.Price * request.Quantity);
+            order.FinalAmount = (order.ShipAmount + order.TotalAmount);
+            if (order.VoucherID > 0)
+            {
+                var voucher = await _unitOfWork.Repository<Voucher>()
+                    .FindAsync(cp => cp.Id == order.VoucherID);
+                if (order.TotalAmount >= (decimal)voucher.MinimumPurchase)
+                {
+                    order.FinalAmount -= (order.TotalAmount * (decimal)voucher.DiscountPercentage);
+                }
+            }
             order.UpdateDate = DateTime.Now;
             await _unitOfWork.Repository<Order>().UpdateAsync(order);
 
+            //cập nhật product sau khi mua
+            var batch = await _unitOfWork.Repository<ProductBatch>().AsQueryable()
+                .Where(b => b.ProductID == request.ProductId)
+                .OrderBy(pb => pb.ImportDate)
+                .FirstOrDefaultAsync();
+            if (batch == null)
+            {
+                throw new KeyNotFoundException($"Product with Batch {request.ProductId} not found.");
+            }
+            if (batch.Quantity < request.Quantity)
+            {
+                throw new KeyNotFoundException($"Product with Id {request.ProductId} are insufficient unit in stock.");
+            }
+            batch.Quantity -= request.Quantity;
 
             await _unitOfWork.SaveChangesAsync();
 
@@ -80,7 +100,7 @@ namespace DianaShop.Service.Services
             return _mapper.Map<OrderDetailResponseModel>(AddedResult);
         }
 
-        public async Task<bool> ClearOrder(int orderId)
+        public async Task<bool> ClearOrderDetail(int orderId)
         {
             var orderDetails = _unitOfWork.Repository<OrderDetail>()
                 .GetQueryable()
@@ -96,10 +116,32 @@ namespace DianaShop.Service.Services
             //cập nhật order sau khi làm sạch
             order.Quantity = 0;
             order.TotalAmount = 0;
+            order.FinalAmount = 0;
             order.UpdateDate = DateTime.Now;
+
+            //cập nhật product sau khi xóa
+            var orderDetailList = await orderDetails.ToListAsync(); // ✅ Nạp dữ liệu trước
+            var batchList = new List<ProductBatch>();
+
+            foreach (var item in orderDetailList)
+            {
+                var batch = await _unitOfWork.Repository<ProductBatch>().AsQueryable()
+                    .Where(b => b.ProductID == item.ProductId)
+                    .OrderBy(pb => pb.ImportDate)
+                    .FirstOrDefaultAsync();
+
+                if (batch == null)
+                {
+                    throw new KeyNotFoundException($"Product with Batch {item.ProductId} not found.");
+                }
+                batch.Quantity += item.Quantity;
+                batchList.Add(batch);
+
+            }
 
             _unitOfWork.Repository<OrderDetail>().DeleteRange(orderDetails);
             await _unitOfWork.Repository<Order>().UpdateAsync(order);
+            await _unitOfWork.Repository<ProductBatch>().UpdateRangeAsync(batchList);
             await _unitOfWork.SaveChangesAsync();
             return true;
         }
@@ -129,10 +171,23 @@ namespace DianaShop.Service.Services
             //cập nhật order sau khi xóa
             order.Quantity -= orderDetail.Quantity;
             order.TotalAmount -= (orderDetail.Quantity * orderDetail.UnitPrice);
+            order.FinalAmount += (order.TotalAmount + order.ShipAmount);
             order.UpdateDate = DateTime.Now;
+
+            //cập nhật product sau khi xóa
+            var batch = await _unitOfWork.Repository<ProductBatch>().AsQueryable()
+                .Where(b => b.ProductID == productId)
+                .OrderBy(pb => pb.ImportDate)
+                .FirstOrDefaultAsync();
+            if (batch == null)
+            {
+                throw new KeyNotFoundException($"Product with Batch {productId} not found.");
+            }
+            batch.Quantity += orderDetail.Quantity;
 
             _unitOfWork.Repository<OrderDetail>().Delete(orderDetail);
             await _unitOfWork.Repository<Order>().UpdateAsync(order);
+            await _unitOfWork.Repository<ProductBatch>().UpdateAsync(batch);
             await _unitOfWork.SaveChangesAsync();
             return true;
         }
@@ -154,6 +209,26 @@ namespace DianaShop.Service.Services
             if (order == null)
                 throw new Exception("Order not found");
 
+            //cập nhật product sau khi cập nhật
+            var batch = await _unitOfWork.Repository<ProductBatch>().AsQueryable()
+                .Where(b => b.ProductID == request.ProductId)
+                .OrderBy(pb => pb.ImportDate)
+                .FirstOrDefaultAsync();
+            if (batch == null)
+            {
+                throw new KeyNotFoundException($"Product with Batch are insufficient unit in stock.");
+            }
+            if (request.Quantity > orderDetail.Quantity)
+            {
+                var minus = request.Quantity - orderDetail.Quantity;
+                if (batch.Quantity < minus) throw new KeyNotFoundException($"Product with Batch are insufficient unit in stock.");
+                batch.Quantity -= minus;
+            }
+            else
+            {
+                batch.Quantity += (orderDetail.Quantity - request.Quantity);
+            }
+
             order.Quantity -= orderDetail.Quantity;
             order.TotalAmount -= (orderDetail.Quantity * orderDetail.UnitPrice);
             orderDetail.Quantity = request.Quantity;
@@ -163,10 +238,10 @@ namespace DianaShop.Service.Services
 
             await _unitOfWork.Repository<OrderDetail>().UpdateAsync(orderDetail);
             await _unitOfWork.Repository<Order>().UpdateAsync(order);
+            await _unitOfWork.Repository<ProductBatch>().UpdateAsync(batch);
             await _unitOfWork.SaveChangesAsync();
 
             return _mapper.Map<OrderDetailResponseModel>(orderDetail);
         }
-
     }
 }

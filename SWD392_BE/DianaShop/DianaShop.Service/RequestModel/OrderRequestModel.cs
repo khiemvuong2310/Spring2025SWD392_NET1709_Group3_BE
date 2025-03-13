@@ -11,5 +11,7 @@ namespace DianaShop.Service.RequestModel
     {
         [Required]
         public int UserID { get; set; }
+        public string Address { get; set; }
+
     }
 }

@@ -11,8 +11,6 @@ namespace DianaShop.Data.Entities
         public int UserID { get; set; }
         public int OrderID { get; set; }
         public int PaymentMethodID { get; set; }
-        public string Address { get; set; }
-        public int? VoucherID { get; set; }
         public decimal? FinalAmount { get; set; }
         public DateTime? CreatedDate { get; set; }
         public DateTime? UpdatedDate { get; set; }
@@ -21,8 +19,8 @@ namespace DianaShop.Data.Entities
         public User User { get; set; }
         public Order Order { get; set; }
         public PaymentMethod PaymentMethod { get; set; }
-        public Voucher Voucher { get; set; }
         public StageStatus StageStatus { get; set; }
+        public VnPayTransaction? VnPayTransaction { get; set; }
 
     }
 }

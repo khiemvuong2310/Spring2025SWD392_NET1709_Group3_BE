@@ -18,7 +18,8 @@ namespace DianaShop.Service.Interfaces
         //Task<OrderDetailResponseModel> AddOrderDetail(OrderDetailRequestModel request);
         //Task<OrderDetailResponseModel> UpdateOrderDetail(OrderDetailRequestModel request);
         Task<OrderResponseModel> CreateOrder(OrderRequestModel request);
-        Task<OrderResponseModel> UpdateOrder(int orderId, string status);
+        Task<OrderResponseModel> UpdateOrder(int orderId, int status);
+        Task<OrderResponseModel> AddVoucherToOrder(int orderId, int voucherId);
         //Task<bool> RemoveOrderDetail(int orderId, int productId);
         //Task<bool> ClearOrder(int orderId);
         Task<bool> RemoveOrder(int orderId);

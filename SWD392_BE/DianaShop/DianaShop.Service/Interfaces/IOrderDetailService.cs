@@ -14,6 +14,6 @@ namespace DianaShop.Service.Interfaces
         Task<OrderDetailResponseModel> AddOrderDetail(OrderDetailRequestModel request);
         Task<OrderDetailResponseModel> UpdateOrderDetail(OrderDetailRequestModel request);
         Task<bool> RemoveOrderDetail(int orderId, int productId);
-        Task<bool> ClearOrder(int orderId);
+        Task<bool> ClearOrderDetail(int orderId);
     }
 }
