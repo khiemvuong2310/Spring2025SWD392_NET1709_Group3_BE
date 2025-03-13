@@ -206,47 +206,47 @@ namespace DianaShop.Service.Services
             return true;
         }
 
-        public async Task<bool> Checkout(int userId)
-        {
-            // Lấy thông tin giỏ hàng của User
-            var cart = await _unitOfWork.Repository<Cart>()
-                .GetQueryable()
-                .Where(c => c.UserID == userId)
-                .Include(c => c.CartProducts)         // Include danh sách CartProducts
-                    .ThenInclude(cp => cp.Product)    // Include tiếp Product bên trong CartProduct
-                .FirstOrDefaultAsync();
+        //public async Task<bool> Checkout(int userId)
+        //{
+        //    // Lấy thông tin giỏ hàng của User
+        //    var cart = await _unitOfWork.Repository<Cart>()
+        //        .GetQueryable()
+        //        .Where(c => c.UserID == userId)
+        //        .Include(c => c.CartProducts)         // Include danh sách CartProducts
+        //            .ThenInclude(cp => cp.Product)    // Include tiếp Product bên trong CartProduct
+        //        .FirstOrDefaultAsync();
 
-            if (cart == null || !cart.CartProducts.Any())
-                throw new Exception("Cart is empty or not found");
+        //    if (cart == null || !cart.CartProducts.Any())
+        //        throw new Exception("Cart is empty or not found");
 
-            // Tính tổng số lượng và tổng tiền đơn hàng
-            var totalAmount = cart.CartProducts.Sum(cp => cp.Quantity * cp.Product.Price);
-            var totalQuantity = cart.CartProducts.Sum(cp => cp.Quantity);
+        //    // Tính tổng số lượng và tổng tiền đơn hàng
+        //    var totalAmount = cart.CartProducts.Sum(cp => cp.Quantity * cp.Product.Price);
+        //    var totalQuantity = cart.CartProducts.Sum(cp => cp.Quantity);
 
-            // Tạo một đơn hàng mới
-            var order = new Order
-            {
-                UserID = userId,
-                OrderDate = DateTime.UtcNow,
-                UpdateDate = DateTime.UtcNow,
-                Status = "Processing",
-                TotalAmount = totalAmount,
-                Quantity = totalQuantity,
-                Details = cart.CartProducts.Select(cp => new OrderDetail
-                {
-                    ProductId = cp.ProductId,
-                    Quantity = cp.Quantity,
-                    UnitPrice = cp.Product.Price
-                }).ToList()
-            };
+        //    // Tạo một đơn hàng mới
+        //    var order = new Order
+        //    {
+        //        UserID = userId,
+        //        OrderDate = DateTime.UtcNow,
+        //        UpdateDate = DateTime.UtcNow,
+        //        Status = "Processing",
+        //        TotalAmount = totalAmount,
+        //        Quantity = totalQuantity,
+        //        Details = cart.CartProducts.Select(cp => new OrderDetail
+        //        {
+        //            ProductId = cp.ProductId,
+        //            Quantity = cp.Quantity,
+        //            UnitPrice = cp.Product.Price
+        //        }).ToList()
+        //    };
 
-            await _unitOfWork.Repository<Order>().InsertAsync(order);
+        //    await _unitOfWork.Repository<Order>().InsertAsync(order);
 
-            // Xóa giỏ hàng sau khi thanh toán
-            await ClearCart(userId);
+        //    // Xóa giỏ hàng sau khi thanh toán
+        //    await ClearCart(userId);
 
-            await _unitOfWork.SaveChangesAsync();
-            return true;
-        }
+        //    await _unitOfWork.SaveChangesAsync();
+        //    return true;
+        //}
     }
 }

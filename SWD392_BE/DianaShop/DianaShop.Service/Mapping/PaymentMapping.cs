@@ -17,7 +17,9 @@ namespace DianaShop.Service.Mapping
             CreateMap<PaymentRequestModel, Payment>();
             CreateMap<Payment, PaymentResponseModel>()
                 .ForMember(dest => dest.UserName, otp => otp.MapFrom(src => src.User.Username))
-                .ForMember(dest => dest.MethodName, otp => otp.MapFrom(src => src.PaymentMethod.MethodName));
+                .ForMember(dest => dest.MethodName, otp => otp.MapFrom(src => src.PaymentMethod.MethodName))
+                .ForMember(dest => dest.Address, otp => otp.MapFrom(src => src.Order.Address))
+                .ForMember(dest => dest.StatusName, otp => otp.MapFrom(src => src.StageStatus.StatusName));
         }
     }
 }

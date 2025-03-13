@@ -12,13 +12,17 @@ namespace DianaShop.Data.Entities
         public int Quantity { get; set; }
         public DateTime? OrderDate { get; set; }
         public decimal? TotalAmount { get; set; }
+        public int? VoucherID { get; set; }
+        public string Address { get; set; }
+        public decimal? ShipAmount { get; set; }
+        public decimal? FinalAmount { get; set; }
         public DateTime? UpdateDate { get; set; }
-        public String Status { get; set; }
         public int? StatusId { get; set; }
 
         public User User { get; set; }
         public virtual ICollection<OrderDetail> Details { get; set; }
         public Payment Payment { get; set; }
         public StageStatus StageStatus { get; set; }
+        public Voucher? Voucher { get; set; }
     }
 }
