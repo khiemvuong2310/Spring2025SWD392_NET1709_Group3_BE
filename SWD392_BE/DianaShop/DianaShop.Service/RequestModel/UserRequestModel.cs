@@ -31,7 +31,7 @@ namespace DianaShop.Service.RequestModel
         public string Location { get; set; }
 
         //[Required(ErrorMessage = "Skin type is required.")]
-        public int? SkinTypeId { get; set; }
+        //public int? SkinTypeId { get; set; }
 
         public bool Status { get; set; } = true; 
     }

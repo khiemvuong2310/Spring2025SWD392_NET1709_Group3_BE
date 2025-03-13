@@ -210,9 +210,11 @@ namespace DianaShop.Service.Services
         // Lấy người dùng theo username
         public async Task<UserResponseModel?> GetUserByUsernameAsync(string username)
         {
-            return await _unitOfWork.Repository<User>().AsQueryable()
+            return await _unitOfWork.Repository<User>()
+                .AsQueryable()
                 .Where(u => u.Username == username && !u.IsDelete)
-                .ProjectTo<UserResponseModel>(_mapper.ConfigurationProvider).FirstOrDefaultAsync();
+                .ProjectTo<UserResponseModel>(_mapper.ConfigurationProvider)
+                .FirstOrDefaultAsync();
         }
 
         // Lấy người dùng theo email
