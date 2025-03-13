@@ -95,7 +95,6 @@ namespace DianaShop.Service.Services
                 throw new Exception("Failed to retrieve created user.");
             }
 
-            // Trả về UserResponseModel (tránh vòng lặp)
             return createdUser;
         }
 
@@ -110,10 +109,8 @@ namespace DianaShop.Service.Services
 
             if (existingUserResponse == null) return null;
 
-            // Map từ UserResponseModel sang User entity
             var existingUser = _mapper.Map<User>(existingUserResponse);
 
-            // Nếu không có thông tin mới để cập nhật, trả về user hiện tại
             if (request.Username == null &&
                 request.Email == null &&
                 request.Phone == null &&
@@ -125,7 +122,6 @@ namespace DianaShop.Service.Services
                 return _mapper.Map<UserResponseModel>(existingUserResponse);
             }
 
-            // Kiểm tra trùng lặp email (nếu có email mới)
             if (!string.IsNullOrEmpty(request.Email))
             {
                 var emailUser = await _unitOfWork.Repository<User>()

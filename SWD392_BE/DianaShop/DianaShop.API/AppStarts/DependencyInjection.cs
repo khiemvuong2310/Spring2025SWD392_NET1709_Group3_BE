@@ -24,13 +24,7 @@ namespace DianaShop.API.AppStarts
                 options.LowercaseUrls = true; ;
                 options.LowercaseQueryStrings = true;
             });
-            services.AddDbContext<AppDbContext>(options =>
-            {
-                var connectionString = configuration.GetConnectionString("DefaultConnection");
-                var serverVersion = new MySqlServerVersion(new Version(8, 0, 2)); // Adjust the version to match your MySQL version
 
-                options.UseMySql(connectionString, serverVersion);
-            });
             services.AddSingleton<ITwilioRestClient>(new TwilioRestClient("ACCOUNT_SID", "AUTH_TOKEN"));
 
             //Add Scoped
