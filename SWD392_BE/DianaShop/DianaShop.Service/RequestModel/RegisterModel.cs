@@ -19,14 +19,13 @@ namespace DianaShop.Service.RequestModel
         [EmailAddress(ErrorMessage = "Invalid email format.")]
         public string Email { get; set; }
 
-        [Required(ErrorMessage = "Location is required.")]
         [StringLength(100, ErrorMessage = "Location cannot exceed 100 characters.")]
-        public string Location { get; set; }
+        public string? Location { get; set; }
 
         [Required(ErrorMessage = "Phone number is required.")]
         [RegularExpression(@"^\+?[0-9]{10,15}$", ErrorMessage = "Phone number must be between 10 and 15 digits and may start with a '+' sign.")]
         public string Phone { get; set; }
-        public bool Status { get; set; }
+        public bool? Status { get; set; }
 
     }
 
