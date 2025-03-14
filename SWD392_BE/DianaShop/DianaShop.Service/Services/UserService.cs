@@ -104,12 +104,11 @@ namespace DianaShop.Service.Services
             var existingUserResponse = await _unitOfWork.Repository<User>()
                 .AsQueryable()
                 .Where(u => u.Id == id && !u.IsDelete)
-                .ProjectTo<UserResponseModel>(_mapper.ConfigurationProvider)
                 .FirstOrDefaultAsync();
 
             if (existingUserResponse == null) return null;
 
-            var existingUser = _mapper.Map<User>(existingUserResponse);
+            //var existingUser = _mapper.Map<User>(existingUserResponse);
 
             if (request.Username == null &&
                 request.Email == null &&
@@ -134,21 +133,19 @@ namespace DianaShop.Service.Services
             }
 
             // Cập nhật từng trường nếu có giá trị mới
-            if (!string.IsNullOrEmpty(request.Username)) existingUser.Username = request.Username;
-            if (!string.IsNullOrEmpty(request.Email)) existingUser.Email = request.Email;
-            if (!string.IsNullOrEmpty(request.Phone)) existingUser.Phone = request.Phone;
-            if (!string.IsNullOrEmpty(request.Location)) existingUser.Location = request.Location;
-            if (!string.IsNullOrEmpty(request.Image)) existingUser.Image = request.Image;
-            if (request.Status.HasValue) existingUser.Status = request.Status.Value;
-            if (request.SkinTypeId.HasValue) existingUser.SkinTypeId = request.SkinTypeId.Value;
+            if (!string.IsNullOrEmpty(request.Username)) existingUserResponse.Username = request.Username;
+            if (!string.IsNullOrEmpty(request.Email)) existingUserResponse.Email = request.Email;
+            if (!string.IsNullOrEmpty(request.Phone)) existingUserResponse.Phone = request.Phone;
+            if (!string.IsNullOrEmpty(request.Location)) existingUserResponse.Location = request.Location;
+            if (!string.IsNullOrEmpty(request.Image)) existingUserResponse.Image = request.Image;
+            if (request.Status.HasValue) existingUserResponse.Status = request.Status.Value;
+            if (request.SkinTypeId.HasValue) existingUserResponse.SkinTypeId = request.SkinTypeId.Value;
 
-            await _unitOfWork.Repository<User>().Update(existingUser, id);
+            await _unitOfWork.Repository<User>().Update(existingUserResponse, id);
             await _unitOfWork.SaveChangesAsync();
 
-            return _mapper.Map<UserResponseModel>(existingUser);
+            return _mapper.Map<UserResponseModel>(existingUserResponse);
         }
-
-
 
 
         // Cập nhật mật khẩu người dùng
