@@ -5,6 +5,7 @@ using DianaShop.Repository.UnitOfWork;
 using DianaShop.Service.Interfaces;
 using DianaShop.Service.ReponseModel;
 using DianaShop.Service.RequestModel;
+using DianaShop.Service.RequestModel.QueryRequest;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -25,10 +26,11 @@ namespace DianaShop.Service.Services
             _mapper = mapper;
         }
 
-        public async Task<IEnumerable<PostResponseModel>> GetAllAsync(PostQueryRequest request)
+        public async Task<PaginatedResponse<PostResponseModel>> GetAllAsync(PostQueryRequest request)
         {
             var postsQuery = _unitOfWork.Repository<Post>()
                 .GetAll()
+                .Where(p => request.IsDeleted == null || p.IsDelete == request.IsDeleted)
                 .Where(p => request.UserId == null || p.UserId == request.UserId)
                 .Where(p => string.IsNullOrEmpty(request.Title) || p.Title.Contains(request.Title))
                 .Where(p => p.Status == request.Status)
@@ -47,9 +49,7 @@ namespace DianaShop.Service.Services
                 _ => postsQuery
             };
 
-            return await postsQuery.Skip((request.PageNumber - 1) * request.PageSize)
-                                   .Take(request.PageSize)
-                                   .ToListAsync();
+            return await PaginatedResponse<PostResponseModel>.CreateAsync(postsQuery, request.PageNumber, request.PageSize);
         }
 
         public async Task<PostResponseModel?> AddAsync(PostRequestModel model, int userId)

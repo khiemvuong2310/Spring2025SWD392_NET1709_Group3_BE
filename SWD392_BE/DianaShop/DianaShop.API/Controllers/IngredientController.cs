@@ -38,6 +38,8 @@ namespace DianaShop.API.Controllers
         public async Task<IActionResult> Update(int id, [FromBody] IngredientRequestModel request)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
+            var response = await _ingredientService.GetByIdAsync(id);
+            if (response == null) return NotFound();
             var updateResponse = await _ingredientService.UpdateAsync(id, request);
             if (updateResponse == null) return NotFound();
             return Ok(updateResponse);

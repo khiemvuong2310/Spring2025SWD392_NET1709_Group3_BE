@@ -5,7 +5,7 @@ using DianaShop.Data.Entities;
 using DianaShop.Repository.UnitOfWork;
 using DianaShop.Service.Interfaces;
 using DianaShop.Service.ReponseModel;
-using DianaShop.Service.RequestModel;
+using DianaShop.Service.RequestModel.QueryRequest;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -30,13 +30,13 @@ namespace DianaShop.Service.Services
             _mapper = mapper;
         }
 
-        public async Task<List<ImageResponseModel>> GetAllAsync(ImageQueryRequest request)
+        public async Task<PaginatedResponse<ImageResponseModel>> GetAllAsync(ImageQueryRequest request)
         {
             var images = _unitOfWork.Repository<Image>().GetAll()
-                .Where(i => !i.IsDelete)
+                .Where(i => request.IsDeleted == null || i.IsDelete == request.IsDeleted)
                 .Where(i => request.ImageUrl == null || i.ImageUrl.Contains(request.ImageUrl))
                 .ProjectTo<ImageResponseModel>(_mapper.ConfigurationProvider);
-            return await images.Skip((request.PageNumber - 1) * request.PageSize).Take(request.PageSize).ToListAsync();
+            return await PaginatedResponse<ImageResponseModel>.CreateAsync(images, request.PageNumber, request.PageSize);
         }
 
         public async Task<ImageResponseModel?> GetByIdAsync(int id)

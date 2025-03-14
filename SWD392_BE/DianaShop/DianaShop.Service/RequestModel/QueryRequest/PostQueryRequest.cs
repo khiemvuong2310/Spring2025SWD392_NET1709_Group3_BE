@@ -5,16 +5,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DianaShop.Service.RequestModel
+namespace DianaShop.Service.RequestModel.QueryRequest
 {
-    public class PostQueryRequest
+    public class PostQueryRequest : BaseQuery
     {
-        public int PageNumber { get; set; } = 1;
-        public int PageSize { get; set; } = 10;
         public string? Title { get; set; }
         public int? UserId { get; set; }
         public bool Status { get; set; } = true;
-        public bool IsDeleted { get; set; } = false;
         public DateTime? MinCreatedDate { get; set; }
         public DateTime? MaxCreatedDate { get; set; }
         public DateTime? MinPublishedDate { get; set; }
