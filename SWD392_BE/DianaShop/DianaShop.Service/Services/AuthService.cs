@@ -144,9 +144,19 @@ namespace DianaShop.Service.Services
 
             await _unitOfWork.Repository<User>().InsertAsync(user);
             await _unitOfWork.CommitAsync();
+            // Gán quyền mặc định (tránh ánh xạ trực tiếp trong UserCreateRequest)
+            var userRole = new UserRole
+            {
+                UserId = user.Id,
+                RoleId = 3,
+                Status = true
+            };
+            await _unitOfWork.Repository<UserRole>().InsertAsync(userRole);
+            await _unitOfWork.SaveChangesAsync();
 
             var userWithRole = await _userService.GetUserByUsernameAsync(user.Username);
             var roleNames = string.Join(",", userWithRole.UserRoles.Select(ur => ur.RoleName));
+
             string token = GenerateJwtToken(user.Username, roleNames, user.Id);
 
             return new BaseResponse<TokenModel>

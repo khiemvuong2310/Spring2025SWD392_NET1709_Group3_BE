@@ -20,11 +20,13 @@ namespace DianaShop.Service.Services
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly IVoucherStorageService _voucherStorageService; // Inject VoucherService
 
-        public UserService(IUnitOfWork unitOfWork, IMapper mapper)
+        public UserService(IUnitOfWork unitOfWork, IMapper mapper, IVoucherStorageService voucherStorageService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _voucherStorageService = voucherStorageService;
         }
 
         // Lấy tất cả người dùng
@@ -53,16 +55,15 @@ namespace DianaShop.Service.Services
                 throw new ArgumentException("Invalid phone number format.");
             }
 
-            // Kiểm tra email đã tồn tại chưa
             var existingUser = await _unitOfWork.Repository<User>().FindAsync(u => u.Email == request.Email);
             if (existingUser != null)
             {
                 throw new InvalidOperationException("Email already exists.");
             }
 
-            // Ánh xạ UserCreateRequest -> User (theo cấu hình trong UserMapping)
             var user = _mapper.Map<User>(request);
             user.Password = PasswordTools.HashPassword(user.Password);
+
             // Lưu user vào database trước khi gán UserRoles để tránh lỗi vòng lặp
             await _unitOfWork.Repository<User>().InsertAsync(user);
             await _unitOfWork.SaveChangesAsync();
@@ -77,6 +78,12 @@ namespace DianaShop.Service.Services
             await _unitOfWork.Repository<UserRole>().InsertAsync(userRole);
             await _unitOfWork.SaveChangesAsync();
 
+            //Gọi phương thức tạo voucher cho user
+            await _voucherStorageService.CreateVoucherStorageAsync(new VoucherStorageRequestModel
+            {
+                UserID = user.Id
+            });
+
             var createdUser = await _unitOfWork.Repository<User>()
                 .AsQueryable()
                 .Where(u => u.Id == user.Id)
@@ -88,7 +95,6 @@ namespace DianaShop.Service.Services
                 throw new Exception("Failed to retrieve created user.");
             }
 
-            // Trả về UserResponseModel (tránh vòng lặp)
             return createdUser;
         }
 
@@ -98,15 +104,12 @@ namespace DianaShop.Service.Services
             var existingUserResponse = await _unitOfWork.Repository<User>()
                 .AsQueryable()
                 .Where(u => u.Id == id && !u.IsDelete)
-                .ProjectTo<UserResponseModel>(_mapper.ConfigurationProvider)
                 .FirstOrDefaultAsync();
 
             if (existingUserResponse == null) return null;
 
-            // Map từ UserResponseModel sang User entity
-            var existingUser = _mapper.Map<User>(existingUserResponse);
+            //var existingUser = _mapper.Map<User>(existingUserResponse);
 
-            // Nếu không có thông tin mới để cập nhật, trả về user hiện tại
             if (request.Username == null &&
                 request.Email == null &&
                 request.Phone == null &&
@@ -118,7 +121,6 @@ namespace DianaShop.Service.Services
                 return _mapper.Map<UserResponseModel>(existingUserResponse);
             }
 
-            // Kiểm tra trùng lặp email (nếu có email mới)
             if (!string.IsNullOrEmpty(request.Email))
             {
                 var emailUser = await _unitOfWork.Repository<User>()
@@ -131,21 +133,19 @@ namespace DianaShop.Service.Services
             }
 
             // Cập nhật từng trường nếu có giá trị mới
-            if (!string.IsNullOrEmpty(request.Username)) existingUser.Username = request.Username;
-            if (!string.IsNullOrEmpty(request.Email)) existingUser.Email = request.Email;
-            if (!string.IsNullOrEmpty(request.Phone)) existingUser.Phone = request.Phone;
-            if (!string.IsNullOrEmpty(request.Location)) existingUser.Location = request.Location;
-            if (!string.IsNullOrEmpty(request.Image)) existingUser.Image = request.Image;
-            if (request.Status.HasValue) existingUser.Status = request.Status.Value;
-            if (request.SkinTypeId.HasValue) existingUser.SkinTypeId = request.SkinTypeId.Value;
+            if (!string.IsNullOrEmpty(request.Username)) existingUserResponse.Username = request.Username;
+            if (!string.IsNullOrEmpty(request.Email)) existingUserResponse.Email = request.Email;
+            if (!string.IsNullOrEmpty(request.Phone)) existingUserResponse.Phone = request.Phone;
+            if (!string.IsNullOrEmpty(request.Location)) existingUserResponse.Location = request.Location;
+            if (!string.IsNullOrEmpty(request.Image)) existingUserResponse.Image = request.Image;
+            if (request.Status.HasValue) existingUserResponse.Status = request.Status.Value;
+            if (request.SkinTypeId.HasValue) existingUserResponse.SkinTypeId = request.SkinTypeId.Value;
 
-            await _unitOfWork.Repository<User>().Update(existingUser, id);
+            await _unitOfWork.Repository<User>().Update(existingUserResponse, id);
             await _unitOfWork.SaveChangesAsync();
 
-            return _mapper.Map<UserResponseModel>(existingUser);
+            return _mapper.Map<UserResponseModel>(existingUserResponse);
         }
-
-
 
 
         // Cập nhật mật khẩu người dùng
@@ -207,9 +207,11 @@ namespace DianaShop.Service.Services
         // Lấy người dùng theo username
         public async Task<UserResponseModel?> GetUserByUsernameAsync(string username)
         {
-            return await _unitOfWork.Repository<User>().AsQueryable()
+            return await _unitOfWork.Repository<User>()
+                .AsQueryable()
                 .Where(u => u.Username == username && !u.IsDelete)
-                .ProjectTo<UserResponseModel>(_mapper.ConfigurationProvider).FirstOrDefaultAsync();
+                .ProjectTo<UserResponseModel>(_mapper.ConfigurationProvider)
+                .FirstOrDefaultAsync();
         }
 
         // Lấy người dùng theo email

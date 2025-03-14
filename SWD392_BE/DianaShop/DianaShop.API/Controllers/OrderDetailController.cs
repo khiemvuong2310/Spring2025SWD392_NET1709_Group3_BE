@@ -19,7 +19,7 @@ namespace DianaShop.API.Controllers
 
 
         /// 🛒 Lấy order detail theo order
-        [HttpGet("order/{orderId}")]  
+        [HttpGet("order/{orderId}")]
         public async Task<IActionResult> GetOrderDetailByOrder(int orderId)
         {
             var response = await _orderDetailService.GetAllOrderDetailsByOrderId(orderId);
@@ -74,7 +74,7 @@ namespace DianaShop.API.Controllers
         [HttpDelete("clear/{orderId}")]
         public async Task<IActionResult> ClearOrder(int orderId)
         {
-            var result = await _orderDetailService.ClearOrder(orderId);
+            var result = await _orderDetailService.ClearOrderDetail(orderId);
             if (!result)
                 return BadRequest("Order is already empty or does not exist.");
             return Ok(new { Message = "Order cleared successfully!" });

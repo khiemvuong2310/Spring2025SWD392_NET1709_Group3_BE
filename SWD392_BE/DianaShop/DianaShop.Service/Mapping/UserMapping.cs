@@ -34,7 +34,7 @@ namespace DianaShop.Service.Mapping
                 .ForMember(dest => dest.VoucherStorage, opt => opt.Ignore())
                 .ForMember(dest => dest.FeedBacks, opt => opt.Ignore())
                 .ForMember(dest => dest.UserRoles, opt => opt.Ignore())
-                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status)); // Ánh xạ Status
+                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status));
 
             // Mapping UserUpdateRequest -> User
             CreateMap<UserUpdateRequest, User>()
@@ -46,9 +46,8 @@ namespace DianaShop.Service.Mapping
                 .ForMember(dest => dest.SkinTypeId, opt => opt.MapFrom(src => src.SkinTypeId))
                 .ForMember(dest => dest.Orders, opt => opt.Ignore())
                 .ForMember(dest => dest.Payments, opt => opt.Ignore())
-                .ForMember(dest => dest.VnPay, opt => opt.Ignore());
-
+                .ForMember(dest => dest.VnPay, opt => opt.Ignore())
+                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status));
         }
     }
-
 }

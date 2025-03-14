@@ -43,6 +43,8 @@ namespace DianaShop.Data
         public DbSet<VoucherStorage> VoucherStorages { get; set; }
         public DbSet<Storage> Storages { get; set; }
         public DbSet<CartProduct> CartProducts { get; set; }
+        public DbSet<Order> Orders { get; set; }
+        public DbSet<OrderDetail> OrderDetails { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -158,28 +160,47 @@ namespace DianaShop.Data
                 .WithMany(p => p.CartProducts)
                 .HasForeignKey(cp => cp.ProductId);
 
+            // Cấu hình Order
             modelBuilder.Entity<Order>()
                 .HasKey(o => o.Id);
+
             modelBuilder.Entity<Order>()
                 .HasOne(o => o.User)
                 .WithMany(u => u.Orders)
-                .HasForeignKey(o => o.UserID);
-            
+                .HasForeignKey(o => o.UserID)
+                .OnDelete(DeleteBehavior.Restrict);
 
+            modelBuilder.Entity<Order>()
+                .HasOne(o => o.StageStatus)
+                .WithMany(ss => ss.Orders)
+                .HasForeignKey(o => o.StatusId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Order>()
+                .HasOne(o => o.Voucher)
+                .WithMany(v => v.Orders)
+                .HasForeignKey(o => o.VoucherID)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            // Cấu hình OrderDetail
             modelBuilder.Entity<OrderDetail>()
                 .HasKey(od => od.Id);
+
             modelBuilder.Entity<OrderDetail>()
                 .HasOne(od => od.Order)
                 .WithMany(o => o.Details)
-                .HasForeignKey(od => od.OrderId);
+                .HasForeignKey(od => od.OrderId)
+                .OnDelete(DeleteBehavior.Cascade);
+
             modelBuilder.Entity<OrderDetail>()
                 .HasOne(od => od.Product)
                 .WithMany(p => p.OrderDetails)
-                .HasForeignKey(od => od.ProductId);
+                .HasForeignKey(od => od.ProductId)
+                .OnDelete(DeleteBehavior.Restrict);
 
-            // Cấu hình cho Payment
+            // Cấu hình Payment
             modelBuilder.Entity<Payment>()
-                .HasKey(p => p.Id); // Khóa chính từ BaseEntity
+                .HasKey(p => p.Id);
 
             modelBuilder.Entity<Payment>()
                 .HasOne(p => p.User)
@@ -200,18 +221,12 @@ namespace DianaShop.Data
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Payment>()
-                .HasOne(p => p.Voucher)
-                .WithMany(v => v.Payments)
-                .HasForeignKey(p => p.VoucherID)
-                .OnDelete(DeleteBehavior.SetNull);
-
-            modelBuilder.Entity<Payment>()
                 .HasOne(p => p.StageStatus)
                 .WithMany(ss => ss.Payments)
                 .HasForeignKey(p => p.StatusId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // Cấu hình cho PaymentMethod
+            // Cấu hình PaymentMethod
             modelBuilder.Entity<PaymentMethod>()
                 .HasKey(pm => pm.Id);
 
@@ -220,14 +235,7 @@ namespace DianaShop.Data
                 .IsRequired()
                 .HasMaxLength(100);
 
-            //update order 
-            modelBuilder.Entity<Order>()
-                .HasOne(o => o.StageStatus)
-                .WithMany(ss => ss.Orders)
-                .HasForeignKey(o => o.StatusId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            // Cấu hình cho StageStatus
+            // Cấu hình StageStatus
             modelBuilder.Entity<StageStatus>()
                 .HasKey(ss => ss.Id);
 
@@ -235,6 +243,7 @@ namespace DianaShop.Data
                 .Property(ss => ss.StatusName)
                 .IsRequired()
                 .HasMaxLength(100);
+
 
             modelBuilder.Entity<VnPayTransaction>()
                 .HasKey(i => i.TransactionId);
@@ -259,8 +268,14 @@ namespace DianaShop.Data
             modelBuilder.Entity<StageStatus>().HasData(
                 new StageStatus { Id = 1, StatusName = "Unpaid" },
                 new StageStatus { Id = 2, StatusName = "Paid" },
-                new StageStatus { Id = 3, StatusName = "Shipping" },
-                new StageStatus { Id = 4, StatusName = "Completed" }
+                new StageStatus { Id = 3, StatusName = "Waiting" },
+                new StageStatus { Id = 4, StatusName = "Shipping" },
+                new StageStatus { Id = 5, StatusName = "Completed" }
+                );
+
+            modelBuilder.Entity<PaymentMethod>().HasData(
+                new PaymentMethod { Id = 1, MethodName = "Cash on Delivery" },
+                new PaymentMethod { Id = 2, MethodName = "VNPay" }
                 );
         }
     }

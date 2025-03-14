@@ -10,13 +10,17 @@ namespace DianaShop.API.Controllers
     public class OrderController : ControllerBase
     {
         private readonly IOrderService _orderService;
+        private readonly IOrderDetailService _orderDetailService;
 
-        public OrderController(IOrderService orderService)
+        public OrderController(IOrderService orderService, IOrderDetailService orderDetailService)
         {
             _orderService = orderService;
+            _orderDetailService = orderDetailService;
         }
 
-        /// 🛒 Lấy tất cả order của User
+
+
+        /// 🛒 Lấy tất cả order
         [HttpGet("all")]
         public async Task<IActionResult> GetAllOrders()
         {
@@ -25,7 +29,7 @@ namespace DianaShop.API.Controllers
         }
 
         /// 🛒 Lấy tất cả order của User
-        [HttpGet("user/{userId}")]  
+        [HttpGet("user/{userId}")]
         public async Task<IActionResult> GetAllOrdersByUser(int userId)
         {
             var response = await _orderService.GetAllOrderByUser(userId);
@@ -33,7 +37,7 @@ namespace DianaShop.API.Controllers
         }
 
         /// 🛒 Lấy order theo ID
-        [HttpGet("id/{orderId}")]  // Đổi {orderId} thành "id/{orderId}"
+        [HttpGet("id/{orderId}")]
         public async Task<IActionResult> GetOrderById(int orderId)
         {
             var response = await _orderService.GetOrderById(orderId);
@@ -56,8 +60,8 @@ namespace DianaShop.API.Controllers
         /// <summary>
         /// Cập nhật trạng thái trong đơn hàng
         /// </summary>
-        [HttpPut("status/{orderId}")]
-        public async Task<IActionResult> UpdateCartProduct(int orderId, [FromBody] string status)
+        [HttpPut("status/{orderId}/{status}")]
+        public async Task<IActionResult> UpdateOrderStatus(int orderId, int status)
         {
             try
             {
@@ -70,13 +74,29 @@ namespace DianaShop.API.Controllers
             }
         }
 
+        //thêm voucher
+        [HttpPut("status/{orderId}/{voucherId}")]
+        public async Task<IActionResult> AddVoucher(int orderId, int voucherId)
+        {
+            try
+            {
+                var result = await _orderService.AddVoucherToOrder(orderId, voucherId);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+        }
+
         /// 🗑️ Xóa hóa đơn
         [HttpDelete("Remove/{orderId}")]
         public async Task<IActionResult> RemoveOrder(int orderId)
         {
+            var condition = await _orderDetailService.ClearOrderDetail(orderId);
             var result = await _orderService.RemoveOrder(orderId);
             if (!result)
-                return BadRequest("Order is already empty or does not exist.");
+                return BadRequest("Order does not exist.");
             return Ok(new { Message = "Order cleared successfully!" });
         }
     }

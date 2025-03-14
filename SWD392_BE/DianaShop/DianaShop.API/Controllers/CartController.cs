@@ -79,14 +79,14 @@ namespace DianaShop.API.Controllers
             return Ok(new { Message = "Cart cleared successfully" });
         }
 
-        /// ✅ Thanh toán giỏ hàng
-        [HttpPost("checkout/{userId}")]
-        public async Task<IActionResult> Checkout(int userId)
-        {
-            var success = await _cartService.Checkout(userId);
-            if (!success)
-                return BadRequest("Checkout failed.");
-            return Ok(new { Message = "Order placed successfully" });
-        }
+        ///// ✅ Thanh toán giỏ hàng
+        //[HttpPost("checkout/{userId}")]
+        //public async Task<IActionResult> Checkout(int userId)
+        //{
+        //    var success = await _cartService.Checkout(userId);
+        //    if (!success)
+        //        return BadRequest("Checkout failed.");
+        //    return Ok(new { Message = "Order placed successfully" });
+        //}
     }
 }

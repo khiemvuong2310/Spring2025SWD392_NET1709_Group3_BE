@@ -21,7 +21,7 @@ namespace DianaShop.API.Controllers
 
         // GET: api/UserRole/Role/{roleId}
         [HttpGet("Role/{userId}/Roles")]
-        //[Authorize]
+        [Authorize]
         public async Task<ActionResult<UserRoleResponseModel>> GetRoles(int userId)
         {
             if (userId <= 0)

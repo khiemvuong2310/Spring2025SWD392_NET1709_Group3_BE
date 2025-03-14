@@ -10,6 +10,6 @@ namespace DianaShop.Service.RequestModel
     {
         public int OrderID { get; set; }
         public int PaymentMethodID { get; set; }
-        public string Address { get; set; }
     }
+
 }

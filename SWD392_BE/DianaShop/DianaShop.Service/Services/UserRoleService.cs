@@ -121,7 +121,7 @@ namespace DianaShop.Service.Services
 
             roleRequest.Status = true;
 
-            _unitOfWork.Repository<UserRole>().Update(roleRequest, roleRequest.RoleId);
+            await _unitOfWork.Repository<UserRole>().Update(roleRequest, roleRequest.RoleId);
             await _unitOfWork.CommitAsync();
         }
 
