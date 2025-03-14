@@ -70,7 +70,6 @@ namespace DianaShop.API.AppStarts
             services.AddAutoMapper(typeof(OrderDetailMapping));
             services.AddAutoMapper(typeof(PaymentMapping));
             services.AddAutoMapper(typeof(UserMapping));
-            services.AddAutoMapper(typeof(UserMapping));
             services.AddAutoMapper(typeof(UserRoleMapping));
             services.AddAutoMapper(typeof(VoucherMapping));
             services.AddAutoMapper(typeof(CommentMapping));
