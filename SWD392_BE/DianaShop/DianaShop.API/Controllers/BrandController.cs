@@ -41,6 +41,8 @@ namespace DianaShop.API.Controllers
         public async Task<IActionResult> Update(int id, [FromBody] BrandRequestModel request)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
+            var response = await _brandService.GetByIdAsync(id);
+            if (response == null) return NotFound();
             var updateResponse = await _brandService.UpdateAsync(id, request);
             if (updateResponse == null) return NotFound();
             return Ok(updateResponse);

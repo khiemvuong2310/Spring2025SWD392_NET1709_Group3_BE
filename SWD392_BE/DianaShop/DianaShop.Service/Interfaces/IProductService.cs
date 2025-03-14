@@ -3,6 +3,7 @@ using DianaShop.Data.Entities;
 using DianaShop.Repository.UnitOfWork;
 using DianaShop.Service.ReponseModel;
 using DianaShop.Service.RequestModel;
+using DianaShop.Service.RequestModel.QueryRequest;
 using System;
 using System.Collections.Generic;
 using System.Linq;

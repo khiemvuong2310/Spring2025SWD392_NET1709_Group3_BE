@@ -35,6 +35,8 @@ namespace DianaShop.API.Controllers
         public async Task<IActionResult> Update(int id, [FromBody] BatchRequestModel request)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
+            var response = await _batchService.GetByIdAsync(id);
+            if (response == null) return NotFound();
             var updateResponse = await _batchService.UpdateAsync(id, request);
             if (updateResponse == null) return NotFound();
             return Ok(updateResponse);

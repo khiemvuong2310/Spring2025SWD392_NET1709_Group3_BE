@@ -1,5 +1,6 @@
 ﻿using DianaShop.Service.Interfaces;
 using DianaShop.Service.RequestModel;
+using DianaShop.Service.RequestModel.QueryRequest;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -47,6 +48,8 @@ namespace DianaShop.API.Controllers
         [HttpPut("publication/{id}")]
         public async Task<IActionResult> UpdatePublicationStatus(int id)
         {
+            var response = await _postService.GetByIdAsync(id);
+            if (response == null) return NotFound();
             await _postService.UpdatePublicationStatusAsync(id);
             return NoContent();
         }
@@ -55,6 +58,8 @@ namespace DianaShop.API.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, [FromBody] PostRequestModel request)
         {
+            var response = await _postService.GetByIdAsync(id);
+            if (response == null) return NotFound();
             if (!ModelState.IsValid) return BadRequest(ModelState);
             await _postService.UpdateAsync(id, request);
             return NoContent();
@@ -64,6 +69,8 @@ namespace DianaShop.API.Controllers
         [HttpDelete("soft-delete/{id}")]
         public async Task<IActionResult> SoftDelete(int id)
         {
+            var response = await _postService.GetByIdAsync(id);
+            if (response == null) return NotFound();
             await _postService.SoftDeleteAsync(id);
             return NoContent();
         }
@@ -72,6 +79,8 @@ namespace DianaShop.API.Controllers
         [HttpDelete("hard-delete/{id}")]
         public async Task<IActionResult> Delete(int id)
         {
+            var response = await _postService.GetByIdAsync(id);
+            if (response == null) return NotFound();
             await _postService.HardDeleteAsync(id);
             return NoContent();
         }
