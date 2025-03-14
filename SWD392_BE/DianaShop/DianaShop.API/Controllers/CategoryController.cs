@@ -39,6 +39,8 @@ namespace DianaShop.API.Controllers
         public async Task<IActionResult> Update(int id, [FromBody] CategoryRequestModel request)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
+            var response = await _categoryService.GetByIdAsync(id);
+            if (response == null) return NotFound();
             var updateResponse = await _categoryService.UpdateAsync(id, request);
             if (updateResponse == null) return NotFound();
             return Ok(updateResponse);

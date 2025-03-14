@@ -1,5 +1,5 @@
 ﻿using DianaShop.Service.ReponseModel;
-using DianaShop.Service.RequestModel;
+using DianaShop.Service.RequestModel.QueryRequest;
 using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
@@ -11,7 +11,7 @@ namespace DianaShop.Service.Interfaces
 {
     public interface IImageService
     {
-        Task<List<ImageResponseModel>> GetAllAsync(ImageQueryRequest request);
+        Task<PaginatedResponse<ImageResponseModel>> GetAllAsync(ImageQueryRequest request);
         Task<ImageResponseModel?> GetByIdAsync(int id);
         Task<List<ImageResponseModel>> AddAsync(List<IFormFile> files);
         Task<ImageResponseModel?> UpdateAsync(int id, IFormFile file);

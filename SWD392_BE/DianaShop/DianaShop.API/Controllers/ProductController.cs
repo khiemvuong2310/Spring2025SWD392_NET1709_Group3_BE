@@ -1,5 +1,6 @@
 ﻿using DianaShop.Service.Interfaces;
 using DianaShop.Service.RequestModel;
+using DianaShop.Service.RequestModel.QueryRequest;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DianaShop.API.Controllers
@@ -41,6 +42,8 @@ namespace DianaShop.API.Controllers
         public async Task<IActionResult> Update(int id, [FromBody] ProductRequestModel request)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
+            var response = await _productService.GetProductByIdAsync(id);
+            if (response == null) return NotFound();
             await _productService.UpdateProductAsync(id, request);
             return NoContent();
         }
@@ -48,6 +51,8 @@ namespace DianaShop.API.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
+            var response = await _productService.GetProductByIdAsync(id);
+            if (response == null) return NotFound();
             await _productService.DeleteProductAsync(id);
             return NoContent();
         }
