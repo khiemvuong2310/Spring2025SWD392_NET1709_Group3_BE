@@ -5,6 +5,7 @@ using DianaShop.Repository.UnitOfWork;
 using DianaShop.Service.Interfaces;
 using DianaShop.Service.ReponseModel;
 using DianaShop.Service.RequestModel;
+using DianaShop.Service.RequestModel.QueryRequest;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -29,7 +30,7 @@ namespace DianaShop.Service.Services
         {
             var productsQuery = _unitOfWork.Repository<Product>()
                 .GetAll()
-                .Where(p => p.IsDelete == request.IsDeleted)
+                .Where(p => request.IsDeleted == null || p.IsDelete == request.IsDeleted)
                 .Where(p => request.Name == null || p.Name.Contains(request.Name))
                 .Where(p => request.MinPrice == null || p.Price >= request.MinPrice)
                 .Where(p => request.MaxPrice == null || p.Price <= request.MaxPrice)

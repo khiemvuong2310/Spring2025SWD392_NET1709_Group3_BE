@@ -5,12 +5,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DianaShop.Service.RequestModel
+namespace DianaShop.Service.RequestModel.QueryRequest
 {
-    public class ProductQueryRequest
+    public class ProductQueryRequest : BaseQuery
     {
-        public int PageNumber { get; set; } = 1;
-        public int PageSize { get; set; } = 10;
         public string? Name { get; set; }
         public int? CategoryId { get; set; }
         public int? BrandId { get; set; }
@@ -20,7 +18,6 @@ namespace DianaShop.Service.RequestModel
         public decimal? MaxPrice { get; set; }
         public ProductSort SortBy { get; set; } = ProductSort.Default;
         public bool Ascending { get; set; } = true;
-        public bool IsDeleted { get; set; } = false;
         public List<int> SkinTypeIds { get; set; } = new List<int>();
         public List<int> TagIds { get; set; } = new List<int>();
         public List<int> IngredientIds { get; set; } = new List<int>();

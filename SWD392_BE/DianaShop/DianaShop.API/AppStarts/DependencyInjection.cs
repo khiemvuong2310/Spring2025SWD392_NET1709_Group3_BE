@@ -24,13 +24,7 @@ namespace DianaShop.API.AppStarts
                 options.LowercaseUrls = true; ;
                 options.LowercaseQueryStrings = true;
             });
-            services.AddDbContext<AppDbContext>(options =>
-            {
-                var connectionString = configuration.GetConnectionString("DefaultConnection");
-                var serverVersion = new MySqlServerVersion(new Version(8, 0, 2)); // Adjust the version to match your MySQL version
 
-                options.UseMySql(connectionString, serverVersion);
-            });
             services.AddSingleton<ITwilioRestClient>(new TwilioRestClient("ACCOUNT_SID", "AUTH_TOKEN"));
 
             //Add Scoped
@@ -49,21 +43,23 @@ namespace DianaShop.API.AppStarts
             services.AddScoped<IVoucherService, VoucherService>();
             services.AddScoped<IVoucherStorageService, VoucherStorageService>();
             services.AddScoped<IStorageService, StorageService>();
-            services.AddTransient<IPackagingService, PackagingService>();
-            services.AddTransient<ISkinTypeTestService, SkinTypeTestService>();
-            services.AddTransient<ICategoryService, CategoryService>();
-            services.AddTransient<IBrandService, BrandService>();
-            services.AddTransient<IFormulationTypeService, FormulationTypeService>();
-            services.AddTransient<IIngredientService, IngredientService>();
-            services.AddTransient<IBatchService, BatchService>();
-            services.AddTransient<ITagService, TagService>();
-            services.AddTransient<IPostService, PostService>();
-            services.AddTransient<IImageService, ImageService>();
+            services.AddScoped<IPackagingService, PackagingService>();
+            services.AddScoped<ISkinTypeTestService, SkinTypeTestService>();
+            services.AddScoped<ICategoryService, CategoryService>();
+            services.AddScoped<IBrandService, BrandService>();
+            services.AddScoped<IFormulationTypeService, FormulationTypeService>();
+            services.AddScoped<IIngredientService, IngredientService>();
+            services.AddScoped<IBatchService, BatchService>();
+            services.AddScoped<ITagService, TagService>();
+            services.AddScoped<IPostService, PostService>();
+            services.AddScoped<IImageService, ImageService>();
             services.AddScoped<IBlobService, BlobService>();
             services.AddScoped<ICartProductService, CartProductService>();
             services.AddScoped<IOrderService, OrderService>();
             services.AddScoped<IOrderDetailService, OrderDetailService>();
             services.AddScoped<IPaymentService, PaymentService>();
+            services.AddScoped<ISkinTypeService, SkinTypeService>();
+            services.AddScoped<ISkincareRoutineService, SkincareRoutineService>();
             //services.AddScoped<IJwtService, JwtService>();
 
             // Thêm AutoMapper vào dịch vụ
@@ -75,7 +71,6 @@ namespace DianaShop.API.AppStarts
             services.AddAutoMapper(typeof (OrderMapping));
             services.AddAutoMapper(typeof(OrderDetailMapping));
             services.AddAutoMapper(typeof(PaymentMapping));
-            services.AddAutoMapper(typeof(UserMapping));
             services.AddAutoMapper(typeof(UserMapping));
             services.AddAutoMapper(typeof(UserRoleMapping));
             services.AddAutoMapper(typeof(VoucherMapping));

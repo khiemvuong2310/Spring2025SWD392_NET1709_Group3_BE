@@ -1,4 +1,5 @@
-﻿using DianaShop.Service.Interfaces;
+﻿using DianaShop.Data.Entities;
+using DianaShop.Service.Interfaces;
 using DianaShop.Service.RequestModel;
 using Microsoft.AspNetCore.Mvc;
 
@@ -55,6 +56,8 @@ namespace DianaShop.API.Controllers
         public async Task<IActionResult> UpdateQuestionAsync(int questionId, [FromBody] QuestionRequestModel questionRequestModel)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
+            var response = await _skinTypeTestService.GetQuestionById(questionId);
+            if (response == null) return NotFound();
             await _skinTypeTestService.UpdateQuestionAsync(questionId, questionRequestModel);
             return NoContent();
         }
@@ -63,6 +66,8 @@ namespace DianaShop.API.Controllers
         public async Task<IActionResult> UpdateAnswerAsync(int answerId, [FromBody] AnswerRequestModel answerRequestModel)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
+            var response = await _skinTypeTestService.GetAnswerById(answerId);
+            if (response == null) return NotFound();
             await _skinTypeTestService.UpdateAnswerAsync(answerId, answerRequestModel);
             return NoContent();
         }

@@ -1,6 +1,6 @@
 ﻿using DianaShop.Data.Entities;
 using DianaShop.Service.Interfaces;
-using DianaShop.Service.RequestModel;
+using DianaShop.Service.RequestModel.QueryRequest;
 using Microsoft.AspNetCore.Mvc;
 namespace DianaShop.API.Controllers
 {

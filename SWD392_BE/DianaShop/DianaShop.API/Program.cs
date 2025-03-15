@@ -8,6 +8,9 @@ using System.Text;
 using System.Text.Json.Serialization;
 using DianaShop.Service.Interfaces;
 using DianaShop.Service.Services;
+using DianaShop.Data;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 namespace DianaShop.API
 {
     public class Program
@@ -24,6 +27,13 @@ namespace DianaShop.API
                 options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
             });
             builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+            builder.Services.AddDbContext<AppDbContext>(options =>
+            {
+                var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+                var serverVersion = new MySqlServerVersion(new Version(8, 0, 2)); // Adjust the version to match your MySQL version
+
+                options.UseMySql(connectionString, serverVersion);
+            });
             builder.Services.AddProblemDetails();
 
             builder.Services.AddScoped<IVnPayService, VnPayService>();
