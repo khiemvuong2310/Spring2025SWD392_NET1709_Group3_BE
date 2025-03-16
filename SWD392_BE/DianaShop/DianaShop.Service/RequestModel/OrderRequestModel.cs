@@ -13,6 +13,7 @@ namespace DianaShop.Service.RequestModel
         [Required]
         public int UserID { get; set; }
         public string Address { get; set; }
+        public decimal? Shipprice { get; set; }
 
     }
 
@@ -22,6 +23,8 @@ namespace DianaShop.Service.RequestModel
         public int UserID { get; set; }
         public string Address { get; set; }
         public int PaymentMethodID { get; set; }
+        public int? voucherID { get; set; }
+        public decimal? Shipprice { get; set; }
 
         public IEnumerable<CheckoutDetailRequestModel> Details { get; set; }
 

@@ -114,7 +114,8 @@ namespace DianaShop.API.Controllers
             var orderRequest = new OrderRequestModel
             {
                 UserID = request.UserID,
-                Address = request.Address
+                Address = request.Address,
+                Shipprice = request.Shipprice
             };
             var success1 = await _orderService.CreateOrder(orderRequest);
 
@@ -140,7 +141,19 @@ namespace DianaShop.API.Controllers
                 }
             }
 
-            //var result = GetOrderById(success1.Id);
+            if (request.voucherID != null && request.voucherID > 0)
+            {
+                try
+                {
+                    var voucherID = request.voucherID ?? 0;
+                    var voucherResult = await _orderService.AddVoucherToOrder(success1.Id, voucherID);
+                    return Ok(voucherResult);
+                }
+                catch (Exception ex)
+                {
+                    return NotFound(new { message = ex.Message });
+                }
+            }
 
             var paymentRequest = new PaymentRequestModel
             {

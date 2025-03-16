@@ -18,6 +18,8 @@ namespace DianaShop.Service.ReponseModel
         public decimal? ShipAmount { get; set; }
         public decimal? ReducedAmount { get; set; }
         public decimal? FinalAmount { get; set; }
+        public int StatusId { get; set; }
+        public string StatusName { get; set; }
         public DateTime OrderDate { get; set; }
         public DateTime? UpdateDate { get; set; }
         public IEnumerable<OrderDetailResponseModel> Details { get; set; }

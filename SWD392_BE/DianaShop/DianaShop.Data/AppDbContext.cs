@@ -270,7 +270,8 @@ namespace DianaShop.Data
                 new StageStatus { Id = 2, StatusName = "Paid" },
                 new StageStatus { Id = 3, StatusName = "Waiting" },
                 new StageStatus { Id = 4, StatusName = "Shipping" },
-                new StageStatus { Id = 5, StatusName = "Completed" }
+                new StageStatus { Id = 5, StatusName = "Completed" }/*,
+                new StageStatus { Id = 6, StatusName = "Cancelled" }*/
                 );
 
             modelBuilder.Entity<PaymentMethod>().HasData(
