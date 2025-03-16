@@ -19,11 +19,12 @@ namespace DianaShop.Service.Services
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
-
-        public ProductService(IUnitOfWork unitOfWork, IMapper mapper)
+        private readonly IImageService _imageService;
+        public ProductService(IUnitOfWork unitOfWork, IMapper mapper, IImageService imageService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _imageService = imageService;
         }
 
         public async Task<PaginatedResponse<ProductResponseModel>> GetAllProductsAsync(ProductQueryRequest request)
@@ -81,40 +82,54 @@ namespace DianaShop.Service.Services
             // Map Request Model to Product Entity
             var product = _mapper.Map<Product>(model);
 
-            // Assign related entities
-            product.Brand = brand;
-            product.Category = category;
-            product.Packaging = packaging;
-            product.FormulationType = formulationType;
-
-            // Handle Collections (e.g., Tags, Images)
             // Handle Many-to-Many relationships
-            if (model.ProductTags?.Count > 0)
+            if (model.ProductTagIds?.Count > 0)
             {
-                foreach (var tagId in model.ProductTags)
+                product.ProductTags = new List<ProductTag>();
+                foreach (var tagId in model.ProductTagIds)
                 {
-                    await _unitOfWork.Repository<ProductTag>().InsertAsync(new ProductTag { ProductId = product.Id, TagId = tagId });
+
+                    var tag = await _unitOfWork.Repository<Tag>().GetById(tagId);
+                    if (tag != null)
+                    {
+                        product.ProductTags.Add(new ProductTag { Tag = tag });
+                    }
                 }
             }
-            if (model.ProductSkinTypes?.Count > 0)
+            if (model.ProductSkinTypeIds?.Count > 0)
             {
-                foreach (var skinTypeId in model.ProductSkinTypes)
+                product.ProductSkinTypes = new List<ProductSkinType>();
+                foreach (var skinTypeId in model.ProductSkinTypeIds)
                 {
-                    await _unitOfWork.Repository<ProductSkinType>().InsertAsync(new ProductSkinType { ProductId = product.Id, SkinTypeId = skinTypeId });
+                    var skinType = await _unitOfWork.Repository<SkinType>().GetById(skinTypeId);
+                    if (skinType != null)
+                    {
+                        product.ProductSkinTypes.Add(new ProductSkinType { SkinType = skinType });
+                    }
                 }
             }
-            if (model.ProductIngredients?.Count > 0)
+            if (model.ProductIngredientIds?.Count > 0)
             {
-                foreach (var ingredientId in model.ProductIngredients)
+                product.ProductIngredients = new List<ProductIngredient>();
+                foreach (var ingredientId in model.ProductIngredientIds)
                 {
-                    await _unitOfWork.Repository<ProductIngredient>().InsertAsync(new ProductIngredient { ProductId = product.Id, IngredientId = ingredientId });
+                    var ingredient = await _unitOfWork.Repository<Ingredient>().GetById(ingredientId);
+                    if (ingredient != null)
+                    {
+                        product.ProductIngredients.Add(new ProductIngredient { Ingredient = ingredient });
+                    }
                 }
             }
-            if (model.ProductImages?.Count > 0)
+            if (model.ProductImageFiles?.Count > 0)
             {
-                foreach (var imageUrl in model.ProductImages)
+                product.ProductImages = new List<ProductImage>();               
+                foreach (var imageUrl in model.ProductImageFiles)
                 {
-                    await _unitOfWork.Repository<ProductImage>().InsertAsync(new ProductImage { ProductId = product.Id, ImageId = imageUrl });
+                    var image = await _imageService.ConvertToImageAsync(imageUrl);
+                    if (image != null)
+                    {
+                        product.ProductImages.Add(new ProductImage { Image = image });
+                    }                 
                 }
             }
             return product;
@@ -142,7 +157,8 @@ namespace DianaShop.Service.Services
         {
             var product = await _unitOfWork.Repository<Product>().GetById(id);
             if (product == null) throw new ("Product not found");
-            _mapper.Map(model, product);
+            var updatedProduct = await HandleValidation(model);
+            _mapper.Map(updatedProduct, product);
             // Update to DB
             await _unitOfWork.Repository<Product>().Update(product, id);
             await _unitOfWork.CommitAsync();

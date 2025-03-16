@@ -31,7 +31,7 @@ namespace DianaShop.API.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] ProductRequestModel request)
+        public async Task<IActionResult> Create([FromForm] ProductRequestModel request)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
             var response = await _productService.AddProductAsync(request);
@@ -39,7 +39,7 @@ namespace DianaShop.API.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, [FromBody] ProductRequestModel request)
+        public async Task<IActionResult> Update(int id, [FromForm] ProductRequestModel request)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
             var response = await _productService.GetProductByIdAsync(id);

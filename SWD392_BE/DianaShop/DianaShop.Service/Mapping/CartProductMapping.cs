@@ -20,7 +20,7 @@ namespace DianaShop.Service.Mapping
             CreateMap<CartProduct, CartProductResponse>()
                 .ForMember(dest => dest.ProductName, opt => opt.MapFrom(src => src.Product.Name))
                 .ForMember(dest => dest.Price, opt => opt.MapFrom(src => src.Product.Price ?? 0))
-            .ForMember(dest => dest.ImageURL, opt => opt.MapFrom(src => src.Product.ProductImages.FirstOrDefault() != null ? src.Product.ProductImages.FirstOrDefault().Image.ImageUrl : null));
+            .ForMember(dest => dest.ImageURL, opt => opt.MapFrom(src => src.Product.ProductImages.FirstOrDefault() != null ? src.Product.ProductImages.FirstOrDefault().Image.Base64Image : null));
 
         }
     }

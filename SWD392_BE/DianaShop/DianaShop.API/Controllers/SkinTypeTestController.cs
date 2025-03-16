@@ -15,7 +15,7 @@ namespace DianaShop.API.Controllers
 
         // POST api/skintypetest
         [HttpPost("questions")]
-        public async Task<IActionResult> AddQuestionAsync([FromBody] QuestionRequestModel questionRequestModel)
+        public async Task<IActionResult> AddQuestionAsync([FromForm] QuestionRequestModel questionRequestModel)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
             var response = await _skinTypeTestService.AddQuestionAsync(questionRequestModel);
@@ -23,7 +23,7 @@ namespace DianaShop.API.Controllers
         }
 
         [HttpPost("answers")]
-        public async Task<IActionResult> AddAnswerAsync([FromBody] AnswerRequestModel answerRequestModel)
+        public async Task<IActionResult> AddAnswerAsync([FromForm] AnswerRequestModel answerRequestModel)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
             var response = await _skinTypeTestService.AddAnswerAsync(answerRequestModel);
@@ -53,7 +53,7 @@ namespace DianaShop.API.Controllers
         }
 
         [HttpPut("questions/{questionId}")]
-        public async Task<IActionResult> UpdateQuestionAsync(int questionId, [FromBody] QuestionRequestModel questionRequestModel)
+        public async Task<IActionResult> UpdateQuestionAsync(int questionId, [FromForm] QuestionRequestModel questionRequestModel)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
             var response = await _skinTypeTestService.GetQuestionById(questionId);
@@ -63,7 +63,7 @@ namespace DianaShop.API.Controllers
         }
 
         [HttpPut("answers/{answerId}")]
-        public async Task<IActionResult> UpdateAnswerAsync(int answerId, [FromBody] AnswerRequestModel answerRequestModel)
+        public async Task<IActionResult> UpdateAnswerAsync(int answerId, [FromForm] AnswerRequestModel answerRequestModel)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
             var response = await _skinTypeTestService.GetAnswerById(answerId);

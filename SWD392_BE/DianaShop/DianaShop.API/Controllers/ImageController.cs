@@ -40,10 +40,20 @@ namespace DianaShop.API.Controllers
             await _imageService.UpdateAsync(id, file);
             return NoContent();
         }
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
+        [HttpDelete("soft-deletion/{id}")]
+        public async Task<IActionResult> SoftDelete(int id)
         {
-            await _imageService.DeleteAsync(id);
+            var response = await _imageService.GetByIdAsync(id);
+            if (response == null) return NotFound();
+            await _imageService.SoftDeleteAsync(id);
+            return NoContent();
+        }
+        [HttpDelete("hard-deletion/{id}")]
+        public async Task<IActionResult> HardDelete(int id)
+        {
+            var response = await _imageService.GetByIdAsync(id);
+            if (response == null) return NotFound();
+            await _imageService.HardDeleteAsync(id);
             return NoContent();
         }
 

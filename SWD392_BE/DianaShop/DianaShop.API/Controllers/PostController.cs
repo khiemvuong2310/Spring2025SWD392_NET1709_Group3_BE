@@ -33,7 +33,7 @@ namespace DianaShop.API.Controllers
 
         [Authorize(Roles = "Staff,Admin")]
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] PostRequestModel request)
+        public async Task<IActionResult> Create([FromForm] PostRequestModel request)
         {           
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
@@ -56,7 +56,7 @@ namespace DianaShop.API.Controllers
 
         [Authorize(Roles = "Staff,Admin")]
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, [FromBody] PostRequestModel request)
+        public async Task<IActionResult> Update(int id, [FromForm] PostRequestModel request)
         {
             var response = await _postService.GetByIdAsync(id);
             if (response == null) return NotFound();

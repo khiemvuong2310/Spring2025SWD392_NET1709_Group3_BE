@@ -29,7 +29,7 @@ namespace DianaShop.API.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] FormulationTypeRequestModel request)
+        public async Task<IActionResult> Create([FromForm] FormulationTypeRequestModel request)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
             var response = await _formulationTypeService.CreateAsync(request);
@@ -37,7 +37,7 @@ namespace DianaShop.API.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, [FromBody] FormulationTypeRequestModel request)
+        public async Task<IActionResult> Update(int id, [FromForm] FormulationTypeRequestModel request)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
             var updateResponse = await _formulationTypeService.UpdateAsync(id, request);

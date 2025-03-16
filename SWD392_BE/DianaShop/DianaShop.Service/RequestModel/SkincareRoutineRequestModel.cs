@@ -15,7 +15,7 @@ namespace DianaShop.Service.RequestModel
         public string Description { get; set; }
         [Required]
         public List<int> SkinTypeIds { get; set; }
-        public List<RoutineStepRequestModel> RoutineSteps { get; set; }
+        public List<RoutineStepRequestModel> RoutineSteps { get; set; } = new List<RoutineStepRequestModel>();
 
     }
 }

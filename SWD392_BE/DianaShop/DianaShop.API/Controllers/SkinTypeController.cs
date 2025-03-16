@@ -28,14 +28,14 @@ namespace DianaShop.API.Controllers
             return Ok(response);
         }
         [HttpPost]
-        public async Task<IActionResult> Create(SkinTypeRequestModel model)
+        public async Task<IActionResult> Create([FromForm] SkinTypeRequestModel model)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
             var response = await _skinTypeService.AddAsync(model);
             return Ok(response);
         }
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, SkinTypeRequestModel model)
+        public async Task<IActionResult> Update(int id, [FromForm] SkinTypeRequestModel model)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
             var response = await _skinTypeService.GetByIdAsync(id);

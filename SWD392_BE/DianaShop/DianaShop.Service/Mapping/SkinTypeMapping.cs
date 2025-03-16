@@ -9,7 +9,8 @@ namespace DianaShop.Service.Mapping
     {
         public SkinTypeMapping()
         {
-            CreateMap<SkinType, SkinTypeResponseModel>();
+            CreateMap<SkinType, SkinTypeResponseModel>()
+                .ForMember(dest => dest.IsDeleted, opt => opt.MapFrom(src => src.IsDelete));
             CreateMap<SkinTypeRequestModel,SkinType>();
         }
     }
