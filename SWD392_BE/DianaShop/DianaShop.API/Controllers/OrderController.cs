@@ -1,4 +1,6 @@
-﻿using DianaShop.Service.Interfaces;
+﻿using DianaShop.Data.Entities;
+using DianaShop.Service.Interfaces;
+using DianaShop.Service.ReponseModel;
 using DianaShop.Service.RequestModel;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -11,14 +13,14 @@ namespace DianaShop.API.Controllers
     {
         private readonly IOrderService _orderService;
         private readonly IOrderDetailService _orderDetailService;
+        private readonly IPaymentService _paymentService;
 
-        public OrderController(IOrderService orderService, IOrderDetailService orderDetailService)
+        public OrderController(IOrderService orderService, IOrderDetailService orderDetailService, IPaymentService paymentService)
         {
             _orderService = orderService;
             _orderDetailService = orderDetailService;
+            _paymentService = paymentService;
         }
-
-
 
         /// 🛒 Lấy tất cả order
         [HttpGet("all")]
@@ -98,6 +100,56 @@ namespace DianaShop.API.Controllers
             if (!result)
                 return BadRequest("Order does not exist.");
             return Ok(new { Message = "Order cleared successfully!" });
+        }
+
+        /// ✅ Thanh toán giỏ hàng
+        [HttpPost("checkout")]
+        public async Task<IActionResult> Checkout([FromBody] CheckoutRequestModel request)
+        {
+            if (request == null || request.UserID <= 0)
+            {
+                return BadRequest("Invalid user ID.");
+            }
+
+            var orderRequest = new OrderRequestModel
+            {
+                UserID = request.UserID,
+                Address = request.Address
+            };
+            var success1 = await _orderService.CreateOrder(orderRequest);
+
+            var listDetail = request.Details;
+            //var listsuccess2 = List<OrderDetailResponseModel>();
+
+            foreach (var item in listDetail)
+            {
+                try
+                {
+                    var detailRequest = new OrderDetailRequestModel
+                    {
+                        OrderID = success1.Id,
+                        ProductId = item.ProductId,
+                        Quantity = item.Quantity
+                    };
+
+                    var detail = await _orderDetailService.AddOrderDetail(detailRequest);
+                }
+                catch (Exception ex)
+                {
+                    return BadRequest(new { message = ex.Message });
+                }
+            }
+
+            //var result = GetOrderById(success1.Id);
+
+            var paymentRequest = new PaymentRequestModel
+            {
+                OrderID = success1.Id,
+                PaymentMethodID = request.PaymentMethodID
+            };
+            var paymentResponse = await _paymentService.CreatePayment(paymentRequest);
+
+            return Ok(new { Message = "Check out successfully" });
         }
     }
 }
