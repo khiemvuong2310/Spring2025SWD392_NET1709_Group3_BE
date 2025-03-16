@@ -30,7 +30,7 @@ namespace DianaShop.API.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] BrandRequestModel request)
+        public async Task<IActionResult> Create([FromForm] BrandRequestModel request)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
             var response = await _brandService.CreateAsync(request);
@@ -38,7 +38,7 @@ namespace DianaShop.API.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, [FromBody] BrandRequestModel request)
+        public async Task<IActionResult> Update(int id, [FromForm] BrandRequestModel request)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
             var response = await _brandService.GetByIdAsync(id);
@@ -48,11 +48,12 @@ namespace DianaShop.API.Controllers
             return Ok(updateResponse);
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("soft-deletion/{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            var response = await _brandService.DeleteAsync(id);
-            if (!response) return NotFound();
+            var response = await _brandService.GetByIdAsync(id);
+            if (response == null) return NotFound();
+            await _brandService.SoftDeleteAsync(id);
             return NoContent();
         }
     }

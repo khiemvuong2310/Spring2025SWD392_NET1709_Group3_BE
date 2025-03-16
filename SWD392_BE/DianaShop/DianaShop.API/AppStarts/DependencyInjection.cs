@@ -53,7 +53,6 @@ namespace DianaShop.API.AppStarts
             services.AddScoped<ITagService, TagService>();
             services.AddScoped<IPostService, PostService>();
             services.AddScoped<IImageService, ImageService>();
-            services.AddScoped<IBlobService, BlobService>();
             services.AddScoped<ICartProductService, CartProductService>();
             services.AddScoped<IOrderService, OrderService>();
             services.AddScoped<IOrderDetailService, OrderDetailService>();

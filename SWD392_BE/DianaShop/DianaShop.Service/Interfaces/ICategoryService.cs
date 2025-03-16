@@ -14,6 +14,7 @@ namespace DianaShop.Service.Interfaces
         Task<CategoryResponseModel?> GetByIdAsync(int id);
         Task<CategoryResponseModel> CreateAsync(CategoryRequestModel request);
         Task<CategoryResponseModel?> UpdateAsync(int id, CategoryRequestModel request);
-        Task<bool> DeleteAsync(int id);
+        Task SoftDeleteAsync(int id);
+        Task HardDeleteAsync(int id);
     }
 }

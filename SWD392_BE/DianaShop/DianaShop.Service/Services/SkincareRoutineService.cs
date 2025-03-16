@@ -57,6 +57,18 @@ namespace DianaShop.Service.Services
         public async Task<SkincareRoutineResponseModel?> CreateRoutineAsync(SkincareRoutineRequestModel request)
         {
             var routine = _mapper.Map<SkincareRoutine>(request);
+            if (request.SkinTypeIds.Any())
+            {
+                routine.RoutineSkinTypes = new List<RoutineSkinType>();
+                foreach (var skinTypeId in request.SkinTypeIds)
+                {
+                    var skinType = await _unitOfWork.Repository<SkinType>().GetById(skinTypeId);
+                    if (skinType != null)
+                    {
+                        routine.RoutineSkinTypes.Add(new RoutineSkinType { SkinType = skinType });
+                    }
+                }
+            }
             if (routine.RoutineSteps != null)
             {
                 routine.RoutineSteps = ReorderRoutineSteps(routine.RoutineSteps);
@@ -75,6 +87,10 @@ namespace DianaShop.Service.Services
                 .FirstOrDefaultAsync();
             if (routine == null) return null;
             var routineStep = _mapper.Map<RoutineStep>(request);
+            if (routineStep.Order > routine.RoutineSteps.Count + 1)
+            {
+                routineStep.Order = routine.RoutineSteps.Count + 1;
+            }
             foreach (var step in routine.RoutineSteps)
             {
                 if (step.Order >= request.Order)
@@ -87,18 +103,76 @@ namespace DianaShop.Service.Services
             await _unitOfWork.SaveChangesAsync();
             return await GetRoutineByIdAsync(routineId);
         }
-        //public async Task UpdateRoutineAsync(int id, SkincareRoutineRequestModel request)
-        //{
-        //    var routine = await _unitOfWork.Repository<SkincareRoutine>().GetById(id);
-        //    if (routine == null) throw new Exception("Routine not found");
-        //    _mapper.Map(request, routine);
-        //    if (request.RoutineSteps != null)
-        //    {
-        //        routine.RoutineSteps = request.RoutineSteps.Select(step => _mapper.Map<RoutineStep>(step)).ToList();
-        //    }
-        //    await _unitOfWork.Repository<SkincareRoutine>().Update(routine, id);
-        //    await _unitOfWork.SaveChangesAsync();
-        //}
+        public async Task UpdateRoutineAsync(int id, SkincareRoutineRequestModel request)
+        {
+            var routine = await _unitOfWork.Repository<SkincareRoutine>().AsQueryable()
+                .Where(r => r.Id == id)
+                .Include (r => r.RoutineSkinTypes)
+                .Include(r => r.RoutineSteps)
+                .FirstOrDefaultAsync();
+            if (routine == null) throw new Exception("Routine not found");
+            _mapper.Map(request, routine);
+            if (request.SkinTypeIds.Any())
+            {
+                routine.RoutineSkinTypes = new List<RoutineSkinType>();
+                foreach (var skinTypeId in request.SkinTypeIds)
+                {
+                    var skinType = await _unitOfWork.Repository<SkinType>().GetById(skinTypeId);
+                    if (skinType != null)
+                    {
+                        routine.RoutineSkinTypes.Add(new RoutineSkinType { SkinType = skinType });
+                    }
+                }
+            }
+            if (routine.RoutineSteps != null)
+            {
+
+                var routineSteps = await _unitOfWork.Repository<RoutineStep>()
+                .AsQueryable()
+                .Where(s => s.SkincareRoutineId == id)
+                .ToListAsync();
+                foreach (var step in routine.RoutineSteps)
+                {
+                    routineSteps.Add(step);
+                }
+                routineSteps = ReorderRoutineSteps(routineSteps);
+                routine.RoutineSteps.Clear();
+                routine.RoutineSteps = routineSteps;
+            }
+            
+            await _unitOfWork.Repository<SkincareRoutine>().Update(routine, id);
+            await _unitOfWork.SaveChangesAsync();
+        }
+        public async Task UpdateRoutineStepAsync(int id, RoutineStepRequestModel request)
+        {
+            var routineStep = await _unitOfWork.Repository<RoutineStep>().GetById(id);
+            if (routineStep == null) throw new Exception("Routine step not found");
+            if (request.Order != routineStep.Order)
+            {
+                var routinesteps = _unitOfWork.Repository<RoutineStep>()
+                    .AsQueryable()
+                    .Where(s => s.SkincareRoutineId == routineStep.SkincareRoutineId)
+                    .ToList();
+                if (request.Order > routinesteps.Count + 1)
+                {
+                    request.Order = routinesteps.Count + 1;
+                }
+                else
+                {
+                    foreach (var step in routinesteps)
+                    {
+                        if (step.Order >= request.Order)
+                        {
+                            step.Order++;
+                        }
+                    }
+                }              
+            }
+            _mapper.Map(request, routineStep);
+
+            await _unitOfWork.Repository<RoutineStep>().Update(routineStep, id);
+            await _unitOfWork.SaveChangesAsync();
+        }
         public async Task DeleteRoutineAsync(int id)
         {
             var routine = await _unitOfWork.Repository<SkincareRoutine>().GetById(id);

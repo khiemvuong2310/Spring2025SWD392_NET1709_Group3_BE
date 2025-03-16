@@ -60,14 +60,19 @@ namespace DianaShop.Service.Services
             return _mapper.Map<TagResponseModel>(existingTag);
         }
 
-        public async Task<bool> DeleteAsync(int id)
+        public async Task SoftDeleteAsync(int id)
         {
             var tag = await _unitOfWork.Repository<Tag>().GetById(id);
-            if (tag == null) return false;
+            if (tag == null) return;
             tag.IsDelete = true;
             await _unitOfWork.Repository<Tag>().Update(tag, id);
             await _unitOfWork.SaveChangesAsync();
-            return true;
+        }
+
+        public async Task HardDeleteAsync(int id)
+        {
+            await _unitOfWork.Repository<Tag>().HardDelete(id);
+            await _unitOfWork.SaveChangesAsync();
         }
 
         public async Task AddTagToProductAsync(int tagId, int productId)

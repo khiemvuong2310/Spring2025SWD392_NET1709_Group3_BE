@@ -25,25 +25,35 @@ namespace DianaShop.API.Controllers
             return Ok(response);
         }
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] TagRequestModel request)
+        public async Task<IActionResult> Create([FromForm] TagRequestModel request)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
             var response = await _tagService.CreateAsync(request);
             return CreatedAtAction(nameof(GetById), new { id = response.Id }, response);
         }
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, [FromBody] TagRequestModel request)
+        public async Task<IActionResult> Update(int id, [FromForm] TagRequestModel request)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
             var updateResponse = await _tagService.UpdateAsync(id, request);
             if (updateResponse == null) return NotFound();
             return Ok(updateResponse);
         }
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
+        [HttpDelete("soft-deletion/{id}")]
+        public async Task<IActionResult> SoftDelete(int id)
         {
-            var response = await _tagService.DeleteAsync(id);
-            if (!response) return NotFound();
+            var response = await _tagService.GetByIdAsync(id);
+            if (response == null) return NotFound();
+            await _tagService.SoftDeleteAsync(id);
+            return NoContent();
+        }
+
+        [HttpDelete("hard-deletion/{id}")]
+        public async Task<IActionResult> HardDelete(int id)
+        {
+            var response = await _tagService.GetByIdAsync(id);
+            if (response == null) return NotFound();
+            await _tagService.HardDeleteAsync(id);
             return NoContent();
         }
 

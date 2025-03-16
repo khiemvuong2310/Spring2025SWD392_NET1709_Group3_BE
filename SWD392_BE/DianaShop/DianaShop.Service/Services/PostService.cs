@@ -19,11 +19,13 @@ namespace DianaShop.Service.Services
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly IImageService _imageService;
 
-        public PostService(IUnitOfWork unitOfWork, IMapper mapper)
+        public PostService(IUnitOfWork unitOfWork, IMapper mapper, IImageService imageService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _imageService = imageService;
         }
 
         public async Task<PaginatedResponse<PostResponseModel>> GetAllAsync(PostQueryRequest request)
@@ -65,12 +67,13 @@ namespace DianaShop.Service.Services
                     post.PostTags.Add(new PostTag { TagId = tagId });
                 }
             }
-            if (model.ImageIds != null)
+            if (model.ImageFiles != null)
             {
                 post.PostImages = new List<PostImage>();
-                foreach (var ImageId in model.ImageIds)
+                foreach (var ImageId in model.ImageFiles)
                 {
-                    post.PostImages.Add(new PostImage { ImageId = ImageId });
+                    var image = await _imageService.ConvertToImageAsync(ImageId);
+                    if (image != null) post.PostImages.Add(new PostImage { Image = image });
                 }
             }
             await _unitOfWork.Repository<Post>().InsertAsync(post);
@@ -102,6 +105,23 @@ namespace DianaShop.Service.Services
             if (post == null) throw new Exception("Post not found");
 
             _mapper.Map(model, post);
+            if (model.TagIds != null)
+            {
+                post.PostTags = new List<PostTag>();
+                foreach (var tagId in model.TagIds)
+                {
+                    post.PostTags.Add(new PostTag { TagId = tagId });
+                }
+            }
+            if (model.ImageFiles != null)
+            {
+                post.PostImages = new List<PostImage>();
+                foreach (var ImageId in model.ImageFiles)
+                {
+                    var image = await _imageService.ConvertToImageAsync(ImageId);
+                    if (image != null) post.PostImages.Add(new PostImage { Image = image });
+                }
+            }
             post.UpdatedDate = DateTime.UtcNow;
             await _unitOfWork.Repository<Post>().Update(post, id);
             await _unitOfWork.CommitAsync();

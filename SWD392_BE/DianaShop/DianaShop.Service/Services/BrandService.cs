@@ -62,14 +62,19 @@ namespace DianaShop.Service.Services
             return _mapper.Map<BrandResponseModel>(existingBrand);
         }
 
-        public async Task<bool> DeleteAsync(int id)
+        public async Task SoftDeleteAsync(int id)
         {
             var brand = await _unitOfWork.Repository<Brand>().GetById(id);
-            if (brand == null) return false;
+            if (brand == null) return;
             brand.IsDelete = true;
             await _unitOfWork.SaveChangesAsync();
 
-            return true;
+        }
+
+        public async Task HardDeleteAsync(int id)
+        {
+            await _unitOfWork.Repository<Brand>().HardDelete(id);
+            await _unitOfWork.SaveChangesAsync();
         }
     }
 }
