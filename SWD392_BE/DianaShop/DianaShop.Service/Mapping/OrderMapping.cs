@@ -17,7 +17,8 @@ namespace DianaShop.Service.Mapping
             CreateMap<OrderRequestModel, Order>();
             CreateMap<Order, OrderResponseModel>()
                 .ForMember(dest => dest.Details, otp => otp.MapFrom(src => src.Details.ToList()))
-                .ForMember(dest => dest.UserName, otp => otp.MapFrom(src => src.User.Username));
+                .ForMember(dest => dest.UserName, otp => otp.MapFrom(src => src.User.Username))
+                .ForMember(dest => dest.StatusName, otp => otp.MapFrom(src => src.StageStatus.StatusName));
         }
     }
 

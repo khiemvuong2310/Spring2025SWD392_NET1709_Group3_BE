@@ -449,9 +449,6 @@ namespace DianaShop.Data.Migrations
                     b.Property<int>("UserID")
                         .HasColumnType("int");
 
-                    b.Property<int?>("VnPayTransactionTransactionId")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
 
                     b.HasIndex("OrderID")
@@ -462,8 +459,6 @@ namespace DianaShop.Data.Migrations
                     b.HasIndex("StatusId");
 
                     b.HasIndex("UserID");
-
-                    b.HasIndex("VnPayTransactionTransactionId");
 
                     b.ToTable("Payment");
                 });
@@ -835,9 +830,6 @@ namespace DianaShop.Data.Migrations
                     b.Property<int>("SkincareRoutineId")
                         .HasColumnType("int");
 
-                    b.Property<bool>("Status")
-                        .HasColumnType("tinyint(1)");
-
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasColumnType("longtext");
@@ -1088,6 +1080,9 @@ namespace DianaShop.Data.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
+                    b.Property<int>("PaymentId")
+                        .HasColumnType("int");
+
                     b.Property<string>("PaymentMethod")
                         .IsRequired()
                         .HasColumnType("longtext");
@@ -1104,6 +1099,9 @@ namespace DianaShop.Data.Migrations
                         .HasColumnType("longtext");
 
                     b.HasKey("TransactionId");
+
+                    b.HasIndex("PaymentId")
+                        .IsUnique();
 
                     b.HasIndex("UserId");
 
@@ -1316,10 +1314,6 @@ namespace DianaShop.Data.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("DianaShop.Data.Entities.VnPayTransaction", "VnPayTransaction")
-                        .WithMany()
-                        .HasForeignKey("VnPayTransactionTransactionId");
-
                     b.Navigation("Order");
 
                     b.Navigation("PaymentMethod");
@@ -1327,8 +1321,6 @@ namespace DianaShop.Data.Migrations
                     b.Navigation("StageStatus");
 
                     b.Navigation("User");
-
-                    b.Navigation("VnPayTransaction");
                 });
 
             modelBuilder.Entity("DianaShop.Data.Entities.Post", b =>
@@ -1581,11 +1573,19 @@ namespace DianaShop.Data.Migrations
 
             modelBuilder.Entity("DianaShop.Data.Entities.VnPayTransaction", b =>
                 {
+                    b.HasOne("DianaShop.Data.Entities.Payment", "Payment")
+                        .WithOne("VnPayTransaction")
+                        .HasForeignKey("DianaShop.Data.Entities.VnPayTransaction", "PaymentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("DianaShop.Data.Entities.User", "User")
                         .WithMany("VnPay")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.Navigation("Payment");
 
                     b.Navigation("User");
                 });
@@ -1644,6 +1644,11 @@ namespace DianaShop.Data.Migrations
             modelBuilder.Entity("DianaShop.Data.Entities.Packaging", b =>
                 {
                     b.Navigation("Products");
+                });
+
+            modelBuilder.Entity("DianaShop.Data.Entities.Payment", b =>
+                {
+                    b.Navigation("VnPayTransaction");
                 });
 
             modelBuilder.Entity("DianaShop.Data.Entities.PaymentMethod", b =>
