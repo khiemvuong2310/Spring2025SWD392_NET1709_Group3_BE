@@ -1,6 +1,7 @@
 ﻿using DianaShop.Data.Entities;
 using DianaShop.Service.Interfaces;
 using DianaShop.Service.RequestModel;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DianaShop.API.Controllers
@@ -13,8 +14,8 @@ namespace DianaShop.API.Controllers
             _skinTypeTestService = skinTypeTestService;
         }
 
-        // POST api/skintypetest
         [HttpPost("questions")]
+        [Authorize(Roles = "Staff,Manager")]
         public async Task<IActionResult> AddQuestionAsync([FromForm] QuestionRequestModel questionRequestModel)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -23,6 +24,7 @@ namespace DianaShop.API.Controllers
         }
 
         [HttpPost("{questionId}/answers")]
+        [Authorize(Roles = "Staff,Manager")]
         public async Task<IActionResult> AddAnswerAsync(int questionId, [FromForm] AnswerRequestModel answerRequestModel)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -55,6 +57,7 @@ namespace DianaShop.API.Controllers
         }
 
         [HttpPut("questions/{questionId}")]
+        [Authorize(Roles = "Staff,Manager")]
         public async Task<IActionResult> UpdateQuestionAsync(int questionId, [FromForm] QuestionRequestModel questionRequestModel)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -65,6 +68,7 @@ namespace DianaShop.API.Controllers
         }
 
         [HttpPut("answers/{answerId}")]
+        [Authorize(Roles = "Staff,Manager")]
         public async Task<IActionResult> UpdateAnswerAsync(int answerId, [FromForm] AnswerRequestModel answerRequestModel)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -75,6 +79,7 @@ namespace DianaShop.API.Controllers
         }
 
         [HttpDelete("questions/{questionId}")]
+        [Authorize(Roles = "Staff,Manager")]
         public async Task<IActionResult> DeleteQuestionAsync(int questionId)
         {
             await _skinTypeTestService.DeleteQuestionAsync(questionId);
@@ -82,6 +87,7 @@ namespace DianaShop.API.Controllers
         }
 
         [HttpDelete("answers/{answerId}")]
+        [Authorize(Roles = "Staff,Manager")]
         public async Task<IActionResult> DeleteAnswerAsync(int answerId)
         {
             await _skinTypeTestService.DeleteAnswerAsync(answerId);

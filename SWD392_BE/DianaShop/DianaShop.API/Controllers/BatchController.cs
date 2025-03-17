@@ -1,9 +1,11 @@
 ﻿using DianaShop.Service.Interfaces;
 using DianaShop.Service.RequestModel;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DianaShop.API.Controllers
 {
+    [Authorize(Roles = "Staff")]
     public class BatchController : BaseController
     {
         private readonly IBatchService _batchService;

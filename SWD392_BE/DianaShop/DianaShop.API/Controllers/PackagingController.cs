@@ -4,6 +4,7 @@ using DianaShop.Repository.Repositories;
 using DianaShop.Service.Interfaces;
 using DianaShop.Service.ReponseModel;
 using DianaShop.Service.RequestModel;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -37,6 +38,7 @@ namespace DianaShop.API.Controllers
 
         // POST: api/packaging
         [HttpPost]
+        [Authorize(Roles = "Staff,Manager")]
         public async Task<IActionResult> Create([FromForm] PackagingRequestModel request)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -46,6 +48,7 @@ namespace DianaShop.API.Controllers
 
         // PUT: api/packaging/{id}
         [HttpPut("{id}")]
+        [Authorize(Roles = "Staff,Manager")]
         public async Task<IActionResult> Update(int id, [FromForm] PackagingRequestModel request)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -58,6 +61,7 @@ namespace DianaShop.API.Controllers
 
         // DELETE: api/packaging/{id}
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Staff,Manager")]
         public async Task<IActionResult> Delete(int id)
         {
             var response = await _packagingService.DeleteAsync(id);

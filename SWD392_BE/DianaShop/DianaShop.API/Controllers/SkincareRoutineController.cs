@@ -1,6 +1,7 @@
 ﻿using DianaShop.Service.Interfaces;
 using DianaShop.Service.RequestModel;
 using DianaShop.Service.RequestModel.QueryRequest;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 namespace DianaShop.API.Controllers
 {
@@ -36,6 +37,7 @@ namespace DianaShop.API.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Staff,Manager")]
         public async Task<IActionResult> Create([FromForm]SkincareRoutineRequestModel model)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -43,6 +45,7 @@ namespace DianaShop.API.Controllers
             return Ok(response);
         }
         [HttpPost("{routineId}/step")]
+        [Authorize(Roles = "Staff,Manager")]
         public async Task<IActionResult> AddStep(int routineId, [FromForm]RoutineStepRequestModel model)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -52,6 +55,7 @@ namespace DianaShop.API.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize(Roles = "Staff,Manager")]
         public async Task<IActionResult> Update(int id, [FromForm] SkincareRoutineRequestModel model)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -62,6 +66,7 @@ namespace DianaShop.API.Controllers
         }
 
         [HttpPut("steps/{id}")]
+        [Authorize(Roles = "Staff,Manager")]
         public async Task<IActionResult> UpdateStep(int id, [FromForm]RoutineStepRequestModel model)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -72,6 +77,7 @@ namespace DianaShop.API.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Staff,Manager")]
         public async Task<IActionResult> Delete(int id)
         {
             var response = await _skincareRoutineService.GetRoutineByIdAsync(id);
@@ -81,6 +87,7 @@ namespace DianaShop.API.Controllers
         }
 
         [HttpDelete("steps/{id}")]
+        [Authorize(Roles = "Staff,Manager")]
         public async Task<IActionResult> DeleteStep(int id)
         {
             var response = await _skincareRoutineService.DeleteRoutineStepAsync(id);

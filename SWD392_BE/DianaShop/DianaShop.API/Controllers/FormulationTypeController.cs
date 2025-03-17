@@ -1,5 +1,6 @@
 ﻿using DianaShop.Service.Interfaces;
 using DianaShop.Service.RequestModel;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -29,6 +30,7 @@ namespace DianaShop.API.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Staff,Manager")]
         public async Task<IActionResult> Create([FromForm] FormulationTypeRequestModel request)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -37,6 +39,7 @@ namespace DianaShop.API.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize(Roles = "Staff,Manager")]
         public async Task<IActionResult> Update(int id, [FromForm] FormulationTypeRequestModel request)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -46,6 +49,7 @@ namespace DianaShop.API.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Staff,Manager")]
         public async Task<IActionResult> Delete(int id)
         {
             var response = await _formulationTypeService.DeleteAsync(id);
