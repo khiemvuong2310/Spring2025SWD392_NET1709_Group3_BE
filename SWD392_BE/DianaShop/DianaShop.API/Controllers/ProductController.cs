@@ -1,6 +1,7 @@
 ﻿using DianaShop.Service.Interfaces;
 using DianaShop.Service.RequestModel;
 using DianaShop.Service.RequestModel.QueryRequest;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DianaShop.API.Controllers
@@ -31,6 +32,7 @@ namespace DianaShop.API.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Manager, Staff")]
         public async Task<IActionResult> Create([FromForm] ProductRequestModel request)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -39,6 +41,7 @@ namespace DianaShop.API.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize(Roles = "Manager, Staff")]
         public async Task<IActionResult> Update(int id, [FromForm] ProductRequestModel request)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -49,6 +52,7 @@ namespace DianaShop.API.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Manager, Staff")]
         public async Task<IActionResult> Delete(int id)
         {
             var response = await _productService.GetProductByIdAsync(id);

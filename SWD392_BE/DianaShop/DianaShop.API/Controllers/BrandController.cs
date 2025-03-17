@@ -1,5 +1,6 @@
 ﻿using DianaShop.Service.Interfaces;
 using DianaShop.Service.RequestModel;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DianaShop.API.Controllers
@@ -30,6 +31,7 @@ namespace DianaShop.API.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Manager, Staff")]
         public async Task<IActionResult> Create([FromForm] BrandRequestModel request)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -38,6 +40,7 @@ namespace DianaShop.API.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize(Roles = "Manager, Staff")]
         public async Task<IActionResult> Update(int id, [FromForm] BrandRequestModel request)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -49,6 +52,7 @@ namespace DianaShop.API.Controllers
         }
 
         [HttpDelete("soft-deletion/{id}")]
+        [Authorize(Roles = "Manager, Staff")]
         public async Task<IActionResult> Delete(int id)
         {
             var response = await _brandService.GetByIdAsync(id);

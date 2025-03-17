@@ -1,6 +1,7 @@
 ﻿using DianaShop.Service.Interfaces;
 using DianaShop.Service.RequestModel;
 using DianaShop.Service.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -20,6 +21,7 @@ namespace DianaShop.API.Controllers
 
         // lấy tất cả
         [HttpGet("all")]
+        [Authorize(Roles = "Manager, Staff")]
         public async Task<IActionResult> GetAllPayments()
         {
             var response = await _paymentService.GetAllPayments();
@@ -28,6 +30,7 @@ namespace DianaShop.API.Controllers
 
         /// 🛒 Lấy tất cả payment của User
         [HttpGet("user/{userId}")]
+        [Authorize]
         public async Task<IActionResult> GetAllPaymentsByUser(int userId)
         {
             var response = await _paymentService.GetAllPaymentByUser(userId);
@@ -35,7 +38,8 @@ namespace DianaShop.API.Controllers
         }
 
         /// 🛒 Lấy payment theo order
-        [HttpGet("order/{orderId}")]  // Đổi {orderId} thành "id/{orderId}"
+        [HttpGet("order/{orderId}")]
+        [Authorize]
         public async Task<IActionResult> GetPaymentByOrder(int orderId)
         {
             var response = await _paymentService.GetPaymentByOrder(orderId);
@@ -43,7 +47,8 @@ namespace DianaShop.API.Controllers
         }
 
         /// 🛒 Lấy payment theo ID
-        [HttpGet("id/{paymentId}")]  // Đổi {orderId} thành "id/{orderId}"
+        [HttpGet("id/{paymentId}")]
+        [Authorize]
         public async Task<IActionResult> GetPaymentById(int paymentId)
         {
             var response = await _paymentService.GetPaymentById(paymentId);
@@ -52,6 +57,7 @@ namespace DianaShop.API.Controllers
 
         /// 🛒 API tạo payment 
         [HttpPost("create payment")]
+        [Authorize]
         public async Task<IActionResult> CreateOrder([FromBody] PaymentRequestModel request)
         {
             if (request == null || request.OrderID <= 0)
@@ -67,6 +73,7 @@ namespace DianaShop.API.Controllers
         /// Cập nhật trạng thái trong thanh toán
         /// </summary>
         [HttpPut("status/{paymentID}/{statusId}")]
+        [Authorize(Roles = "Manager, Staff")]
         public async Task<IActionResult> UpdatePaymentStatus(int paymentID, int statusId)
         {
             try
@@ -81,6 +88,7 @@ namespace DianaShop.API.Controllers
         }
 
         [HttpPut("method/{paymentID}/{methodId}")]
+        [Authorize]
         public async Task<IActionResult> UpdatePaymentMethod(int paymentID, int methodId)
         {
             try
@@ -98,6 +106,7 @@ namespace DianaShop.API.Controllers
         /// Cập nhật trạng thái theo đơn hàng
         /// </summary>
         [HttpPut("order/{paymentID}")]
+        [Authorize]
         public async Task<IActionResult> UpdatePaymentByOrder(int paymentID)
         {
             try
@@ -113,6 +122,7 @@ namespace DianaShop.API.Controllers
 
         /// 🗑️ Xóa thanh toan
         [HttpDelete("Remove/{paymentId}")]
+        [Authorize]
         public async Task<IActionResult> RemovePayment(int paymentId)
         {
             var result = await _paymentService.RemovePayment(paymentId);

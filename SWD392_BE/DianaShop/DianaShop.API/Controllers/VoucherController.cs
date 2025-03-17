@@ -1,5 +1,6 @@
 ﻿using DianaShop.Service.Interfaces;
 using DianaShop.Service.RequestModel;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -31,6 +32,7 @@ namespace DianaShop.API.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Manager, Staff")]
         public async Task<IActionResult> Create(VoucherRequestModel request)
         {
             var voucher = await _voucherService.CreateVoucherAsync(request);
@@ -38,6 +40,7 @@ namespace DianaShop.API.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize(Roles = "Manager, Staff")]
         public async Task<IActionResult> Update(int id, VoucherRequestModel request)
         {
             var updatedVoucher = await _voucherService.UpdateVoucherAsync(id, request);
@@ -46,6 +49,7 @@ namespace DianaShop.API.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Manager, Staff")]
         public async Task<IActionResult> Delete(int id)
         {
             var deleted = await _voucherService.DeleteVoucherAsync(id);

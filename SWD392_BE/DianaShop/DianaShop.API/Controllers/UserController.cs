@@ -19,6 +19,7 @@ namespace DianaShop.API.Controllers
 
         // Lấy tất cả người dùng
         [HttpGet]
+        [Authorize(Roles = "Manager, Staff")]
         //[Authorize]
         public async Task<IActionResult> GetAllUsers()
         {
@@ -28,6 +29,7 @@ namespace DianaShop.API.Controllers
 
         // Lấy người dùng theo ID
         [HttpGet("{id}")]
+        [Authorize(Roles = "Manager, Staff")]
         public async Task<IActionResult> GetUserById(int id)
         {
             var user = await _userService.GetUserByIdAsync(id);
@@ -40,6 +42,7 @@ namespace DianaShop.API.Controllers
 
         // Tạo người dùng mới
         [HttpPost]
+        [Authorize(Roles = "Manager, Staff")]
         //[Authorize]
         public async Task<IActionResult> CreateUser([FromBody] UserCreateRequest request)
         {
@@ -54,6 +57,7 @@ namespace DianaShop.API.Controllers
 
         // Cập nhật người dùng
         [HttpPut("{id}")]
+        [Authorize(Roles = "Manager, Staff")]
         //[Authorize]
         public async Task<IActionResult> UpdateUser(int id, [FromBody] UserUpdateRequest request)
         {
@@ -73,6 +77,7 @@ namespace DianaShop.API.Controllers
 
         // Xóa người dùng
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Manager, Staff")]
         //[Authorize]
         public async Task<IActionResult> DeleteUser(int id)
         {
@@ -86,7 +91,7 @@ namespace DianaShop.API.Controllers
         }
 
         [HttpPut("UpdatePassword/{id}")]
-        //[Authorize]
+        [Authorize(Roles = "Manager, Staff")]
         public async Task<IActionResult> UpdatePassword(int id, [FromBody] UpdatePasswordRequest request)
         {
             try

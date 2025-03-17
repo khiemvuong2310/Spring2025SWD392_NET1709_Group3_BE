@@ -1,5 +1,6 @@
 ﻿using DianaShop.Service.Interfaces;
 using DianaShop.Service.RequestModel;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -18,12 +19,14 @@ namespace DianaShop.API.Controllers
 
 
         [HttpGet]
+        [Authorize(Roles = "Manager, Staff")]
         public async Task<IActionResult> GetAll()
         {
             return Ok(await _storageService.GetAllStoragesAsync());
         }
 
         [HttpGet("{voucherId}/{storageId}")]
+        [Authorize]
         public async Task<IActionResult> GetById(int voucherId, int storageId)
         {
             var storage = await _storageService.GetStorageByIdAsync(voucherId, storageId);
@@ -32,6 +35,7 @@ namespace DianaShop.API.Controllers
         }
 
         [HttpPost]
+        [Authorize]
         public async Task<IActionResult> Create([FromBody] StorageRequestModel request)
         {
             var storage = await _storageService.CreateStorageAsync(request);
@@ -40,6 +44,7 @@ namespace DianaShop.API.Controllers
 
 
         [HttpPut("{voucherId}/{storageId}")]
+        [Authorize]
         public async Task<IActionResult> Update(int voucherId, int storageId, [FromBody] StorageRequestModel request)
         {
             var updatedStorage = await _storageService.UpdateStorageAsync(voucherId, storageId, request);
@@ -48,6 +53,7 @@ namespace DianaShop.API.Controllers
         }
 
         [HttpDelete("{voucherId}/{storageId}")]
+        [Authorize(Roles = "Manager, Staff")]
         public async Task<IActionResult> Delete(int voucherId, int storageId)
         {
             var success = await _storageService.DeleteStorageAsync(voucherId, storageId);
