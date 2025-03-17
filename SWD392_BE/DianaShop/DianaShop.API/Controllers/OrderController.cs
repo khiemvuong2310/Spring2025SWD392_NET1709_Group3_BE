@@ -157,7 +157,6 @@ namespace DianaShop.API.Controllers
                 {
                     var voucherID = request.voucherID ?? 0;
                     var voucherResult = await _orderService.AddVoucherToOrder(success1.Id, voucherID);
-                    return Ok(voucherResult);
                 }
                 catch (Exception ex)
                 {

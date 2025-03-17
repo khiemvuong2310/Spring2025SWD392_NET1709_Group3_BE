@@ -197,13 +197,13 @@ namespace DianaShop.Service.Services
                 throw new Exception("voucher not found");
             }
 
+            var reducedAmount = order.TotalAmount;
             if (order.TotalAmount >= (decimal)voucher.MinimumPurchase)
             {
-                order.FinalAmount -= (order.TotalAmount * (decimal)voucher.DiscountPercentage);
+                reducedAmount = (order.TotalAmount * (decimal)(voucher.DiscountPercentage/100));
                 storage.Quantity--;
             }
-
-
+            order.FinalAmount = order.TotalAmount + order.ShipAmount - reducedAmount;
             order.UpdateDate = DateTime.Now;
             await _unitOfWork.Repository<Order>().UpdateAsync(order);
             await _unitOfWork.Repository<Storage>().UpdateAsync(storage);
