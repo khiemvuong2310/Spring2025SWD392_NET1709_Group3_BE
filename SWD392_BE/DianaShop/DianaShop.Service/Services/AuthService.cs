@@ -27,17 +27,24 @@ namespace DianaShop.Service.Services
         private readonly IUserService _userService;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IVoucherStorageService _voucherStorageService;
         private const int TOKEN_EXPIRY_HOURS = 24;
         private const int REFRESH_TOKEN_EXPIRY_DAYS = 7;
         private const string EMAIL_SENDER = "studentexchangeweb@gmail.com";
         private const string EMAIL_PASSWORD = "fwpl wpkw zhqe peyh";
 
-        public AuthServices(IConfiguration configuration, IUserService userService, IUnitOfWork unitOfWork, IHttpContextAccessor httpContextAccessor)
+        public AuthServices(
+            IConfiguration configuration, 
+            IUserService userService, 
+            IUnitOfWork unitOfWork, 
+            IHttpContextAccessor httpContextAccessor,
+            IVoucherStorageService voucherStorageService)
         {
             _configuration = configuration;
             _userService = userService;
             _unitOfWork = unitOfWork;
             _httpContextAccessor = httpContextAccessor;
+            _voucherStorageService = voucherStorageService;
         }
 
         public async Task<BaseResponseForLogin<LoginResponseModel>> AuthenticateAsync(string email, string password)
@@ -244,6 +251,14 @@ namespace DianaShop.Service.Services
                 await _unitOfWork.Repository<UserRole>().InsertAsync(userRole);
                 await _unitOfWork.SaveChangesAsync();
 
+                // Create VoucherStorage for the new user
+                var voucherStorageRequest = new VoucherStorageRequestModel
+                {
+                    UserID = user.Id
+                };
+                
+                await _voucherStorageService.CreateVoucherStorageAsync(voucherStorageRequest);
+
                 var userWithRole = await _userService.GetUserByUsernameAsync(user.Username);
                 var roleNames = string.Join(",", userWithRole.UserRoles.Select(ur => ur.RoleName));
 
@@ -304,6 +319,14 @@ namespace DianaShop.Service.Services
 
                 await _unitOfWork.Repository<User>().InsertAsync(user);
                 await _unitOfWork.CommitAsync();
+
+                // Create VoucherStorage for the new user
+                var voucherStorageRequest = new VoucherStorageRequestModel
+                {
+                    UserID = user.Id
+                };
+                
+                await _voucherStorageService.CreateVoucherStorageAsync(voucherStorageRequest);
 
                 var result = await SendAccount(user.Id);
                 if (result.Code != StatusCodes.Status200OK)
