@@ -21,7 +21,7 @@ namespace DianaShop.API.Controllers
 
         // GET: api/UserRole/Role/{roleId}
         [HttpGet("Role/{userId}/Roles")]
-        [Authorize]
+        [Authorize(Roles = "Manager")]
         public async Task<ActionResult<UserRoleResponseModel>> GetRoles(int userId)
         {
             if (userId <= 0)
@@ -29,7 +29,6 @@ namespace DianaShop.API.Controllers
                 return BadRequest("Invalid user ID");
             }
 
-            // Await the async method
             var response = await _userRoleService.GetRolesOfUserAsync(userId);
 
             if (response == null || !response.Any())
@@ -42,7 +41,7 @@ namespace DianaShop.API.Controllers
 
 
         [HttpGet("User/{userId}/HasRole/{roleName}")]
-        [Authorize]
+        [Authorize(Roles = "Manager")]
         public ActionResult<bool> UserHasRole(int userId, string roleName)
         {
             if (userId <= 0)
@@ -58,7 +57,7 @@ namespace DianaShop.API.Controllers
         }
 
         [HttpPost]
-        [Authorize]
+        [Authorize(Roles = "Manager")]
         public async Task<IActionResult> AddRole([FromBody] UserRole role)
         {
             if (role == null)
@@ -82,7 +81,7 @@ namespace DianaShop.API.Controllers
             }
         }
         [HttpDelete("{userId}/{roleId}")]
-        [Authorize]
+        [Authorize(Roles = "Manager")]
         public async Task<IActionResult> RemoveRole(int userId, int roleId)
         {
             if (userId <= 0 || roleId <= 0)
@@ -101,7 +100,7 @@ namespace DianaShop.API.Controllers
         }
 
         [HttpPost("RequestRole")]
-        [Authorize]
+        [Authorize(Roles = "Manager")]
         public async Task<IActionResult> RequestRole([FromBody] UserRoleRequestModels roleRequest)
         {
             if (roleRequest == null || roleRequest.UserId <= 0 || roleRequest.RoleId <= 0)
@@ -120,9 +119,9 @@ namespace DianaShop.API.Controllers
             }
         }
 
-        // NEW: Admin accepting a role request
+        // NEW: Manager accepting a role request
         [HttpPut("AcceptRole/{userId}/{roleId}")]
-        [Authorize]
+        [Authorize(Roles = "Manager")]
         public async Task<IActionResult> AcceptRoleRequest(int userId, int roleId)
         {
             if (userId <= 0 || roleId <= 0)
@@ -142,7 +141,7 @@ namespace DianaShop.API.Controllers
         }
 
         [HttpGet("PendingRequests")]
-        [Authorize]
+        [Authorize(Roles = "Manager")]
         public async Task<ActionResult<IEnumerable<PendingRoles>>> GetAllPendingRoleRequests()
         {
             var pendingRequests = await _userRoleService.GetAllPendingRoleRequestsAsync();

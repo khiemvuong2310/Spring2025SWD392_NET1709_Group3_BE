@@ -10,6 +10,7 @@ namespace DianaShop.Service.Interfaces
         Task<BaseResponse> ForgotPassword(ForgotPasswordRequest request);
         string GenerateJwtToken(string username, string roleName, int userId);
         string GeneratePassword();
+        Task<BaseResponse<TokenModel>> RefreshTokenAsync(string refreshToken);
         Task<BaseResponse<TokenModel>> RegisterAsync(RegisterModel registerModel);
         Task<BaseResponse> SendAccount(int userId);
     }
