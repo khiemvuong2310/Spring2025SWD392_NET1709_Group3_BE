@@ -155,11 +155,20 @@ namespace DianaShop.Service.Services
 
         public async Task UpdateProductAsync(int id, ProductRequestModel model)
         {
+            var existingProduct = await _unitOfWork.Repository<Product>().AsQueryable().Where(p => p.Id == id).Include(p => p.ProductImages).FirstOrDefaultAsync();
             var updatedProduct = await HandleValidation(model);
-            updatedProduct.Id = id;
-            //_mapper.Map(updatedProduct, product);
-            // Update to DB
-            await _unitOfWork.Repository<Product>().Update(updatedProduct, id);
+
+            // Preserve the existing images if none are provided in the model
+            if (model.ProductImageFiles == null || !model.ProductImageFiles.Any())
+            {
+                updatedProduct.ProductImages = existingProduct.ProductImages; // Preserve the old images
+            }
+
+            // Update the product with the preserved images if necessary
+            _mapper.Map(model, existingProduct); // Map the new values to the existing product entity
+            existingProduct.ProductImages = updatedProduct.ProductImages;
+
+            await _unitOfWork.Repository<Product>().Update(existingProduct, id);
             await _unitOfWork.CommitAsync();
         }
 
