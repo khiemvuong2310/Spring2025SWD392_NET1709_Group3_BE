@@ -25,6 +25,18 @@ namespace DianaShop.API.Controllers
             return StatusCode((int)result.Code, result);
         }
 
+        [HttpPost("refresh-token")]
+        public async Task<ActionResult> RefreshToken([FromBody] RefreshTokenRequest request)
+        {
+            if (string.IsNullOrEmpty(request.RefreshToken))
+            {
+                return BadRequest(new { message = "Refresh token is required" });
+            }
+
+            var result = await _authService.RefreshTokenAsync(request.RefreshToken);
+            return StatusCode((int)result.Code, result);
+        }
+
         [HttpPost("send-email")]
         public async Task<ActionResult> Gets(int userId)
         {
@@ -40,13 +52,9 @@ namespace DianaShop.API.Controllers
         }
 
         [HttpPost("register")]
-        public IActionResult Register(RegisterModel model)
+        public async Task<ActionResult> Register(RegisterModel model)
         {
-            // Implement user registration logic here
-
-            // Once the user is registered, generate JWT token
-            //return Ok(_authService.RegisterAsync(model).Result);
-            var result = _authService.RegisterAsync(model).Result;
+            var result = await _authService.RegisterAsync(model);
             return StatusCode((int)result.Code, result);
         }
 

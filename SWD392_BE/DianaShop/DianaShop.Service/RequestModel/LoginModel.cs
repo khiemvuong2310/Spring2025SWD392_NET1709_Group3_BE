@@ -18,6 +18,12 @@ namespace DianaShop.Service.RequestModel
         public string Password { get; set; } = null!;
     }
 
+    public class RefreshTokenRequest
+    {
+        [Required(ErrorMessage = "Refresh token is required.")]
+        public string RefreshToken { get; set; } = null!;
+    }
+
     public class ForgotPasswordRequest
     {
         [Required]
