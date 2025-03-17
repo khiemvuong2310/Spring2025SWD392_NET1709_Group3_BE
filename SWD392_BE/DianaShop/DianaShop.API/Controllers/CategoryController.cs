@@ -1,5 +1,6 @@
 ﻿using DianaShop.Service.Interfaces;
 using DianaShop.Service.RequestModel;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DianaShop.API.Controllers
@@ -28,6 +29,7 @@ namespace DianaShop.API.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Staff,Manager")]
         public async Task<IActionResult> Create([FromForm] CategoryRequestModel request)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -36,6 +38,7 @@ namespace DianaShop.API.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize(Roles = "Staff,Manager")]
         public async Task<IActionResult> Update(int id, [FromForm] CategoryRequestModel request)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -47,11 +50,22 @@ namespace DianaShop.API.Controllers
         }
 
         [HttpDelete("soft-deletion/{id}")]
+        [Authorize(Roles = "Staff,Manager")]
         public async Task<IActionResult> SoftDelete(int id)
         {
             var response = await _categoryService.GetByIdAsync(id);
             if (response == null) return NotFound();
             await _categoryService.SoftDeleteAsync(id);
+            return NoContent();
+        }
+
+        [HttpDelete("hard-deletion/{id}")]
+        [Authorize(Roles = "Manager")]
+        public async Task<IActionResult> HardDelete(int id)
+        {
+            var response = await _categoryService.GetByIdAsync(id);
+            if (response == null) return NotFound();
+            await _categoryService.HardDeleteAsync(id);
             return NoContent();
         }
     }

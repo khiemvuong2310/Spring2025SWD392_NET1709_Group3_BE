@@ -1,5 +1,6 @@
 ﻿using DianaShop.Service.Interfaces;
 using DianaShop.Service.RequestModel;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DianaShop.API.Controllers
@@ -25,6 +26,7 @@ namespace DianaShop.API.Controllers
             return Ok(response);
         }
         [HttpPost]
+        [Authorize(Roles = "Staff,Manager")]
         public async Task<IActionResult> Create([FromForm] TagRequestModel request)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -32,6 +34,7 @@ namespace DianaShop.API.Controllers
             return CreatedAtAction(nameof(GetById), new { id = response.Id }, response);
         }
         [HttpPut("{id}")]
+        [Authorize(Roles = "Staff,Manager")]
         public async Task<IActionResult> Update(int id, [FromForm] TagRequestModel request)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -40,6 +43,7 @@ namespace DianaShop.API.Controllers
             return Ok(updateResponse);
         }
         [HttpDelete("soft-deletion/{id}")]
+        [Authorize(Roles = "Staff,Manager")]
         public async Task<IActionResult> SoftDelete(int id)
         {
             var response = await _tagService.GetByIdAsync(id);
@@ -49,6 +53,7 @@ namespace DianaShop.API.Controllers
         }
 
         [HttpDelete("hard-deletion/{id}")]
+        [Authorize(Roles = "Manager")]
         public async Task<IActionResult> HardDelete(int id)
         {
             var response = await _tagService.GetByIdAsync(id);

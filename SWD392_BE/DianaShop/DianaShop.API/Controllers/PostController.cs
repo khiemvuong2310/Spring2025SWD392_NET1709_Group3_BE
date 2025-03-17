@@ -31,7 +31,7 @@ namespace DianaShop.API.Controllers
             return Ok(response);
         }
 
-        [Authorize(Roles = "Staff,Admin")]
+        [Authorize(Roles = "Staff,Manager")]
         [HttpPost]
         public async Task<IActionResult> Create([FromForm] PostRequestModel request)
         {           
@@ -44,7 +44,7 @@ namespace DianaShop.API.Controllers
             return CreatedAtAction(nameof(GetById), new { id = response.Id }, response);
         }
 
-        [Authorize(Roles = "Staff,Admin")]
+        [Authorize(Roles = "Staff,Manager")]
         [HttpPut("publication/{id}")]
         public async Task<IActionResult> UpdatePublicationStatus(int id)
         {
@@ -54,7 +54,7 @@ namespace DianaShop.API.Controllers
             return NoContent();
         }
 
-        [Authorize(Roles = "Staff,Admin")]
+        [Authorize(Roles = "Staff,Manager")]
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, [FromForm] PostRequestModel request)
         {
@@ -65,7 +65,7 @@ namespace DianaShop.API.Controllers
             return NoContent();
         }
 
-        [Authorize(Roles = "Staff,Admin")]
+        [Authorize(Roles = "Staff,Manager")]
         [HttpDelete("soft-delete/{id}")]
         public async Task<IActionResult> SoftDelete(int id)
         {
@@ -75,7 +75,7 @@ namespace DianaShop.API.Controllers
             return NoContent();
         }
 
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Manager")]
         [HttpDelete("hard-delete/{id}")]
         public async Task<IActionResult> Delete(int id)
         {

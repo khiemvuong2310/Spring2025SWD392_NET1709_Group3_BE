@@ -2,6 +2,7 @@
 using DianaShop.Service.Interfaces;
 using DianaShop.Service.RequestModel;
 using DianaShop.Service.RequestModel.QueryRequest;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 namespace DianaShop.API.Controllers
 {
@@ -28,6 +29,7 @@ namespace DianaShop.API.Controllers
             return Ok(response);
         }
         [HttpPost]
+        [Authorize(Roles = "Staff,Manager")]
         public async Task<IActionResult> Create([FromForm] SkinTypeRequestModel model)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -35,6 +37,7 @@ namespace DianaShop.API.Controllers
             return Ok(response);
         }
         [HttpPut("{id}")]
+        [Authorize(Roles = "Staff,Manager")]
         public async Task<IActionResult> Update(int id, [FromForm] SkinTypeRequestModel model)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -44,6 +47,7 @@ namespace DianaShop.API.Controllers
             return NoContent();
         }
         [HttpDelete("soft-deletion/{id}")]
+        [Authorize(Roles = "Staff,Manager")]
         public async Task<IActionResult> SoftDelete(int id)
         {
             await _skinTypeService.SoftDeleteAsync(id);
@@ -52,6 +56,7 @@ namespace DianaShop.API.Controllers
             return NoContent();
         }
         [HttpDelete("hard-deletion/{id}")]
+        [Authorize(Roles = "Manager")]
         public async Task<IActionResult> HardDelete(int id)
         {
             var response = await _skinTypeService.GetByIdAsync(id);
