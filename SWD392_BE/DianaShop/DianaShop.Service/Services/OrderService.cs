@@ -72,7 +72,7 @@ namespace DianaShop.Service.Services
                 Address = request.Address,
                 Quantity = 0,
                 TotalAmount = 0,
-                ShipAmount = 16000,
+                ShipAmount = request.Shipprice ?? 100,
                 FinalAmount = 0,
                 OrderDate = DateTime.Now,
                 UpdateDate = DateTime.Now,
@@ -120,9 +120,43 @@ namespace DianaShop.Service.Services
             if (order == null)
                 throw new Exception("Order not found");
 
+            if (order.StatusId == 5)
+            {
+                throw new Exception("Order is complete, it can't be changed!");
+            }
+            var user = await _unitOfWork.Repository<User>()
+                .GetQueryable()
+                .Where(cp => cp.Id == order.UserID)
+                .FirstOrDefaultAsync();
+
             order.StatusId = status;
             order.UpdateDate = DateTime.Now;
             await _unitOfWork.Repository<Order>().UpdateAsync(order);
+
+            user.wallet += (order.FinalAmount * 0.05m);
+            await _unitOfWork.Repository<User>().UpdateAsync(user);
+
+            if (status == 6)
+            {
+                if (order.VoucherID > 0 && order.VoucherID != null)
+                {
+                    var userVoucher = await _unitOfWork.Repository<VoucherStorage>()
+                    .GetQueryable()
+                    .Where(cp => cp.UserID == order.UserID)
+                    .FirstOrDefaultAsync();
+                    if (userVoucher == null) throw new Exception("User not have this voucher storage");
+
+
+                    var storage = await _unitOfWork.Repository<Storage>()
+                    .GetQueryable()
+                    .Where(cp => cp.VoucherId == order.VoucherID && cp.VoucherStorageId == userVoucher.Id)
+                    .FirstOrDefaultAsync();
+                    if (storage == null) throw new Exception("User not have this voucher");
+
+                    storage.Quantity++;
+                    await _unitOfWork.Repository<Storage>().UpdateAsync(storage);
+                }
+            }
 
             await _unitOfWork.SaveChangesAsync();
             return _mapper.Map<OrderResponseModel>(order);
@@ -137,24 +171,42 @@ namespace DianaShop.Service.Services
             if (order == null)
                 throw new Exception("Order not found");
 
+            if (order.VoucherID > 0 && order.VoucherID != null)
+            {
+                throw new Exception("There is a voucher is applied before!");
+            }
+
+            var userVoucher = await _unitOfWork.Repository<VoucherStorage>()
+            .GetQueryable()
+            .Where(cp => cp.UserID == order.UserID)
+            .FirstOrDefaultAsync();
+            if (userVoucher == null) throw new Exception("User not have this voucher storage");
+
             var storage = await _unitOfWork.Repository<Storage>()
-                .GetQueryable()
-                .Where(cp => cp.VoucherId == voucherId)
-                .FirstOrDefaultAsync();
-            if (storage == null) throw new Exception("User not have this voucher");
+            .GetQueryable()
+            .Where(cp => cp.VoucherId == voucherId && cp.VoucherStorageId == userVoucher.Id)
+            .FirstOrDefaultAsync();
+            if (storage == null || storage.Quantity == 0) throw new Exception("User not have this voucher");
 
             order.VoucherID = voucherId;
-            if (order.VoucherID > 0)
-            {
-                var voucher = await _unitOfWork.Repository<Voucher>()
+
+            var voucher = await _unitOfWork.Repository<Voucher>()
                     .FindAsync(cp => cp.Id == order.VoucherID);
-                if (order.TotalAmount >= (decimal)voucher.MinimumPurchase)
-                {
-                    order.FinalAmount -= (order.TotalAmount * (decimal)voucher.DiscountPercentage);
-                }
+            if (voucher == null)
+            {
+                throw new Exception("voucher not found");
             }
+
+            if (order.TotalAmount >= (decimal)voucher.MinimumPurchase)
+            {
+                order.FinalAmount -= (order.TotalAmount * (decimal)voucher.DiscountPercentage);
+                storage.Quantity--;
+            }
+
+
             order.UpdateDate = DateTime.Now;
             await _unitOfWork.Repository<Order>().UpdateAsync(order);
+            await _unitOfWork.Repository<Storage>().UpdateAsync(storage);
 
             await _unitOfWork.SaveChangesAsync();
             return _mapper.Map<OrderResponseModel>(order);

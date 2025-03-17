@@ -13,4 +13,9 @@ namespace DianaShop.Service.RequestModel
         public int Quantity { get; set; }
     }
 
+    public class CheckoutDetailRequestModel
+    {
+        public int ProductId { get; set; }
+        public int Quantity { get; set; }
+    }
 }
