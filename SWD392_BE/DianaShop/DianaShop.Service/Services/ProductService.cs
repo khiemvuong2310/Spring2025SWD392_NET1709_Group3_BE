@@ -155,12 +155,11 @@ namespace DianaShop.Service.Services
 
         public async Task UpdateProductAsync(int id, ProductRequestModel model)
         {
-            var product = await _unitOfWork.Repository<Product>().GetById(id);
-            if (product == null) throw new ("Product not found");
             var updatedProduct = await HandleValidation(model);
-            _mapper.Map(updatedProduct, product);
+            updatedProduct.Id = id;
+            //_mapper.Map(updatedProduct, product);
             // Update to DB
-            await _unitOfWork.Repository<Product>().Update(product, id);
+            await _unitOfWork.Repository<Product>().Update(updatedProduct, id);
             await _unitOfWork.CommitAsync();
         }
 
