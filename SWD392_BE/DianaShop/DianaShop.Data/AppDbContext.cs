@@ -258,6 +258,13 @@ namespace DianaShop.Data
                 .HasForeignKey(u => u.UserId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            modelBuilder.Entity<VnPayTransaction>()
+                .HasOne(p => p.Payment)
+                .WithOne(o => o.VnPayTransaction)
+                .HasForeignKey<VnPayTransaction>(p => p.PaymentId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+
             //SeedData
             modelBuilder.Entity<Role>().HasData(
                 new Role { Id = 1, Name = "Manager" },
@@ -278,6 +285,10 @@ namespace DianaShop.Data
                 new PaymentMethod { Id = 1, MethodName = "Cash on Delivery" },
                 new PaymentMethod { Id = 2, MethodName = "VNPay" }
                 );
+
+
         }
     }
 }
+
+

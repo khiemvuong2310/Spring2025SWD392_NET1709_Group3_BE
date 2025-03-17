@@ -7,7 +7,7 @@ namespace DianaShop.Service.Interfaces
 {
     public interface IVnPayService
     {
-        string CreatePaymentUrl(HttpContext context, VnPaymentRequestModel model);
+        Task<string> CreatePaymentUrl(HttpContext context, VnPaymentRequestModel model);
         VNPaymentResponseModel PaymentExecute(IQueryCollection collections);
         Task SaveTransactionAsync(VNPaymentResponseModel response);
 
