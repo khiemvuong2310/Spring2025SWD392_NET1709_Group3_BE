@@ -15,7 +15,7 @@ namespace DianaShop.Service.Interfaces
         Task<QuestionResponseModel?> GetQuestionById(int id);
         Task<List<AnswerResponseModel>> GetAllAnswerByQuestionIdAsync(int questionId);
         Task<QuestionResponseModel> AddQuestionAsync(QuestionRequestModel questionRequestModel);
-        Task<AnswerResponseModel> AddAnswerAsync(AnswerRequestModel answerRequestModel);
+        Task<AnswerResponseModel> AddAnswerAsync(int questionId, AnswerRequestModel answerRequestModel);
         Task<List<QuestionResponseModel>> GetAllQuestionsAsync();
         Task UpdateQuestionAsync(int questionId, QuestionRequestModel questionRequestModel);
         Task UpdateAnswerAsync(int answerId, AnswerRequestModel answerRequestModel);
