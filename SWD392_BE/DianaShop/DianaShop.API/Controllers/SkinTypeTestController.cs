@@ -22,11 +22,13 @@ namespace DianaShop.API.Controllers
             return Ok(response);
         }
 
-        [HttpPost("answers")]
-        public async Task<IActionResult> AddAnswerAsync([FromForm] AnswerRequestModel answerRequestModel)
+        [HttpPost("{questionId}/answers")]
+        public async Task<IActionResult> AddAnswerAsync(int questionId, [FromForm] AnswerRequestModel answerRequestModel)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
-            var response = await _skinTypeTestService.AddAnswerAsync(answerRequestModel);
+            var question = await _skinTypeTestService.GetQuestionById(questionId);
+            if (question == null) return NotFound();
+            var response = await _skinTypeTestService.AddAnswerAsync(questionId, answerRequestModel);
             return Ok(response);
         }
 

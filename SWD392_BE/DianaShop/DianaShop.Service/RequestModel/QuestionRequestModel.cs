@@ -11,6 +11,6 @@ namespace DianaShop.Service.RequestModel
     {
         [Required]
         public string Content { get; set; }
-        public List<AnswerRequestModel> Answers { get; set; }
+        public List<AnswerRequestModel> Answers { get; set; } = new List<AnswerRequestModel>();
     }
 }

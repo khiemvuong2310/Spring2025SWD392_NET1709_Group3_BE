@@ -12,8 +12,6 @@ namespace DianaShop.Service.RequestModel
         [Required]
         public string Content { get; set; }
         [Required]
-        public int QuestionId { get; set; } // The ID of the related question
-        [Required]
-        public int SkinTypeId { get; set; } // The ID of the related skin type
+        public int SkinTypeId { get; set; }
     }
 }
