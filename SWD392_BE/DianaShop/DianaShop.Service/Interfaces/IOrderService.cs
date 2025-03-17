@@ -12,7 +12,7 @@ namespace DianaShop.Service.Interfaces
     {
         Task<IEnumerable<OrderResponseModel>> GetAllOrder();
         Task<IEnumerable<OrderResponseModel>> GetAllOrderByUser(int userId);
-        Task<OrderResponseModel> GetOrderById(int orderId);
+        Task<OrderResponseModel?> GetOrderById(int orderId);
 
         //Task<IEnumerable<OrderDetailResponseModel>> GetOrderDetails(int orderId);
         //Task<OrderDetailResponseModel> AddOrderDetail(OrderDetailRequestModel request);
