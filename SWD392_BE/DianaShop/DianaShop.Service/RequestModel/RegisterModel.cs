@@ -35,4 +35,20 @@ namespace DianaShop.Service.RequestModel
         [StringLength(100, MinimumLength = 6, ErrorMessage = "Password must be at least 6 characters.")]
         public string Password { get; set; }
     }
+
+    public class EmailVerificationModel
+    {
+        [Required]
+        public string Email { get; set; }
+
+        [Required]
+        public string VerificationCode { get; set; }
+    }
+
+    public class EmailRequest
+    {
+        [Required]
+        [EmailAddress]
+        public string Email { get; set; }
+    }
 }

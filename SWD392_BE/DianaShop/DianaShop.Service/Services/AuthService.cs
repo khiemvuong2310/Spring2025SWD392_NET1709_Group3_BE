@@ -32,6 +32,7 @@ namespace DianaShop.Service.Services
         private const int REFRESH_TOKEN_EXPIRY_DAYS = 7;
         private const string EMAIL_SENDER = "studentexchangeweb@gmail.com";
         private const string EMAIL_PASSWORD = "fwpl wpkw zhqe peyh";
+        private static readonly Dictionary<string, (string Code, DateTime Expiry)> _verificationCodes = new();
 
         public AuthServices(
             IConfiguration configuration, 
@@ -311,7 +312,7 @@ namespace DianaShop.Service.Services
                     Location = adminCreateAccountModel.Location,
                     Username = adminCreateAccountModel.Username,
                     Email = adminCreateAccountModel.Email,
-                    Password = "01234", // Temporary password
+                    Password = "01234", 
                     Phone = adminCreateAccountModel.Phone,
                     Status = true,
                     wallet = 0,
@@ -601,6 +602,223 @@ namespace DianaShop.Service.Services
       <p>Hello <span class='highlight'>" + username + @"</span>,</p>
       <p>Your reset password is: <span class='highlight'>" + password + @"</span></p>
       <p>This is a temporary password. Please change your password after logging in.</p>
+    </div>
+    <div class='footer'>
+      &copy; " + DateTime.Now.Year + @" Exchange Web. All rights reserved.
+    </div>
+  </div>
+</body>
+</html>";
+        }
+
+        public async Task<BaseResponse> SendVerificationEmailAsync(string email)
+        {
+            try
+            {
+                var existingUser = await _unitOfWork.Repository<User>().FindAsync(u => u.Email == email);
+                if (existingUser != null)
+                {
+                    return new BaseResponse
+                    {
+                        Code = StatusCodes.Status409Conflict,
+                        Message = "Email already exists"
+                    };
+                }
+
+                var verificationCode = GenerateVerificationCode();
+                _verificationCodes[email] = (verificationCode, DateTime.UtcNow.AddMinutes(15));
+
+                await SendEmailAsync(
+                    email,
+                    "Email Verification",
+                    GetVerificationEmailTemplate(verificationCode)
+                );
+
+                return new BaseResponse
+                {
+                    Code = StatusCodes.Status200OK,
+                    Message = "Verification code sent successfully"
+                };
+            }
+            catch (Exception ex)
+            {
+                return new BaseResponse
+                {
+                    Code = StatusCodes.Status500InternalServerError,
+                    Message = "Failed to send verification code: " + ex.Message
+                };
+            }
+        }
+
+        public async Task<BaseResponse<TokenModel>> VerifyEmailAndRegisterAsync(EmailVerificationModel model)
+        {
+            try
+            {
+                if (!_verificationCodes.TryGetValue(model.Email, out var verificationData))
+                {
+                    return new BaseResponse<TokenModel>
+                    {
+                        Code = StatusCodes.Status400BadRequest,
+                        Message = "No verification code found for this email"
+                    };
+                }
+
+                if (DateTime.UtcNow > verificationData.Expiry)
+                {
+                    _verificationCodes.Remove(model.Email);
+                    return new BaseResponse<TokenModel>
+                    {
+                        Code = StatusCodes.Status400BadRequest,
+                        Message = "Verification code has expired"
+                    };
+                }
+
+                if (verificationData.Code != model.VerificationCode)
+                {
+                    return new BaseResponse<TokenModel>
+                    {
+                        Code = StatusCodes.Status400BadRequest,
+                        Message = "Invalid verification code"
+                    };
+                }
+
+                // Remove the verification code after successful verification
+                _verificationCodes.Remove(model.Email);
+
+                // Generate a random password for the user
+                var tempPassword = GeneratePassword();
+                
+                // Create the user account
+                var user = new User
+                {
+                    Email = model.Email,
+                    Username = model.Email.Split('@')[0], // Use part of email as username
+                    Password = PasswordTools.HashPassword(tempPassword),
+                    Status = true,
+                    wallet = 0,
+                    IsDelete = false
+                };
+
+                await _unitOfWork.Repository<User>().InsertAsync(user);
+                await _unitOfWork.CommitAsync();
+                
+                // Assign default role (Customer)
+                var userRole = new UserRole
+                {
+                    UserId = user.Id,
+                    RoleId = 3, // Customer role ID
+                    Status = true
+                };
+                
+                await _unitOfWork.Repository<UserRole>().InsertAsync(userRole);
+                await _unitOfWork.SaveChangesAsync();
+
+                // Create VoucherStorage for the new user
+                var voucherStorageRequest = new VoucherStorageRequestModel
+                {
+                    UserID = user.Id
+                };
+                
+                await _voucherStorageService.CreateVoucherStorageAsync(voucherStorageRequest);
+
+                // Send the temporary password to the user
+                await SendEmailAsync(
+                    user.Email,
+                    "Your Account Has Been Created",
+                    GetAccountEmailTemplate(user.Email, tempPassword)
+                );
+
+                // Generate token
+                var token = GenerateJwtToken(user.Username, "Customer", user.Id);
+                var refreshToken = GenerateRefreshToken();
+                
+                // Store refresh token
+                user.Token = refreshToken;
+                await _unitOfWork.Repository<User>().Update(user, user.Id);
+                await _unitOfWork.CommitAsync();
+
+                return new BaseResponse<TokenModel>
+                {
+                    Code = StatusCodes.Status201Created,
+                    Message = "Registration successful. Please check your email for your temporary password.",
+                    Data = new TokenModel
+                    {
+                        Token = token,
+                        RefreshToken = refreshToken
+                    }
+                };
+            }
+            catch (Exception ex)
+            {
+                return new BaseResponse<TokenModel>
+                {
+                    Code = StatusCodes.Status500InternalServerError,
+                    Message = "Registration failed: " + ex.Message
+                };
+            }
+        }
+
+        private string GenerateVerificationCode()
+        {
+            var random = new Random();
+            return random.Next(100000, 999999).ToString();
+        }
+
+        private string GetVerificationEmailTemplate(string verificationCode)
+        {
+            return @"
+<html>
+<head>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      line-height: 1.6;
+    }
+    .container {
+      padding: 20px;
+      background-color: #f4f4f4;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    .header {
+      font-size: 20px;
+      font-weight: bold;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .content {
+      font-size: 16px;
+      color: #333;
+    }
+    .footer {
+      font-size: 12px;
+      color: #888;
+      text-align: center;
+      margin-top: 20px;
+    }
+    .code {
+      font-size: 24px;
+      font-weight: bold;
+      color: #007BFF;
+      text-align: center;
+      padding: 10px;
+      background-color: #fff;
+      border-radius: 5px;
+      margin: 20px 0;
+    }
+  </style>
+</head>
+<body>
+  <div class='container'>
+    <div class='header'>Email Verification</div>
+    <div class='content'>
+      <p>Thank you for registering with our Exchange Web!</p>
+      <p>Your verification code is:</p>
+      <div class='code'>" + verificationCode + @"</div>
+      <p>This code will expire in 15 minutes.</p>
+      <p>If you didn't request this verification, please ignore this email.</p>
     </div>
     <div class='footer'>
       &copy; " + DateTime.Now.Year + @" Exchange Web. All rights reserved.
