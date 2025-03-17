@@ -73,17 +73,14 @@ namespace DianaShop.Service.Services
             return _mapper.Map<QuestionResponseModel>(question);
         }
 
-        public async Task<AnswerResponseModel> AddAnswerAsync(AnswerRequestModel answerRequestModel)
+        public async Task<AnswerResponseModel> AddAnswerAsync(int questionId, AnswerRequestModel answerRequestModel)
         {
             var answer = _mapper.Map<Answer>(answerRequestModel);
             if (await _unitOfWork.Repository<SkinType>().AnyAsync(x => x.Id == answer.SkinTypeId) == false)
             {
                 throw new ArgumentException("Skin type not found");
             }
-            if (await GetQuestionById(answerRequestModel.QuestionId) == null)
-            {
-                throw new ArgumentException("Question not found");
-            }
+            answer.QuestionId = questionId;
             await _unitOfWork.Repository<Answer>().InsertAsync(answer);
             await _unitOfWork.CommitAsync();
             return _mapper.Map<AnswerResponseModel>(answer);
@@ -96,13 +93,16 @@ namespace DianaShop.Service.Services
             {
                 throw new ArgumentException("Question not found");
             }
-            foreach (var answer in question.Answers)
+            if (questionRequestModel.Answers.Any())
             {
-                if (await _unitOfWork.Repository<SkinType>().AnyAsync(x => x.Id == answer.SkinTypeId) == false)
+                foreach (var answer in question.Answers)
                 {
-                    throw new ArgumentException("Skin type not found");
+                    if (await _unitOfWork.Repository<SkinType>().AnyAsync(x => x.Id == answer.SkinTypeId) == false)
+                    {
+                        throw new ArgumentException("Skin type not found");
+                    }
                 }
-            }
+            }            
             _mapper.Map(questionRequestModel, question);
             await _unitOfWork.Repository<Question>().Update(question, questionId);
             await _unitOfWork.CommitAsync();
@@ -119,12 +119,10 @@ namespace DianaShop.Service.Services
             {
                 throw new ArgumentException("Skin type not found");
             }
-            if (await GetQuestionById(answerRequestModel.QuestionId) == null)
-            {
-                throw new ArgumentException("Question not found");
-            }
-            _mapper.Map(answerRequestModel, answer);
-            await _unitOfWork.Repository<Answer>().Update(answer, answerId);
+            var newAnswer = _mapper.Map<Answer>(answerRequestModel);
+            newAnswer.Id = answerId;
+            newAnswer.QuestionId = answer.QuestionId;
+            await _unitOfWork.Repository<Answer>().Update(newAnswer, answerId);
             await _unitOfWork.CommitAsync();
         }
 

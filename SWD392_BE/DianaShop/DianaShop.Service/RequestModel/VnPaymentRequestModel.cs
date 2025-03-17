@@ -16,5 +16,6 @@ namespace DianaShop.Service.RequestModel
         public DateTime CreatedDate { get; set; }
 
         public int UserId { get; set; }  // Added UserId
+        public int PaymentId { get; set; }
     }
 }

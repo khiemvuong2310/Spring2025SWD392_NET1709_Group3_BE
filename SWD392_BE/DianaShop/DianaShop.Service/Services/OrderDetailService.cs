@@ -78,19 +78,49 @@ namespace DianaShop.Service.Services
             await _unitOfWork.Repository<Order>().UpdateAsync(order);
 
             //cập nhật product sau khi mua
-            var batch = await _unitOfWork.Repository<ProductBatch>().AsQueryable()
-                .Where(b => b.ProductID == request.ProductId)
-                .OrderBy(pb => pb.ImportDate)
-                .FirstOrDefaultAsync();
-            if (batch == null)
+            //var inStock = product.ProductBatches.Where(pb => pb.Status == true && !pb.IsDelete).Sum(pb => pb.Quantity) ?? 0;
+            var batchs = await _unitOfWork.Repository<ProductBatch>().GetAll().Where(p => p.ProductID == product.Id).ToListAsync();
+            int inStock = 0;
+            foreach (var batch in batchs)
             {
-                throw new KeyNotFoundException($"Product with Batch {request.ProductId} not found.");
+                inStock += (batch.Quantity ?? 0);
             }
-            if (batch.Quantity < request.Quantity)
+            
+            //if (inStock == null)
+            //{
+            //    throw new KeyNotFoundException($"Product with Batch inStock {request.ProductId} not found.");
+            //}
+            if (inStock < request.Quantity)
             {
                 throw new KeyNotFoundException($"Product with Id {request.ProductId} are insufficient unit in stock.");
             }
-            batch.Quantity -= request.Quantity;
+
+            var batchList = new List<ProductBatch>();
+            var tmpQuantity = request.Quantity;
+            while (tmpQuantity != 0)
+            {
+                var batch = await _unitOfWork.Repository<ProductBatch>().AsQueryable()
+                .Where(b => b.ProductID == request.ProductId && b.Quantity != 0)
+                .OrderBy(pb => pb.ImportDate)
+                .FirstOrDefaultAsync();
+                
+                if (batch == null)
+                {
+                    throw new KeyNotFoundException($"Product with Batch {request.ProductId} not found.");
+                }
+
+                if (batch.Quantity < request.Quantity)
+                {
+                    tmpQuantity -= (batch.Quantity ?? 0);
+                    batch.Quantity = 0;
+                } else
+                {
+                    batch.Quantity -= tmpQuantity;
+                    tmpQuantity = 0;
+                }
+                batchList.Add(batch);
+            }
+            await _unitOfWork.Repository<ProductBatch>().UpdateRangeAsync(batchList);
 
             await _unitOfWork.SaveChangesAsync();
 
@@ -176,7 +206,7 @@ namespace DianaShop.Service.Services
 
             //cập nhật product sau khi xóa
             var batch = await _unitOfWork.Repository<ProductBatch>().AsQueryable()
-                .Where(b => b.ProductID == productId)
+                .Where(b => b.ProductID == productId && b.ExpiryDate > DateTime.Now)
                 .OrderBy(pb => pb.ImportDate)
                 .FirstOrDefaultAsync();
             if (batch == null)

@@ -24,19 +24,19 @@ namespace DianaShop.Service.Services
             _unitOfWork = unitOfWork;
             _serviceProvider = serviceProvider;
         }
-        private static Dictionary<string, (int UserId, decimal Amount)> _paymentTracker
-       = new Dictionary<string, (int UserId, decimal Amount)>();
-        public string CreatePaymentUrl(HttpContext context, VnPaymentRequestModel model)
+        private static Dictionary<string, (int UserId, int PaymentId, decimal Amount)> _paymentTracker
+       = new Dictionary<string, (int UserId, int PaymentId, decimal Amount)>();
+        public async Task<string> CreatePaymentUrl(HttpContext context, VnPaymentRequestModel model)
         {
             var tick = DateTime.Now.Ticks.ToString();
             var vnpay = new VnPayLibrary();
 
-            _paymentTracker[tick] = (model.UserId, model.Amount);
+            _paymentTracker[tick] = (model.UserId, model.PaymentId, model.Amount);
 
             vnpay.AddRequestData("vnp_Version", _config["VnPay:Version"]);
             vnpay.AddRequestData("vnp_Command", _config["VnPay:Command"]);
             vnpay.AddRequestData("vnp_TmnCode", _config["VnPay:TmnCode"]);
-            vnpay.AddRequestData("vnp_Amount", (model.Amount * 100).ToString()); //Số tiền thanh toán. Số tiền không mang các ký tự phân tách thập phân, phần nghìn, ký tự tiền tệ. Để gửi số tiền thanh toán là 100,000 VND(một trăm nghìn VNĐ) thì merchant cần nhân thêm 100 lần(khử phần thập phân), sau đó gửi sang VNPAY là: 10000000
+            vnpay.AddRequestData("vnp_Amount", ((int)(model.Amount * 100 * 100)).ToString()); //Số tiền thanh toán. Số tiền không mang các ký tự phân tách thập phân, phần nghìn, ký tự tiền tệ. Để gửi số tiền thanh toán là 100,000 VND(một trăm nghìn VNĐ) thì merchant cần nhân thêm 100 lần(khử phần thập phân), sau đó gửi sang VNPAY là: 10000000
 
 
             vnpay.AddRequestData("vnp_CreateDate", model.CreatedDate.ToString("yyyyMMddHHmmss"));
@@ -46,6 +46,9 @@ namespace DianaShop.Service.Services
 
             vnpay.AddRequestData("vnp_OrderInfo", "Thanh toán cho đơn hàng:" + model.OrderId);
             vnpay.AddRequestData("vnp_OrderType", "other"); //default value: other
+            //vnpay.AddRequestData("vnp_UserId", model.UserId.ToString());
+            //vnpay.AddRequestData("vnp_PaymentId", model.PaymentId.ToString());
+
             var callback = _config["VnPay:PaymentBackReturnUrl"];
             vnpay.AddRequestData("vnp_ReturnUrl", callback);
             vnpay.AddRequestData("vnp_TxnRef", tick); // Mã tham chiếu của giao dịch tại hệ thống của merchant. Mã này là duy nhất dùng để phân biệt các đơn hàng gửi sang VNPAY. Không được trùng lặp trong ngày
@@ -66,7 +69,7 @@ namespace DianaShop.Service.Services
                 }
             }
             var responseTicket = vnpay.GetResponseData("vnp_TxnRef");
-            var (userId, amount) = _paymentTracker.GetValueOrDefault(responseTicket);
+            var (userId, paymentId, amount) = _paymentTracker.GetValueOrDefault(responseTicket);
             _paymentTracker.Remove(responseTicket);
 
 
@@ -86,11 +89,19 @@ namespace DianaShop.Service.Services
                     Success = false
                 };
             }
-            //int userId;
-            //if (!int.TryParse(vnpay.GetResponseData("vnp_UserId"), out userId))
+
+            //int _userId;
+            //if (!int.TryParse(vnpay.GetResponseData("vnp_UserId"), out _userId))
             //{
-            //	userId = 0; // Hoặc xử lý nếu không thể chuyển đổi
+            //    _userId = 0; // Hoặc xử lý nếu không thể chuyển đổi
             //}
+
+            //int _paymentId;
+            //if (!int.TryParse(vnpay.GetResponseData("vnp_PaymentId"), out _paymentId))
+            //{
+            //    _paymentId = 0; // Hoặc xử lý nếu không thể chuyển đổi
+            //}
+
             return new VNPaymentResponseModel
             {
                 Success = true,
@@ -101,6 +112,7 @@ namespace DianaShop.Service.Services
                 Token = vnp_SecureHash,
                 VnPayResponseCode = vnp_ResponseCode,
                 UserId = userId,
+                PaymentId = paymentId,
                 Amount = amount
             };
 
@@ -112,6 +124,7 @@ namespace DianaShop.Service.Services
             {
                 UserId = response.UserId,
                 Amount = response.Amount,
+                PaymentId = response.PaymentId,
                 PaymentMethod = response.PaymentMethod,
                 OrderDescription = response.OrderDescription,
                 OrderId = response.OrderId,
