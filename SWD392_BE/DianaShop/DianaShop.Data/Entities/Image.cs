@@ -8,7 +8,8 @@ namespace DianaShop.Data.Entities
 {
     public class Image : BaseEntity
     {
-        public string ImageUrl { get; set; }
+        public string Base64Image { get; set; }
+        public string ContentType { get; set; }
         public virtual ICollection<ProductImage> ProductImages { get; set; }
         public virtual ICollection<PostImage> PostImages { get; set; }
     }

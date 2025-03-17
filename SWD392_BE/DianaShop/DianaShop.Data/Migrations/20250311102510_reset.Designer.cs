@@ -268,7 +268,7 @@ namespace DianaShop.Data.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("ImageUrl")
+                    b.Property<string>("Base64Image")
                         .IsRequired()
                         .HasColumnType("longtext");
 

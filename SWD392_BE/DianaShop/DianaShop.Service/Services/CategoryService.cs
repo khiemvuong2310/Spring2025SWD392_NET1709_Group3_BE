@@ -62,14 +62,17 @@ namespace DianaShop.Service.Services
             return _mapper.Map<CategoryResponseModel>(existingCategory);
         }
 
-        public async Task<bool> DeleteAsync(int id)
+        public async Task SoftDeleteAsync(int id)
         {
             var category = await _unitOfWork.Repository<Category>().GetById(id);
-            if (category == null) return false;
+            if (category == null) return;
             category.IsDelete = true;
             await _unitOfWork.SaveChangesAsync();
-
-            return true;
+        }
+        public async Task HardDeleteAsync(int id)
+        {
+            await _unitOfWork.Repository<Category>().HardDelete(id);
+            await _unitOfWork.SaveChangesAsync();
         }
     }
 }

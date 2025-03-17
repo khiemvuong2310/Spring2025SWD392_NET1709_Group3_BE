@@ -14,6 +14,7 @@ namespace DianaShop.Service.Interfaces
         Task<BrandResponseModel?> GetByIdAsync(int id);
         Task<BrandResponseModel> CreateAsync(BrandRequestModel request);
         Task<BrandResponseModel?> UpdateAsync(int id, BrandRequestModel request);
-        Task<bool> DeleteAsync(int id);
+        Task SoftDeleteAsync(int id);
+        Task HardDeleteAsync(int id);
     }
 }

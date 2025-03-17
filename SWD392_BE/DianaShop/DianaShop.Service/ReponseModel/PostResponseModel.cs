@@ -13,6 +13,7 @@ namespace DianaShop.Service.ReponseModel
         public string Content { get; set; }
         public string Author { get; set; }
         public string Status { get; set; }
+        public bool IsDeleted { get; set; }
         public DateTime CreatedDate { get; set; }
         public DateTime? UpdatedDate { get; set; }
         public DateTime? PublishedDate { get; set; }

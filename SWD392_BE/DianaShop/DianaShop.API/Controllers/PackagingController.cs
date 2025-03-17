@@ -37,7 +37,7 @@ namespace DianaShop.API.Controllers
 
         // POST: api/packaging
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] PackagingRequestModel request)
+        public async Task<IActionResult> Create([FromForm] PackagingRequestModel request)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
             var response = await _packagingService.CreateAsync(request);
@@ -46,7 +46,7 @@ namespace DianaShop.API.Controllers
 
         // PUT: api/packaging/{id}
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, [FromBody] PackagingRequestModel request)
+        public async Task<IActionResult> Update(int id, [FromForm] PackagingRequestModel request)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
             var response = await _packagingService.GetByIdAsync(id);

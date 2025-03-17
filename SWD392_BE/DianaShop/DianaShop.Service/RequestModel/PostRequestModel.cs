@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Http;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,7 +11,7 @@ namespace DianaShop.Service.RequestModel
     {
         public string Title { get; set; }
         public string Content { get; set; }
-        public List<int>? TagIds { get; set; } 
-        public List<int>? ImageIds { get; set; } 
+        public List<int> TagIds { get; set; } = new List<int>();
+        public List<IFormFile> ImageFiles { get; set; } = new List<IFormFile>();
     }
 }

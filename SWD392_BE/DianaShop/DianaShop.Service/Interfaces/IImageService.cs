@@ -1,4 +1,5 @@
-﻿using DianaShop.Service.ReponseModel;
+﻿using DianaShop.Data.Entities;
+using DianaShop.Service.ReponseModel;
 using DianaShop.Service.RequestModel.QueryRequest;
 using Microsoft.AspNetCore.Http;
 using System;
@@ -13,9 +14,11 @@ namespace DianaShop.Service.Interfaces
     {
         Task<PaginatedResponse<ImageResponseModel>> GetAllAsync(ImageQueryRequest request);
         Task<ImageResponseModel?> GetByIdAsync(int id);
+        Task<Image?> ConvertToImageAsync(IFormFile file);
         Task<List<ImageResponseModel>> AddAsync(List<IFormFile> files);
         Task<ImageResponseModel?> UpdateAsync(int id, IFormFile file);
-        Task DeleteAsync(int id);
+        Task SoftDeleteAsync(int id);
+        Task HardDeleteAsync(int id);
         Task AddImageToProductAsync(int productId, int imageId);
         Task RemoveImageFromProductAsync(int productId, int imageId);
         Task<List<ImageResponseModel>> GetImagesByProductIdAsync(int productId);

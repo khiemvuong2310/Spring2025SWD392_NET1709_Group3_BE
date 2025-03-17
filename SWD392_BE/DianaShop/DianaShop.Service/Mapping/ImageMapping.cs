@@ -16,7 +16,9 @@ namespace DianaShop.Service.Mapping
         {
             CreateMap<Image, ImageResponseModel>()
                 .ForMember(dest => dest.PostIds, opt => opt.MapFrom(src => src.PostImages.Select(pi => pi.PostId)))
-                .ForMember(dest => dest.ProductIds, opt => opt.MapFrom(src => src.ProductImages.Select(pi => pi.ProductId)));
+                .ForMember(dest => dest.ProductIds, opt => opt.MapFrom(src => src.ProductImages.Select(pi => pi.ProductId)))
+                .ForMember(dest => dest.IsDeleted, opt => opt.MapFrom(src => src.IsDelete));
+
         }
     }
 }

@@ -13,8 +13,9 @@ namespace DianaShop.Service.Mapping
                 .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status ? "Published" : "Draft"))
                 .ForMember(dest => dest.Author, opt => opt.MapFrom(src => src.User.Username))
                 .ForMember(dest => dest.Comments, opt => opt.MapFrom(src => src.Comments))
-                .ForMember(dest => dest.ImageUrls, opt => opt.MapFrom(src => src.PostImages.Select(pi => pi.Image.ImageUrl)))
-                .ForMember(dest => dest.Tags, opt => opt.MapFrom(src => src.PostTags.Select(pt => pt.Tag.Name)));
+                .ForMember(dest => dest.ImageUrls, opt => opt.MapFrom(src => src.PostImages.Select(pi => pi.Image.Base64Image)))
+                .ForMember(dest => dest.Tags, opt => opt.MapFrom(src => src.PostTags.Select(pt => pt.Tag.Name)))
+                .ForMember(dest => dest.IsDeleted, opt => opt.MapFrom(src => src.IsDelete));
             CreateMap<PostRequestModel, Post>();
         }
     }

@@ -22,11 +22,13 @@ namespace DianaShop.Service.Services
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
-        private readonly IBlobService _blobService;
-        public ImageService(IUnitOfWork unitOfWork, IBlobService blobService, IMapper mapper)
+        private static readonly Dictionary<string, string[]> AllowedFileTypes = new()
+        {
+            { "images", new[] { "image/jpeg", "image/png", "image/gif" } },
+        };
+        public ImageService(IUnitOfWork unitOfWork, IMapper mapper)
         {
             _unitOfWork = unitOfWork;
-            _blobService = blobService;
             _mapper = mapper;
         }
 
@@ -34,7 +36,7 @@ namespace DianaShop.Service.Services
         {
             var images = _unitOfWork.Repository<Image>().GetAll()
                 .Where(i => request.IsDeleted == null || i.IsDelete == request.IsDeleted)
-                .Where(i => request.ImageUrl == null || i.ImageUrl.Contains(request.ImageUrl))
+                .Where(i => request.ImageUrl == null || i.Base64Image.Contains(request.ImageUrl))
                 .ProjectTo<ImageResponseModel>(_mapper.ConfigurationProvider);
             return await PaginatedResponse<ImageResponseModel>.CreateAsync(images, request.PageNumber, request.PageSize);
         }
@@ -47,16 +49,35 @@ namespace DianaShop.Service.Services
                         .ProjectTo<ImageResponseModel>(_mapper.ConfigurationProvider)
                         .FirstOrDefaultAsync();
         }
+
+        public async Task<Image?> ConvertToImageAsync(IFormFile file)
+        {
+            if (!AllowedFileTypes.ContainsKey("images") || !AllowedFileTypes["images"].Contains(file.ContentType))
+            {
+                return null;
+                //throw new Exception($"ContentType is invalid. Allowed types: {string.Join(", ", AllowedFileTypes["images"])}");
+            }
+            using var memoryStream = new MemoryStream();
+            await file.CopyToAsync(memoryStream);
+            var fileBytes = memoryStream.ToArray();
+            var base64String = Convert.ToBase64String(fileBytes);
+            var image = new Image
+            {
+                Base64Image = base64String,
+                ContentType = file.ContentType
+            };
+            return image;
+        }
         public async Task<List<ImageResponseModel>> AddAsync(List<IFormFile> files)
         {
             var images = new List<Image>();
             foreach (var file in files)
             {
-                if (file.Length <= 0) continue;
-                var imageUrl = await _blobService.UploadImageAsync(file);
-                var image = new Image { ImageUrl = imageUrl };
-                await _unitOfWork.Repository<Image>().InsertAsync(image);
-                images.Add(image);
+                if (file.Length > 0)
+                {
+                    var image = await ConvertToImageAsync(file);
+                    if (image !=null) await _unitOfWork.Repository<Image>().InsertAsync(image);
+                }
             }
             await _unitOfWork.CommitAsync();
             return _mapper.Map<List<ImageResponseModel>>(images);
@@ -66,20 +87,27 @@ namespace DianaShop.Service.Services
         {
             var image = await _unitOfWork.Repository<Image>().GetById(id);
             if (image == null) return null;
-            await _blobService.DeleteImageAsync(image.ImageUrl);
-            var imageUrl = await _blobService.UploadImageAsync(file);
-            image.ImageUrl = imageUrl;
+            var newImage = await ConvertToImageAsync(file);
+            if (newImage == null) return null;
+            image.Base64Image = newImage.Base64Image;
+            image.ContentType = newImage.ContentType;
             await _unitOfWork.Repository<Image>().Update(image, id);
             await _unitOfWork.CommitAsync();
             return _mapper.Map<ImageResponseModel>(image);
         }
 
-        public async Task DeleteAsync(int id)
+        public async Task SoftDeleteAsync(int id)
         {
             var image = await _unitOfWork.Repository<Image>().GetById(id);
             if (image == null) return;
-            var fileName = Path.GetFileName(new Uri(image.ImageUrl).LocalPath);
-            await _blobService.DeleteImageAsync(fileName);
+            image.IsDelete = true;
+            await _unitOfWork.CommitAsync();
+        }
+
+        public async Task HardDeleteAsync(int id)
+        {
+            var image = await _unitOfWork.Repository<Image>().GetById(id);
+            if (image == null) return;
             await _unitOfWork.Repository<Image>().HardDelete(id);
             await _unitOfWork.CommitAsync();
         }
@@ -149,14 +177,12 @@ namespace DianaShop.Service.Services
             var user = await _unitOfWork.Repository<User>().GetById(userId);
             if (user !=  null && file.Length > 0)
             {
-                var imageUrl = await _blobService.UploadImageAsync(file);
-                if (user.Image != null)
+                var image = await ConvertToImageAsync(file);
+                if (image != null)
                 {
-                    var fileName = Path.GetFileName(new Uri(user.Image).LocalPath);
-                    await _blobService.DeleteImageAsync(fileName);
+                    user.Image = image.Base64Image;
+                    await _unitOfWork.CommitAsync();
                 }
-                user.Image = imageUrl;
-                await _unitOfWork.CommitAsync();
             }
         }
     }

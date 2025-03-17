@@ -16,6 +16,8 @@ namespace DianaShop.Service.Interfaces
         Task<RoutineStepResponseModel?> GetRoutineStepByIdAsync(int id);
         Task<SkincareRoutineResponseModel?> CreateRoutineAsync(SkincareRoutineRequestModel request);
         Task<SkincareRoutineResponseModel?> AddRoutineStepAsync(int routineId, RoutineStepRequestModel request);
+        Task UpdateRoutineAsync(int id, SkincareRoutineRequestModel request);
+        Task UpdateRoutineStepAsync(int id, RoutineStepRequestModel request);
         Task DeleteRoutineAsync(int id);
         Task<SkincareRoutineResponseModel?> DeleteRoutineStepAsync(int id);
     }

@@ -27,7 +27,7 @@ namespace DianaShop.API.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] IngredientRequestModel request)
+        public async Task<IActionResult> Create([FromForm] IngredientRequestModel request)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
             var response = await _ingredientService.CreateAsync(request);
@@ -35,7 +35,7 @@ namespace DianaShop.API.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, [FromBody] IngredientRequestModel request)
+        public async Task<IActionResult> Update(int id, [FromForm] IngredientRequestModel request)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
             var response = await _ingredientService.GetByIdAsync(id);
