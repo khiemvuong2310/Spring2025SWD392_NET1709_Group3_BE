@@ -29,6 +29,8 @@ namespace DianaShop.Service.Services
         {
             var orders = await _unitOfWork.Repository<Order>()
                 .GetQueryable()
+                .Include(cp => cp.User)
+                .Include(cp => cp.StageStatus)
                 .ToListAsync();
             return _mapper.Map<IEnumerable<OrderResponseModel>>(orders);
         }
@@ -40,18 +42,27 @@ namespace DianaShop.Service.Services
                 .GetQueryable()
                 .Where(cp => cp.UserID == userId)
                 .Include(cp => cp.Details)
+                .Include(cp => cp.StageStatus)
+                .Include(cp => cp.User)
                 .ToListAsync();
             return _mapper.Map<IEnumerable<OrderResponseModel>>(orders);
         }
 
         public async Task<OrderResponseModel> GetOrderById(int orderId)
         {
-            var order = await _unitOfWork.Repository<Order>()
-                .GetQueryable()
-                .Where(cp => cp.Id == orderId)
-                .Include(cp => cp.Details)
+            //var order = await _unitOfWork.Repository<Order>()
+            //    .GetQueryable()
+            //    .Where(cp => cp.Id == orderId)
+            //    .Include(cp => cp.Details)
+            //    .Include(cp => cp.StageStatus)
+            //    .Include(cp => cp.User)
+            //    .FirstOrDefaultAsync();
+            //return _mapper.Map<OrderResponseModel>(order);
+
+            return await _unitOfWork.Repository<Order>().AsQueryable()
+                .Where(i => i.Id == orderId)
+                .ProjectTo<OrderResponseModel>(_mapper.ConfigurationProvider)
                 .FirstOrDefaultAsync();
-            return _mapper.Map<OrderResponseModel>(order);
         }
 
         public async Task<OrderResponseModel> CreateOrder(OrderRequestModel request)

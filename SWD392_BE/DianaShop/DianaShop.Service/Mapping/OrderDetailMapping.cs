@@ -18,6 +18,7 @@ namespace DianaShop.Service.Mapping
             CreateMap<OrderDetail, OrderDetailResponseModel>()
                 .ForMember(dest => dest.ProductName, otp => otp.MapFrom(src => src.Product.Name))
                 .ForMember(dest => dest.UnitPrice, otp => otp.MapFrom(src => src.Product.Price ?? 0));
+            CreateMap<CheckoutDetailRequestModel, OrderDetail>();
         }
     }
 }
