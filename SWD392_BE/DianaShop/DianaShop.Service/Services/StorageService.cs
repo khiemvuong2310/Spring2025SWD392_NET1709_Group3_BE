@@ -39,11 +39,40 @@ namespace DianaShop.Service.Services
 
         public async Task<StorageResponseModel> CreateStorageAsync(StorageRequestModel request)
         {
-            var existingStorage = await _context.Storages.FirstOrDefaultAsync(s => s.VoucherId == request.VoucherId);
+            var voucher = await _context.Vouchers.FirstOrDefaultAsync(s => s.Id == request.VoucherId);
+            if (voucher == null)
+            {
+                throw new Exception("Voucher not found");
+            }
+
+            var voucherStorage = await _context.VoucherStorages.FirstOrDefaultAsync(s => s.Id == request.VoucherStorageId);
+            if (voucherStorage == null)
+            {
+                throw new Exception("VoucherStorage not found");
+            }
+
+            var user = await _context.Users.FirstOrDefaultAsync(s => s.Id == voucherStorage.UserID);
+            if (user == null)
+            {
+                throw new Exception("User not found");
+            }
+
+
+            if(user.wallet < (decimal)voucher.Value)
+            {
+                throw new Exception("User's points are not enough");
+            }
+            else
+            {
+                user.wallet -= (decimal)voucher.Value;
+            }
+
+            var existingStorage = await _context.Storages.FirstOrDefaultAsync(s => s.VoucherId == request.VoucherId && s.VoucherStorageId == voucherStorage.Id);
 
             if (existingStorage != null)
             {
                 existingStorage.Quantity = (existingStorage.Quantity ?? 1) + 1;
+                _context.Storages.Update(existingStorage);
                 await _context.SaveChangesAsync();
                 return _mapper.Map<StorageResponseModel>(existingStorage);
             }
@@ -51,6 +80,8 @@ namespace DianaShop.Service.Services
             var storage = _mapper.Map<Storage>(request);
             storage.Quantity = 1; // Default quantity when first created
             _context.Storages.Add(storage);
+            _context.Users.Update(user);
+
             await _context.SaveChangesAsync();
             return _mapper.Map<StorageResponseModel>(storage);
         }

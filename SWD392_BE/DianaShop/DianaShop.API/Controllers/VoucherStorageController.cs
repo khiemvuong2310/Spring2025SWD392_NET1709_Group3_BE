@@ -1,5 +1,6 @@
 ﻿using DianaShop.Service.Interfaces;
 using DianaShop.Service.RequestModel;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -17,6 +18,7 @@ namespace DianaShop.API.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = "Manager, Staff")]
         public async Task<IActionResult> GetAll()
         {
             var result = await _voucherStorageService.GetAllVoucherStoragesAsync();
@@ -24,6 +26,7 @@ namespace DianaShop.API.Controllers
         }
 
         [HttpGet("{id}")]
+        [Authorize]
         public async Task<IActionResult> GetById(int id)
         {
             var result = await _voucherStorageService.GetVoucherStorageByIdAsync(id);
@@ -32,6 +35,7 @@ namespace DianaShop.API.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Manager, Staff")]
         public async Task<IActionResult> Create([FromBody] VoucherStorageRequestModel request)
         {
             var result = await _voucherStorageService.CreateVoucherStorageAsync(request);
@@ -39,6 +43,7 @@ namespace DianaShop.API.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Manager, Staff")]
         public async Task<IActionResult> Delete(int id)
         {
             var success = await _voucherStorageService.DeleteVoucherStorageAsync(id);

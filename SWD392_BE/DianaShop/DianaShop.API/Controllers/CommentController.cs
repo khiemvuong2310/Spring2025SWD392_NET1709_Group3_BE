@@ -1,5 +1,6 @@
 ﻿using DianaShop.Service.Interfaces;
 using DianaShop.Service.RequestModel;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -32,6 +33,7 @@ namespace DianaShop.API.Controllers
         }
 
         [HttpPost]
+        [Authorize]
         public async Task<IActionResult> Create([FromBody] CommentRequestModel request)
         {
             var comment = await _service.CreateAsync(request);
@@ -39,6 +41,7 @@ namespace DianaShop.API.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize]
         public async Task<IActionResult> Update(int id, [FromBody] CommentUpdateRequestModel request)
         {
             var result = await _service.UpdateAsync(id, request);
@@ -46,6 +49,7 @@ namespace DianaShop.API.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize]
         public async Task<IActionResult> Delete(int id)
         {
             var result = await _service.DeleteAsync(id);
