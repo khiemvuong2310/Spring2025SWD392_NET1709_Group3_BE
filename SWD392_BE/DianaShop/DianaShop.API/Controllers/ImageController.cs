@@ -1,6 +1,7 @@
 ﻿using DianaShop.Data.Entities;
 using DianaShop.Service.Interfaces;
 using DianaShop.Service.RequestModel.QueryRequest;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 namespace DianaShop.API.Controllers
 {
@@ -13,6 +14,7 @@ namespace DianaShop.API.Controllers
         }
         // GET: api/image
         [HttpGet]
+        [Authorize(Roles = "Staff,Manager")]
         public async Task<IActionResult> GetAll([FromQuery] ImageQueryRequest request)
         {
             var response = await _imageService.GetAllAsync(request);
@@ -20,6 +22,7 @@ namespace DianaShop.API.Controllers
         }
         // GET: api/image/{id}
         [HttpGet("{id}")]
+        [Authorize(Roles = "Staff,Manager")]
         public async Task<IActionResult> GetById(int id)
         {
             var response = await _imageService.GetByIdAsync(id);
@@ -27,6 +30,7 @@ namespace DianaShop.API.Controllers
             return Ok(response);
         }
         [HttpPost]
+        [Authorize(Roles = "Staff,Manager")]
         public async Task<IActionResult> Create(List<IFormFile> files)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -34,6 +38,7 @@ namespace DianaShop.API.Controllers
             return Ok(response);
         }
         [HttpPut("{id}")]
+        [Authorize(Roles = "Staff,Manager")]
         public async Task<IActionResult> Update(int id, IFormFile file)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -41,6 +46,7 @@ namespace DianaShop.API.Controllers
             return NoContent();
         }
         [HttpDelete("soft-deletion/{id}")]
+        [Authorize(Roles = "Staff,Manager")]
         public async Task<IActionResult> SoftDelete(int id)
         {
             var response = await _imageService.GetByIdAsync(id);
@@ -49,6 +55,7 @@ namespace DianaShop.API.Controllers
             return NoContent();
         }
         [HttpDelete("hard-deletion/{id}")]
+        [Authorize(Roles = "Manager")]
         public async Task<IActionResult> HardDelete(int id)
         {
             var response = await _imageService.GetByIdAsync(id);
@@ -58,6 +65,7 @@ namespace DianaShop.API.Controllers
         }
 
         [HttpPost("product/{productId}")]
+        [Authorize(Roles = "Staff,Manager")]
         public async Task<IActionResult> AddImageToProduct(int productId, int imageId)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -66,6 +74,7 @@ namespace DianaShop.API.Controllers
         }
 
         [HttpDelete("product/{productId}")]
+        [Authorize(Roles = "Staff,Manager")]
         public async Task<IActionResult> RemoveImageFromProduct(int productId, int imageId)
         {
             await _imageService.RemoveImageFromProductAsync(productId, imageId);
@@ -79,6 +88,7 @@ namespace DianaShop.API.Controllers
             return Ok(response);
         }
         [HttpPost("post/{postId}")]
+        [Authorize(Roles = "Staff,Manager")]
         public async Task<IActionResult> AddImageToPost(int postId, int imageId)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -86,6 +96,7 @@ namespace DianaShop.API.Controllers
             return NoContent();
         }
         [HttpDelete("post/{postId}")]
+        [Authorize(Roles = "Staff,Manager")]
         public async Task<IActionResult> RemoveImageFromPost(int postId, int imageId)
         {
             await _imageService.RemoveImageFromPostAsync(postId, imageId);
@@ -98,6 +109,7 @@ namespace DianaShop.API.Controllers
             return Ok(response);
         }
         [HttpPost("profile/{userId}")]
+        [Authorize]
         public async Task<IActionResult> AddProfileImage(int userId, IFormFile file)
         {
             await _imageService.AddProfileImageAsync(userId, file);
