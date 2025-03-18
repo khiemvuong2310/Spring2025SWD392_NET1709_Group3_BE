@@ -1,6 +1,7 @@
 ﻿using DianaShop.Service.Interfaces;
 using DianaShop.Service.ReponseModel;
 using DianaShop.Service.RequestModel;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,6 +9,7 @@ namespace DianaShop.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(Roles = "Manager, Staff")]
     public class CartController : ControllerBase
     {
         private readonly ICartService _cartService;

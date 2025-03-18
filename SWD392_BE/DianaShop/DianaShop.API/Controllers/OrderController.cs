@@ -2,6 +2,7 @@
 using DianaShop.Service.Interfaces;
 using DianaShop.Service.ReponseModel;
 using DianaShop.Service.RequestModel;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,6 +10,7 @@ namespace DianaShop.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class OrderController : ControllerBase
     {
         private readonly IOrderService _orderService;
@@ -24,6 +26,7 @@ namespace DianaShop.API.Controllers
 
         /// 🛒 Lấy tất cả order
         [HttpGet("all")]
+        [Authorize(Roles = "Manager, Staff")]
         public async Task<IActionResult> GetAllOrders()
         {
             var response = await _orderService.GetAllOrder();
@@ -32,6 +35,7 @@ namespace DianaShop.API.Controllers
 
         /// 🛒 Lấy tất cả order của User
         [HttpGet("user/{userId}")]
+        [Authorize]
         public async Task<IActionResult> GetAllOrdersByUser(int userId)
         {
             var response = await _orderService.GetAllOrderByUser(userId);
@@ -40,6 +44,7 @@ namespace DianaShop.API.Controllers
 
         /// 🛒 Lấy order theo ID
         [HttpGet("id/{orderId}")]
+        [Authorize]
         public async Task<IActionResult> GetOrderById(int orderId)
         {
             var response = await _orderService.GetOrderById(orderId);
@@ -48,6 +53,7 @@ namespace DianaShop.API.Controllers
 
         /// 🛒 API tạo đơn hàng mới cho User
         [HttpPost("create order")]
+        [Authorize]
         public async Task<IActionResult> CreateOrder([FromBody] OrderRequestModel request)
         {
             if (request == null || request.UserID <= 0)
@@ -63,6 +69,7 @@ namespace DianaShop.API.Controllers
         /// Cập nhật trạng thái trong đơn hàng
         /// </summary>
         [HttpPut("status/{orderId}/{status}")]
+        [Authorize(Roles = "Manager, Staff")]
         public async Task<IActionResult> UpdateOrderStatus(int orderId, int status)
         {
             try
@@ -78,6 +85,7 @@ namespace DianaShop.API.Controllers
 
         //thêm voucher
         [HttpPut("status/{orderId}/{voucherId}")]
+        [Authorize]
         public async Task<IActionResult> AddVoucher(int orderId, int voucherId)
         {
             try
@@ -93,6 +101,7 @@ namespace DianaShop.API.Controllers
 
         /// 🗑️ Xóa hóa đơn
         [HttpDelete("Remove/{orderId}")]
+        [Authorize]
         public async Task<IActionResult> RemoveOrder(int orderId)
         {
             var condition = await _orderDetailService.ClearOrderDetail(orderId);
@@ -104,6 +113,7 @@ namespace DianaShop.API.Controllers
 
         /// ✅ Thanh toán giỏ hàng
         [HttpPost("checkout")]
+        [Authorize]
         public async Task<IActionResult> Checkout([FromBody] CheckoutRequestModel request)
         {
             if (request == null || request.UserID <= 0)
@@ -147,7 +157,6 @@ namespace DianaShop.API.Controllers
                 {
                     var voucherID = request.voucherID ?? 0;
                     var voucherResult = await _orderService.AddVoucherToOrder(success1.Id, voucherID);
-                    return Ok(voucherResult);
                 }
                 catch (Exception ex)
                 {

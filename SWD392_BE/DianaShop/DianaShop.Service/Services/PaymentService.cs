@@ -88,7 +88,7 @@ namespace DianaShop.Service.Services
                 OrderID = request.OrderID,
                 UserID = existingOrder.UserID,
                 PaymentMethodID = request.PaymentMethodID,
-                FinalAmount = existingOrder.TotalAmount,
+                FinalAmount = existingOrder.FinalAmount,
                 CreatedDate = DateTime.Now,
                 UpdatedDate = DateTime.Now,
                 StatusId = 1

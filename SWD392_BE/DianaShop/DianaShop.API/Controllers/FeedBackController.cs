@@ -1,5 +1,6 @@
 ﻿using DianaShop.Service.Interfaces;
 using DianaShop.Service.RequestModel;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -7,6 +8,7 @@ namespace DianaShop.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class FeedBackController : ControllerBase
     {
         private readonly IFeedBackService _feedBackService;
@@ -39,6 +41,7 @@ namespace DianaShop.API.Controllers
 
         // Tạo mới FeedBack
         [HttpPost]
+        [Authorize]
         public async Task<IActionResult> CreateFeedBack([FromBody] FeedBackRequestModel request)
         {
             if (request == null)
@@ -59,6 +62,7 @@ namespace DianaShop.API.Controllers
 
         // Cập nhật FeedBack
         [HttpPut("{id}")]
+        [Authorize]
         public async Task<IActionResult> UpdateFeedBack(int id, [FromBody] FeedBackRequestModel request)
         {
             if (request == null)
@@ -76,6 +80,7 @@ namespace DianaShop.API.Controllers
 
         // Xóa FeedBack
         [HttpDelete("{id}")]
+        [Authorize]
         public async Task<IActionResult> DeleteFeedBack(int id)
         {
             var result = await _feedBackService.DeleteFeedBackAsync(id);

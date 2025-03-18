@@ -1,5 +1,6 @@
 ﻿using DianaShop.Service.Interfaces;
 using DianaShop.Service.RequestModel;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -21,6 +22,7 @@ namespace DianaShop.API.Controllers
         private static int currentOrderId = 1;
 
         [HttpPost("vnpay/{paymentId}")]
+        [Authorize]
         public async Task<IActionResult> PaymentCalls(int paymentId, [FromBody] string description)
         {
             var payment = await _paymentService.GetPaymentById(paymentId);
@@ -89,6 +91,7 @@ namespace DianaShop.API.Controllers
         }
 
         [HttpGet("vnpay/transactions")]
+        [Authorize]
         public async Task<IActionResult> GetTransactions(int? userId = null)
         {
             try
