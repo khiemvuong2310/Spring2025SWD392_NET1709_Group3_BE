@@ -172,7 +172,14 @@ namespace DianaShop.API.Controllers
             };
             var paymentResponse = await _paymentService.CreatePayment(paymentRequest);
 
-            return Ok(new { Message = "Check out successfully" });
+            var orderResponse = await _orderService.GetOrderById(success1.Id);
+
+            return Ok(new
+            {
+                Message = "Check out successfully",
+                orderResponse,
+                paymentResponse
+            });
         }
     }
 }

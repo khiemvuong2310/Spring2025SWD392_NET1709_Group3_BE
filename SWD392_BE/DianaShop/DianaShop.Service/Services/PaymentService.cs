@@ -28,6 +28,8 @@ namespace DianaShop.Service.Services
         {
             var orders = await _unitOfWork.Repository<Payment>()
                 .GetQueryable()
+                .Include(p => p.PaymentMethod)
+                .Include(p => p.StageStatus)
                 .ToListAsync();
             return _mapper.Map<IEnumerable<PaymentResponseModel>>(orders);
         }
@@ -37,6 +39,8 @@ namespace DianaShop.Service.Services
             var payment = await _unitOfWork.Repository<Payment>()
                 .GetQueryable()
                 .Where(cp => cp.Id == paymentId)
+                .Include(p => p.PaymentMethod)
+                .Include(p => p.StageStatus)
                 .FirstOrDefaultAsync();
             return _mapper.Map<PaymentResponseModel>(payment);
         }
@@ -46,6 +50,8 @@ namespace DianaShop.Service.Services
             var payment = await _unitOfWork.Repository<Payment>()
                 .GetQueryable()
                 .Where(cp => cp.UserID == userId)
+                .Include(p => p.PaymentMethod)
+                .Include(p => p.StageStatus)
                 .ToListAsync();
             return _mapper.Map<IEnumerable<PaymentResponseModel>>(payment);
         }
