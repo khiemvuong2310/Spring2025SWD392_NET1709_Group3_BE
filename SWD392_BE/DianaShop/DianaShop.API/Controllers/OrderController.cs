@@ -68,7 +68,7 @@ namespace DianaShop.API.Controllers
         /// <summary>
         /// Cập nhật trạng thái trong đơn hàng
         /// </summary>
-        [HttpPut("status/{orderId}/{status}")]
+        [HttpPut("UpdateOrderStatus/{orderId}/{status}")]
         [Authorize(Roles = "Manager, Staff")]
         public async Task<IActionResult> UpdateOrderStatus(int orderId, int status)
         {
@@ -84,7 +84,7 @@ namespace DianaShop.API.Controllers
         }
 
         //thêm voucher
-        [HttpPut("status/{orderId}/{voucherId}")]
+        [HttpPut("AddVoucher/{orderId}/{voucherId}")]
         [Authorize]
         public async Task<IActionResult> AddVoucher(int orderId, int voucherId)
         {
