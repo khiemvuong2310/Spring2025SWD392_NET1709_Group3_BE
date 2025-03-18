@@ -26,7 +26,7 @@ namespace DianaShop.API.Controllers
 
         /// 🛒 Lấy tất cả order
         [HttpGet("all")]
-        [Authorize(Roles = "Manager, Staff")]
+        [Authorize(Roles = "Manager,Staff")]
         public async Task<IActionResult> GetAllOrders()
         {
             var response = await _orderService.GetAllOrder();
@@ -69,7 +69,8 @@ namespace DianaShop.API.Controllers
         /// Cập nhật trạng thái trong đơn hàng
         /// </summary>
         [HttpPut("status/{orderId}/{status}")]
-        [Authorize(Roles = "Manager, Staff")]
+        [Authorize(Roles = "Manager")]        
+        [Authorize(Roles = "Staff")]
         public async Task<IActionResult> UpdateOrderStatus(int orderId, int status)
         {
             try
