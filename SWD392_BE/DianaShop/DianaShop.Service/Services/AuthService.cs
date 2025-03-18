@@ -32,6 +32,7 @@ namespace DianaShop.Service.Services
         private const int REFRESH_TOKEN_EXPIRY_DAYS = 7;
         private const string EMAIL_SENDER = "studentexchangeweb@gmail.com";
         private const string EMAIL_PASSWORD = "fwpl wpkw zhqe peyh";
+        private static readonly Dictionary<string, (string Code, DateTime Expiry)> _verificationCodes = new();
 
         public AuthServices(
             IConfiguration configuration, 
@@ -76,6 +77,20 @@ namespace DianaShop.Service.Services
                         Message = "Username or Password incorrect",
                         Data = null,
                         IsBanned = false
+                    };
+                }
+
+                // We'll check if user has verified email by checking if there's a verification code for this email
+                if (_verificationCodes.ContainsKey(email))
+                {
+                    // There's still an active verification code, user hasn't verified their email yet
+                    return new BaseResponseForLogin<LoginResponseModel>
+                    {
+                        Code = StatusCodes.Status403Forbidden,
+                        Message = "Please verify your email. Your verification code is still valid.",
+                        Data = null,
+                        IsBanned = false,
+                        RequiresVerification = true
                     };
                 }
 
@@ -211,11 +226,14 @@ namespace DianaShop.Service.Services
             }
         }
 
-        public async Task<BaseResponse<TokenModel>> RegisterAsync(RegisterModel registerModel)
+        public async Task<BaseResponse<TokenModel>> RegisterAsync(RegisterRequestModel registerModel)
         {
             try
             {
-                var existingUser = await _unitOfWork.Repository<User>().FindAsync(u => u.Email == registerModel.Email);
+                var existingUser = await _unitOfWork.Repository<User>()
+                    .AsQueryable()
+                    .Where(u => u.Email == registerModel.Email && !u.IsDelete)
+                    .FirstOrDefaultAsync();
 
                 if (existingUser != null)
                 {
@@ -234,7 +252,8 @@ namespace DianaShop.Service.Services
                     Password = PasswordTools.HashPassword(registerModel.Password),
                     Phone = registerModel.Phone,
                     Status = true,
-                    wallet = 0, // Initialize wallet with 0
+                    wallet = 0 // Initialize wallet with 0
+                    // EmailVerified field removed
                 };
 
                 await _unitOfWork.Repository<User>().InsertAsync(user);
@@ -259,26 +278,22 @@ namespace DianaShop.Service.Services
                 
                 await _voucherStorageService.CreateVoucherStorageAsync(voucherStorageRequest);
 
-                var userWithRole = await _userService.GetUserByUsernameAsync(user.Username);
-                var roleNames = string.Join(",", userWithRole.UserRoles.Select(ur => ur.RoleName));
+                // Generate verification code and send email
+                var verificationCode = GenerateVerificationCode();
+                _verificationCodes[user.Email] = (verificationCode, DateTime.UtcNow.AddMinutes(30)); // Valid for 30 minutes
 
-                string token = GenerateJwtToken(user.Username, roleNames, user.Id);
-                string refreshToken = GenerateRefreshToken();
-                
-                // Store refresh token
-                user.Token = refreshToken;
-                await _unitOfWork.Repository<User>().Update(user, user.Id);
-                await _unitOfWork.CommitAsync();
+                await SendEmailAsync(
+                    user.Email,
+                    "Email Verification",
+                    GetVerificationEmailTemplate(verificationCode)
+                );
 
+                // Do not return a token until email is verified
                 return new BaseResponse<TokenModel>
                 {
                     Code = StatusCodes.Status201Created,
-                    Message = "Register successfully",
-                    Data = new TokenModel
-                    {
-                        Token = token,
-                        RefreshToken = refreshToken
-                    }
+                    Message = "Registration successful. Please check your email for verification code.",
+                    Data = null
                 };
             }
             catch (Exception ex)
@@ -294,31 +309,31 @@ namespace DianaShop.Service.Services
         public async Task<BaseResponse<TokenModel>> AdminGenAcc(AdminCreateAccountModel adminCreateAccountModel)
         {
             try
+        {
+            var existingUser = await _unitOfWork.Repository<User>().FindAsync(u => u.Email == adminCreateAccountModel.Email);
+
+            if (existingUser != null)
             {
-                var existingUser = await _unitOfWork.Repository<User>().FindAsync(u => u.Email == adminCreateAccountModel.Email);
-
-                if (existingUser != null)
+                return new BaseResponse<TokenModel>
                 {
-                    return new BaseResponse<TokenModel>
-                    {
                         Code = StatusCodes.Status409Conflict,
-                        Message = "Email already exists",
-                    };
-                }
-
-                var user = new User()
-                {
-                    Location = adminCreateAccountModel.Location,
-                    Username = adminCreateAccountModel.Username,
-                    Email = adminCreateAccountModel.Email,
-                    Password = "01234", // Temporary password
-                    Phone = adminCreateAccountModel.Phone,
-                    Status = true,
-                    wallet = 0,
+                    Message = "Email already exists",
                 };
+            }
 
-                await _unitOfWork.Repository<User>().InsertAsync(user);
-                await _unitOfWork.CommitAsync();
+            var user = new User()
+            {
+                Location = adminCreateAccountModel.Location,
+                Username = adminCreateAccountModel.Username,
+                Email = adminCreateAccountModel.Email,
+                Password = "01234",
+                Phone = adminCreateAccountModel.Phone,
+                Status = true,
+                    wallet = 0,
+            };
+
+            await _unitOfWork.Repository<User>().InsertAsync(user);
+            await _unitOfWork.CommitAsync();
 
                 // Create VoucherStorage for the new user
                 var voucherStorageRequest = new VoucherStorageRequestModel
@@ -338,19 +353,19 @@ namespace DianaShop.Service.Services
                     };
                 }
 
-                var userWithRole = await _userService.GetUserByUsernameAsync(user.Username);
-                var roleNames = string.Join(",", userWithRole.UserRoles.Select(ur => ur.RoleName));
-                string token = GenerateJwtToken(user.Username, roleNames, user.Id);
+            var userWithRole = await _userService.GetUserByUsernameAsync(user.Username);
+            var roleNames = string.Join(",", userWithRole.UserRoles.Select(ur => ur.RoleName));
+            string token = GenerateJwtToken(user.Username, roleNames, user.Id);
 
-                return new BaseResponse<TokenModel>
-                {
+            return new BaseResponse<TokenModel>
+            {
                     Code = StatusCodes.Status201Created,
                     Message = "Account created successfully",
-                    Data = new TokenModel
-                    {
-                        Token = token
-                    }
-                };
+                Data = new TokenModel
+                {
+                    Token = token
+                }
+            };
             }
             catch (Exception ex)
             {
@@ -601,6 +616,199 @@ namespace DianaShop.Service.Services
       <p>Hello <span class='highlight'>" + username + @"</span>,</p>
       <p>Your reset password is: <span class='highlight'>" + password + @"</span></p>
       <p>This is a temporary password. Please change your password after logging in.</p>
+    </div>
+    <div class='footer'>
+      &copy; " + DateTime.Now.Year + @" Exchange Web. All rights reserved.
+    </div>
+  </div>
+</body>
+</html>";
+        }
+
+        public async Task<BaseResponse> SendVerificationEmailAsync(string email)
+        {
+            try
+            {
+                var existingUser = await _unitOfWork.Repository<User>().FindAsync(u => u.Email == email);
+                if (existingUser != null)
+                {
+                    return new BaseResponse
+                    {
+                        Code = StatusCodes.Status409Conflict,
+                        Message = "Email already exists"
+                    };
+                }
+
+                var verificationCode = GenerateVerificationCode();
+                _verificationCodes[email] = (verificationCode, DateTime.UtcNow.AddMinutes(15));
+
+                await SendEmailAsync(
+                    email,
+                    "Email Verification",
+                    GetVerificationEmailTemplate(verificationCode)
+                );
+
+                return new BaseResponse
+                {
+                    Code = StatusCodes.Status200OK,
+                    Message = "Verification code sent successfully"
+                };
+            }
+            catch (Exception ex)
+            {
+                return new BaseResponse
+                {
+                    Code = StatusCodes.Status500InternalServerError,
+                    Message = "Failed to send verification code: " + ex.Message
+                };
+            }
+        }
+
+        public async Task<BaseResponse<TokenModel>> VerifyAccountAsync(EmailVerificationModel model)
+        {
+            try
+            {
+                if (!_verificationCodes.TryGetValue(model.Email, out var verificationData))
+                {
+                    return new BaseResponse<TokenModel>
+                    {
+                        Code = StatusCodes.Status400BadRequest,
+                        Message = "No verification code found for this email"
+                    };
+                }
+
+                if (DateTime.UtcNow > verificationData.Expiry)
+                {
+                    _verificationCodes.Remove(model.Email);
+                    return new BaseResponse<TokenModel>
+                    {
+                        Code = StatusCodes.Status400BadRequest,
+                        Message = "Verification code has expired"
+                    };
+                }
+
+                if (verificationData.Code != model.VerificationCode)
+                {
+                    return new BaseResponse<TokenModel>
+                    {
+                        Code = StatusCodes.Status400BadRequest,
+                        Message = "Invalid verification code"
+                    };
+                }
+
+                // Remove the verification code after successful verification
+                _verificationCodes.Remove(model.Email);
+
+                // Find user by email
+                var user = await _unitOfWork.Repository<User>()
+                    .AsQueryable()
+                    .Where(u => u.Email == model.Email && !u.IsDelete)
+                    .FirstOrDefaultAsync();
+
+                if (user == null)
+                {
+                    return new BaseResponse<TokenModel>
+                    {
+                        Code = StatusCodes.Status404NotFound,
+                        Message = "User not found"
+                    };
+                }
+
+                // Generate tokens for the verified user
+                var userDetails = await _userService.GetUserByEmailAsync(user.Email);
+                var userWithRole = await _userService.GetUserByUsernameAsync(userDetails.Username);
+                var roleNames = userWithRole.UserRoles.Select(ur => ur.RoleName).ToList();
+                
+                string token = GenerateJwtToken(userDetails.Username, string.Join(",", roleNames), userDetails.Id);
+                string refreshToken = GenerateRefreshToken();
+                
+                // Store refresh token in user record - this indicates email is verified
+                user.Token = refreshToken;
+                await _unitOfWork.Repository<User>().Update(user, user.Id);
+                await _unitOfWork.CommitAsync();
+
+                return new BaseResponse<TokenModel>
+                {
+                    Code = StatusCodes.Status200OK,
+                    Message = "Email verification successful. You can now log in.",
+                    Data = new TokenModel
+                    {
+                        Token = token,
+                        RefreshToken = refreshToken
+                    }
+                };
+            }
+            catch (Exception ex)
+            {
+                return new BaseResponse<TokenModel>
+                {
+                    Code = StatusCodes.Status500InternalServerError,
+                    Message = "Verification failed: " + ex.Message
+                };
+            }
+        }
+
+        private string GenerateVerificationCode()
+        {
+            var random = new Random();
+            return random.Next(100000, 999999).ToString();
+        }
+
+        private string GetVerificationEmailTemplate(string verificationCode)
+        {
+            return @"
+<html>
+<head>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      line-height: 1.6;
+    }
+    .container {
+      padding: 20px;
+      background-color: #f4f4f4;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    .header {
+      font-size: 20px;
+      font-weight: bold;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .content {
+      font-size: 16px;
+      color: #333;
+    }
+    .footer {
+      font-size: 12px;
+      color: #888;
+      text-align: center;
+      margin-top: 20px;
+    }
+    .code {
+      font-size: 24px;
+      font-weight: bold;
+      color: #007BFF;
+      text-align: center;
+      padding: 10px;
+      background-color: #fff;
+      border-radius: 5px;
+      margin: 20px 0;
+    }
+  </style>
+</head>
+<body>
+  <div class='container'>
+    <div class='header'>Email Verification</div>
+    <div class='content'>
+      <p>Thank you for registering with our Exchange Web!</p>
+      <p>Your verification code is:</p>
+      <div class='code'>" + verificationCode + @"</div>
+      <p>This code will expire in 15 minutes.</p>
+      <p>If you didn't request this verification, please ignore this email.</p>
     </div>
     <div class='footer'>
       &copy; " + DateTime.Now.Year + @" Exchange Web. All rights reserved.

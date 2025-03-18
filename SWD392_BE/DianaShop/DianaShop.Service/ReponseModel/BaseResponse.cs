@@ -17,6 +17,7 @@ namespace DianaShop.Service.ReponseModel
     public class BaseResponseForLogin<T> : BaseResponse<T>
     {
         public bool IsBanned { get; set; }
+        public bool RequiresVerification { get; set; }
         public int BannedAccountId { get; set; }
     }
 
