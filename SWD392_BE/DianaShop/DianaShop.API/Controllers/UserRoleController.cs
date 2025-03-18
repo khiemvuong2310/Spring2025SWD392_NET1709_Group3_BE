@@ -58,7 +58,7 @@ namespace DianaShop.API.Controllers
 
         [HttpPost]
         [Authorize(Roles = "Manager")]
-        public async Task<IActionResult> AddRole([FromBody] UserRole role)
+        public async Task<IActionResult> AddRole([FromBody] UserRoleRequestModels role)
         {
             if (role == null)
             {

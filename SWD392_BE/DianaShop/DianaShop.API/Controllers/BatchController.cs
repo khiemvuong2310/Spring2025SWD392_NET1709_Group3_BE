@@ -14,7 +14,8 @@ namespace DianaShop.API.Controllers
             _batchService = batchService;
         }
 
-        [Authorize(Roles = "Manager, Staff")]
+        [Authorize(Roles = "Manager")]      
+        [Authorize(Roles = "Staff")]
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {

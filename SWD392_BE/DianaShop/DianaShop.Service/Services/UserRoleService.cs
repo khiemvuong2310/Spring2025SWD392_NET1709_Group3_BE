@@ -3,6 +3,7 @@ using DianaShop.Data.Entities;
 using DianaShop.Repository.UnitOfWork;
 using DianaShop.Service.Interfaces;
 using DianaShop.Service.ReponseModel;
+using DianaShop.Service.RequestModel;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -41,7 +42,7 @@ namespace DianaShop.Service.Services
                 .Any(s => s.Role != null && s.Role.Name == roleName);
         }
 
-        public async Task AddRoleAsync(UserRole role)
+        public async Task AddRoleAsync(UserRoleRequestModels role)
         {
             var newRole = new UserRole { UserId = role.UserId, RoleId = role.RoleId, Status = true };
             await _unitOfWork.Repository<UserRole>().InsertAsync(newRole);
