@@ -159,9 +159,12 @@ namespace DianaShop.Service.Services
             var updatedProduct = await HandleValidation(model);
 
             // Preserve the existing images if none are provided in the model
-            if (model.ProductImageFiles == null || !model.ProductImageFiles.Any())
+            if (existingProduct.ProductImages.Any() && updatedProduct.ProductImages.Any())
             {
-                updatedProduct.ProductImages = existingProduct.ProductImages; // Preserve the old images
+                foreach (var image in existingProduct.ProductImages)
+                {
+                    updatedProduct.ProductImages.Add(image);
+                }
             }
 
             // Update the product with the preserved images if necessary
