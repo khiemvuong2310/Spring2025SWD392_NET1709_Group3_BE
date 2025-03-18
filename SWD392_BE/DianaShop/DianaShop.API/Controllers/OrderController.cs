@@ -85,7 +85,7 @@ namespace DianaShop.API.Controllers
         }
 
         //thêm voucher
-        [HttpPut("status/{orderId}/{voucherId}")]
+        [HttpPut("AddVoucher/{orderId}/{voucherId}")]
         [Authorize]
         public async Task<IActionResult> AddVoucher(int orderId, int voucherId)
         {
