@@ -101,9 +101,9 @@ namespace DianaShop.Service.Services
         }
         public async Task UpdateAsync(int id, PostRequestModel model)
         {
-            var post = await _unitOfWork.Repository<Post>().GetById(id);
+            var post = await _unitOfWork.Repository<Post>().AsQueryable().Where(p => p.Id == id).Include(p => p.PostImages).FirstOrDefaultAsync();
             if (post == null) throw new Exception("Post not found");
-
+            var existingImages = post.PostImages;
             _mapper.Map(model, post);
             if (model.TagIds != null)
             {
@@ -120,6 +120,13 @@ namespace DianaShop.Service.Services
                 {
                     var image = await _imageService.ConvertToImageAsync(ImageId);
                     if (image != null) post.PostImages.Add(new PostImage { Image = image });
+                }
+                if (existingImages.Any())
+                {
+                    foreach (var image in existingImages)
+                    {
+                        post.PostImages.Add(image);
+                    }
                 }
             }
             post.UpdatedDate = DateTime.UtcNow;
