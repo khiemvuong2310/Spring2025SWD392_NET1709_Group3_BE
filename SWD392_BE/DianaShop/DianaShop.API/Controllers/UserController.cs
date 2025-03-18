@@ -3,6 +3,7 @@ using DianaShop.Service.RequestModel;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace DianaShop.API.Controllers
 {
@@ -31,11 +32,33 @@ namespace DianaShop.API.Controllers
         [Authorize]
         public async Task<IActionResult> GetUserById(int id)
         {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            
+            if (userIdClaim == null)
+            {
+                return Unauthorized("User ID not found in token claims");
+            }
+            
+            // Chuyển đổi ID từ claim sang int
+            if (!int.TryParse(userIdClaim.Value, out int currentUserId))
+            {
+                return BadRequest("Invalid user ID in token");
+            }
+
+            // Kiểm tra nếu người dùng có role Manager hoặc Staff, cho phép xem tất cả user
+            bool isManagerOrStaff = User.IsInRole("Manager") || User.IsInRole("Staff");
+            
+            if (!isManagerOrStaff && currentUserId != id)
+            {
+                return Forbid("You can only view your own user information");
+            }
+
             var user = await _userService.GetUserByIdAsync(id);
             if (user == null)
             {
                 return NotFound("User not found.");
             }
+            
             return Ok(user);
         }
 
