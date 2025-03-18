@@ -65,15 +65,15 @@ namespace DianaShop.Service.Services
             order.Quantity += request.Quantity;
             order.TotalAmount += (product.Price * request.Quantity);
             order.FinalAmount = (order.ShipAmount + order.TotalAmount);
-            if (order.VoucherID > 0)
-            {
-                var voucher = await _unitOfWork.Repository<Voucher>()
-                    .FindAsync(cp => cp.Id == order.VoucherID);
-                if (order.TotalAmount >= (decimal)voucher.MinimumPurchase)
-                {
-                    order.FinalAmount -= (order.TotalAmount * (decimal)voucher.DiscountPercentage);
-                }
-            }
+            //if (order.VoucherID > 0)
+            //{
+            //    var voucher = await _unitOfWork.Repository<Voucher>()
+            //        .FindAsync(cp => cp.Id == order.VoucherID);
+            //    if (order.TotalAmount >= (decimal)voucher.MinimumPurchase)
+            //    {
+            //        order.FinalAmount -= (order.TotalAmount * (decimal)voucher.DiscountPercentage);
+            //    }
+            //}
             order.UpdateDate = DateTime.Now;
             await _unitOfWork.Repository<Order>().UpdateAsync(order);
 
@@ -85,11 +85,7 @@ namespace DianaShop.Service.Services
             {
                 inStock += (batch.Quantity ?? 0);
             }
-            
-            //if (inStock == null)
-            //{
-            //    throw new KeyNotFoundException($"Product with Batch inStock {request.ProductId} not found.");
-            //}
+
             if (inStock < request.Quantity)
             {
                 throw new KeyNotFoundException($"Product with Id {request.ProductId} are insufficient unit in stock.");
