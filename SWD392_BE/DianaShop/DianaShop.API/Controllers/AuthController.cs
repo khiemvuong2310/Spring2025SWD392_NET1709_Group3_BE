@@ -25,7 +25,7 @@ namespace DianaShop.API.Controllers
         }
 
         [HttpPost("register")]
-        public async Task<IActionResult> Register([FromBody] RegisterModel model)
+        public async Task<IActionResult> Register([FromBody] RegisterRequestModel model)
         {
             var result = await _authServices.RegisterAsync(model);
             return StatusCode(result.Code ?? StatusCodes.Status500InternalServerError, result);
@@ -67,7 +67,7 @@ namespace DianaShop.API.Controllers
         [HttpPost("verify-email")]
         public async Task<IActionResult> VerifyEmail([FromBody] EmailVerificationModel model)
         {
-            var result = await _authServices.VerifyEmailAndRegisterAsync(model);
+            var result = await _authServices.VerifyAccountAsync(model);
             return StatusCode(result.Code ?? StatusCodes.Status500InternalServerError, result);
         }
 

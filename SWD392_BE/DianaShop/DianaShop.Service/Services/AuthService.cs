@@ -80,6 +80,20 @@ namespace DianaShop.Service.Services
                     };
                 }
 
+                // We'll check if user has verified email by checking if there's a verification code for this email
+                if (_verificationCodes.ContainsKey(email))
+                {
+                    // There's still an active verification code, user hasn't verified their email yet
+                    return new BaseResponseForLogin<LoginResponseModel>
+                    {
+                        Code = StatusCodes.Status403Forbidden,
+                        Message = "Please verify your email. Your verification code is still valid.",
+                        Data = null,
+                        IsBanned = false,
+                        RequiresVerification = true
+                    };
+                }
+
                 var userDetails = await _userService.GetUserByEmailAsync(email);
                 var userWithRole = await _userService.GetUserByUsernameAsync(userDetails.Username);
                 var roleNames = userWithRole.UserRoles.Select(ur => ur.RoleName).ToList();
@@ -212,11 +226,14 @@ namespace DianaShop.Service.Services
             }
         }
 
-        public async Task<BaseResponse<TokenModel>> RegisterAsync(RegisterModel registerModel)
+        public async Task<BaseResponse<TokenModel>> RegisterAsync(RegisterRequestModel registerModel)
         {
             try
             {
-                var existingUser = await _unitOfWork.Repository<User>().FindAsync(u => u.Email == registerModel.Email);
+                var existingUser = await _unitOfWork.Repository<User>()
+                    .AsQueryable()
+                    .Where(u => u.Email == registerModel.Email && !u.IsDelete)
+                    .FirstOrDefaultAsync();
 
                 if (existingUser != null)
                 {
@@ -235,7 +252,8 @@ namespace DianaShop.Service.Services
                     Password = PasswordTools.HashPassword(registerModel.Password),
                     Phone = registerModel.Phone,
                     Status = true,
-                    wallet = 0, // Initialize wallet with 0
+                    wallet = 0 // Initialize wallet with 0
+                    // EmailVerified field removed
                 };
 
                 await _unitOfWork.Repository<User>().InsertAsync(user);
@@ -260,26 +278,22 @@ namespace DianaShop.Service.Services
                 
                 await _voucherStorageService.CreateVoucherStorageAsync(voucherStorageRequest);
 
-                var userWithRole = await _userService.GetUserByUsernameAsync(user.Username);
-                var roleNames = string.Join(",", userWithRole.UserRoles.Select(ur => ur.RoleName));
+                // Generate verification code and send email
+                var verificationCode = GenerateVerificationCode();
+                _verificationCodes[user.Email] = (verificationCode, DateTime.UtcNow.AddMinutes(30)); // Valid for 30 minutes
 
-                string token = GenerateJwtToken(user.Username, roleNames, user.Id);
-                string refreshToken = GenerateRefreshToken();
-                
-                // Store refresh token
-                user.Token = refreshToken;
-                await _unitOfWork.Repository<User>().Update(user, user.Id);
-                await _unitOfWork.CommitAsync();
+                await SendEmailAsync(
+                    user.Email,
+                    "Email Verification",
+                    GetVerificationEmailTemplate(verificationCode)
+                );
 
+                // Do not return a token until email is verified
                 return new BaseResponse<TokenModel>
                 {
                     Code = StatusCodes.Status201Created,
-                    Message = "Register successfully",
-                    Data = new TokenModel
-                    {
-                        Token = token,
-                        RefreshToken = refreshToken
-                    }
+                    Message = "Registration successful. Please check your email for verification code.",
+                    Data = null
                 };
             }
             catch (Exception ex)
@@ -295,31 +309,31 @@ namespace DianaShop.Service.Services
         public async Task<BaseResponse<TokenModel>> AdminGenAcc(AdminCreateAccountModel adminCreateAccountModel)
         {
             try
+        {
+            var existingUser = await _unitOfWork.Repository<User>().FindAsync(u => u.Email == adminCreateAccountModel.Email);
+
+            if (existingUser != null)
             {
-                var existingUser = await _unitOfWork.Repository<User>().FindAsync(u => u.Email == adminCreateAccountModel.Email);
-
-                if (existingUser != null)
+                return new BaseResponse<TokenModel>
                 {
-                    return new BaseResponse<TokenModel>
-                    {
                         Code = StatusCodes.Status409Conflict,
-                        Message = "Email already exists",
-                    };
-                }
-
-                var user = new User()
-                {
-                    Location = adminCreateAccountModel.Location,
-                    Username = adminCreateAccountModel.Username,
-                    Email = adminCreateAccountModel.Email,
-                    Password = "01234", 
-                    Phone = adminCreateAccountModel.Phone,
-                    Status = true,
-                    wallet = 0,
+                    Message = "Email already exists",
                 };
+            }
 
-                await _unitOfWork.Repository<User>().InsertAsync(user);
-                await _unitOfWork.CommitAsync();
+            var user = new User()
+            {
+                Location = adminCreateAccountModel.Location,
+                Username = adminCreateAccountModel.Username,
+                Email = adminCreateAccountModel.Email,
+                Password = "01234",
+                Phone = adminCreateAccountModel.Phone,
+                Status = true,
+                    wallet = 0,
+            };
+
+            await _unitOfWork.Repository<User>().InsertAsync(user);
+            await _unitOfWork.CommitAsync();
 
                 // Create VoucherStorage for the new user
                 var voucherStorageRequest = new VoucherStorageRequestModel
@@ -339,19 +353,19 @@ namespace DianaShop.Service.Services
                     };
                 }
 
-                var userWithRole = await _userService.GetUserByUsernameAsync(user.Username);
-                var roleNames = string.Join(",", userWithRole.UserRoles.Select(ur => ur.RoleName));
-                string token = GenerateJwtToken(user.Username, roleNames, user.Id);
+            var userWithRole = await _userService.GetUserByUsernameAsync(user.Username);
+            var roleNames = string.Join(",", userWithRole.UserRoles.Select(ur => ur.RoleName));
+            string token = GenerateJwtToken(user.Username, roleNames, user.Id);
 
-                return new BaseResponse<TokenModel>
-                {
+            return new BaseResponse<TokenModel>
+            {
                     Code = StatusCodes.Status201Created,
                     Message = "Account created successfully",
-                    Data = new TokenModel
-                    {
-                        Token = token
-                    }
-                };
+                Data = new TokenModel
+                {
+                    Token = token
+                }
+            };
             }
             catch (Exception ex)
             {
@@ -650,7 +664,7 @@ namespace DianaShop.Service.Services
             }
         }
 
-        public async Task<BaseResponse<TokenModel>> VerifyEmailAndRegisterAsync(EmailVerificationModel model)
+        public async Task<BaseResponse<TokenModel>> VerifyAccountAsync(EmailVerificationModel model)
         {
             try
             {
@@ -685,62 +699,38 @@ namespace DianaShop.Service.Services
                 // Remove the verification code after successful verification
                 _verificationCodes.Remove(model.Email);
 
-                // Generate a random password for the user
-                var tempPassword = GeneratePassword();
-                
-                // Create the user account
-                var user = new User
+                // Find user by email
+                var user = await _unitOfWork.Repository<User>()
+                    .AsQueryable()
+                    .Where(u => u.Email == model.Email && !u.IsDelete)
+                    .FirstOrDefaultAsync();
+
+                if (user == null)
                 {
-                    Email = model.Email,
-                    Username = model.Email.Split('@')[0], // Use part of email as username
-                    Password = PasswordTools.HashPassword(tempPassword),
-                    Status = true,
-                    wallet = 0,
-                    IsDelete = false
-                };
+                    return new BaseResponse<TokenModel>
+                    {
+                        Code = StatusCodes.Status404NotFound,
+                        Message = "User not found"
+                    };
+                }
 
-                await _unitOfWork.Repository<User>().InsertAsync(user);
-                await _unitOfWork.CommitAsync();
+                // Generate tokens for the verified user
+                var userDetails = await _userService.GetUserByEmailAsync(user.Email);
+                var userWithRole = await _userService.GetUserByUsernameAsync(userDetails.Username);
+                var roleNames = userWithRole.UserRoles.Select(ur => ur.RoleName).ToList();
                 
-                // Assign default role (Customer)
-                var userRole = new UserRole
-                {
-                    UserId = user.Id,
-                    RoleId = 3, // Customer role ID
-                    Status = true
-                };
+                string token = GenerateJwtToken(userDetails.Username, string.Join(",", roleNames), userDetails.Id);
+                string refreshToken = GenerateRefreshToken();
                 
-                await _unitOfWork.Repository<UserRole>().InsertAsync(userRole);
-                await _unitOfWork.SaveChangesAsync();
-
-                // Create VoucherStorage for the new user
-                var voucherStorageRequest = new VoucherStorageRequestModel
-                {
-                    UserID = user.Id
-                };
-                
-                await _voucherStorageService.CreateVoucherStorageAsync(voucherStorageRequest);
-
-                // Send the temporary password to the user
-                await SendEmailAsync(
-                    user.Email,
-                    "Your Account Has Been Created",
-                    GetAccountEmailTemplate(user.Email, tempPassword)
-                );
-
-                // Generate token
-                var token = GenerateJwtToken(user.Username, "Customer", user.Id);
-                var refreshToken = GenerateRefreshToken();
-                
-                // Store refresh token
+                // Store refresh token in user record - this indicates email is verified
                 user.Token = refreshToken;
                 await _unitOfWork.Repository<User>().Update(user, user.Id);
                 await _unitOfWork.CommitAsync();
 
                 return new BaseResponse<TokenModel>
                 {
-                    Code = StatusCodes.Status201Created,
-                    Message = "Registration successful. Please check your email for your temporary password.",
+                    Code = StatusCodes.Status200OK,
+                    Message = "Email verification successful. You can now log in.",
                     Data = new TokenModel
                     {
                         Token = token,
@@ -753,7 +743,7 @@ namespace DianaShop.Service.Services
                 return new BaseResponse<TokenModel>
                 {
                     Code = StatusCodes.Status500InternalServerError,
-                    Message = "Registration failed: " + ex.Message
+                    Message = "Verification failed: " + ex.Message
                 };
             }
         }
