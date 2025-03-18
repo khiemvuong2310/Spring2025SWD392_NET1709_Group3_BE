@@ -133,8 +133,13 @@ namespace DianaShop.Service.Services
             order.UpdateDate = DateTime.Now;
             await _unitOfWork.Repository<Order>().UpdateAsync(order);
 
-            user.wallet += (order.FinalAmount * 0.05m);
-            await _unitOfWork.Repository<User>().UpdateAsync(user);
+            if(status == 5)
+            {
+                var tmpAmount = user.wallet ?? 0;
+                tmpAmount += (order.FinalAmount * 0.05m) ?? 0;
+                user.wallet = tmpAmount;
+                await _unitOfWork.Repository<User>().UpdateAsync(user);
+            }
 
             if (status == 6)
             {
@@ -197,13 +202,13 @@ namespace DianaShop.Service.Services
                 throw new Exception("voucher not found");
             }
 
+            var reducedAmount = order.TotalAmount;
             if (order.TotalAmount >= (decimal)voucher.MinimumPurchase)
             {
-                order.FinalAmount -= (order.TotalAmount * (decimal)voucher.DiscountPercentage);
+                reducedAmount = (order.TotalAmount * (decimal)(voucher.DiscountPercentage/100));
                 storage.Quantity--;
             }
-
-
+            order.FinalAmount = order.TotalAmount + order.ShipAmount - reducedAmount;
             order.UpdateDate = DateTime.Now;
             await _unitOfWork.Repository<Order>().UpdateAsync(order);
             await _unitOfWork.Repository<Storage>().UpdateAsync(storage);

@@ -10,56 +10,72 @@ namespace DianaShop.API.Controllers
     [ApiController]
     public class AuthController : ControllerBase
     {
-        private readonly IAuthServices _authService;
+        private readonly IAuthServices _authServices;
 
         public AuthController(IAuthServices authServices)
         {
-            _authService = authServices;
+            _authServices = authServices;
         }
 
         [HttpPost("login")]
-        public async Task<ActionResult> Login(LoginModel model)
+        public async Task<IActionResult> Login([FromBody] LoginModel model)
         {
-            var result = await _authService.AuthenticateAsync(model.Email, model.Password);
+            var result = await _authServices.AuthenticateAsync(model.Email, model.Password);
+            return StatusCode(result.Code ?? StatusCodes.Status500InternalServerError, result);
+        }
 
-            return StatusCode((int)result.Code, result);
+        [HttpPost("register")]
+        public async Task<IActionResult> Register([FromBody] RegisterRequestModel model)
+        {
+            var result = await _authServices.RegisterAsync(model);
+            return StatusCode(result.Code ?? StatusCodes.Status500InternalServerError, result);
+        }
+
+        [HttpPost("admin/create-account")]
+        public async Task<IActionResult> AdminCreateAccount([FromBody] AdminCreateAccountModel model)
+        {
+            var result = await _authServices.AdminGenAcc(model);
+            return StatusCode(result.Code ?? StatusCodes.Status500InternalServerError, result);
+        }
+
+        [HttpPost("forgot-password")]
+        public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequest request)
+        {
+            var result = await _authServices.ForgotPassword(request);
+            return StatusCode(result.Code ?? StatusCodes.Status500InternalServerError, result);
+        }
+
+        [HttpPost("refresh-token")]
+        public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequest request)
+        {
+            var result = await _authServices.RefreshTokenAsync(request.RefreshToken);
+            return StatusCode(result.Code ?? StatusCodes.Status500InternalServerError, result);
+        }
+
+        [HttpPost("send-verification")]
+        public async Task<IActionResult> SendVerificationEmail([FromBody] EmailRequest request)
+        {
+            if (string.IsNullOrEmpty(request.Email))
+            {
+                return BadRequest(new { message = "Email is required" });
+            }
+            
+            var result = await _authServices.SendVerificationEmailAsync(request.Email);
+            return StatusCode(result.Code ?? StatusCodes.Status500InternalServerError, result);
+        }
+
+        [HttpPost("verify-email")]
+        public async Task<IActionResult> VerifyEmail([FromBody] EmailVerificationModel model)
+        {
+            var result = await _authServices.VerifyAccountAsync(model);
+            return StatusCode(result.Code ?? StatusCodes.Status500InternalServerError, result);
         }
 
         [HttpPost("send-email")]
         public async Task<ActionResult> Gets(int userId)
         {
-            var result = await _authService.SendAccount(userId);
-            return StatusCode((int)result.Code, result);
-        }
-
-        [HttpPut("forgot-password")]
-        public async Task<ActionResult> ForgotPassword([FromBody] DianaShop.Service.RequestModel.ForgotPasswordRequest request)
-        {
-            var result = await _authService.ForgotPassword(request);
-            return StatusCode((int)result.Code, result);
-        }
-
-        [HttpPost("register")]
-        public IActionResult Register(RegisterModel model)
-        {
-            // Implement user registration logic here
-
-            // Once the user is registered, generate JWT token
-            //return Ok(_authService.RegisterAsync(model).Result);
-            var result = _authService.RegisterAsync(model).Result;
-            return StatusCode((int)result.Code, result);
-        }
-
-        [HttpPost("admin-create-account")]
-        [Authorize(Roles = "Manager")]
-        public IActionResult AdminGenAcc(AdminCreateAccountModel model)
-        {
-            // Implement user registration logic here
-
-            // Once the user is registered, generate JWT token
-            //return Ok(_authService.RegisterAsync(model).Result);
-            var result = _authService.AdminGenAcc(model).Result;
-            return StatusCode((int)result.Code, result);
+            var result = await _authServices.SendAccount(userId);
+            return StatusCode(result.Code ?? StatusCodes.Status500InternalServerError, result);
         }
     }
 }

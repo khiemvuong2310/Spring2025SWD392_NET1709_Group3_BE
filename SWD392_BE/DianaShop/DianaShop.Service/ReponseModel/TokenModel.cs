@@ -9,5 +9,6 @@ namespace DianaShop.Service.ReponseModel
     public class TokenModel
     {
         public string? Token { get; set; }
+        public string? RefreshToken { get; set; }
     }
 }

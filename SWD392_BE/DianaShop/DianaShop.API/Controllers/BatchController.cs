@@ -13,12 +13,17 @@ namespace DianaShop.API.Controllers
         {
             _batchService = batchService;
         }
+
+        [Authorize(Roles = "Manager")]      
+        [Authorize(Roles = "Staff")]
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
             var response = await _batchService.GetAllAsync();
             return Ok(response);
         }
+
+        [Authorize(Roles = "Manager, Staff")]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
@@ -26,6 +31,8 @@ namespace DianaShop.API.Controllers
             if (response == null) return NotFound();
             return Ok(response);
         }
+
+        [Authorize(Roles = "Manager, Staff")]
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] BatchRequestModel request)
         {
@@ -33,6 +40,8 @@ namespace DianaShop.API.Controllers
             var response = await _batchService.CreateAsync(request);
             return CreatedAtAction(nameof(GetById), new { id = response.Id }, response);
         }
+
+        [Authorize(Roles = "Manager, Staff")]
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, [FromBody] BatchRequestModel request)
         {
@@ -43,6 +52,8 @@ namespace DianaShop.API.Controllers
             if (updateResponse == null) return NotFound();
             return Ok(updateResponse);
         }
+
+        [Authorize(Roles = "Manager, Staff")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
