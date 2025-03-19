@@ -75,7 +75,8 @@ namespace DianaShop.API.Controllers
             try
             {
                 var result = await _orderService.UpdateOrder(orderId, status);
-                return Ok(result);
+                var response = await _orderService.GetOrderById(result.Id);
+                return Ok(response);
             }
             catch (Exception ex)
             {
