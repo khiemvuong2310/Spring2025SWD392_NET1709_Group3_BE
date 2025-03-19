@@ -19,4 +19,14 @@ namespace DianaShop.Service.ReponseModel
         public UserResponseModel User { get; set; }
         public ProductResponseModel Product { get; set; }
     }
+    public class FeedbackResponse
+    {
+        public int Id { get; set; }
+        public int UserID { get; set; }
+        public int ProductID { get; set; }
+        public int? Rating { get; set; }
+        public string? Comment { get; set; }
+        public DateTime? CreatedDate { get; set; }
+        public int? ReplyOn { get; set; }
+    }
 }
