@@ -24,7 +24,7 @@ namespace DianaShop.Service.Services
         private readonly IMapper _mapper;
         private static readonly Dictionary<string, string[]> AllowedFileTypes = new()
         {
-            { "images", new[] { "image/jpeg", "image/png", "image/gif" } },
+            { "images", new[] { "image/jpeg", "image/png", "image/gif", "image/bmp", "image/tiff", "image/webp", "image/x-icon", "image/svg+xml" } },
         };
         public ImageService(IUnitOfWork unitOfWork, IMapper mapper)
         {
