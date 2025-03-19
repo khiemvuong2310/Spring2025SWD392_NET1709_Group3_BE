@@ -110,6 +110,7 @@ namespace DianaShop.Service.Services
                 post.PostTags = new List<PostTag>();
                 foreach (var tagId in model.TagIds)
                 {
+                    if (await _unitOfWork.Repository<PostTag>().AnyAsync(pt => pt.TagId == tagId && pt.PostId == post.Id)) continue;
                     post.PostTags.Add(new PostTag { TagId = tagId });
                 }
             }
