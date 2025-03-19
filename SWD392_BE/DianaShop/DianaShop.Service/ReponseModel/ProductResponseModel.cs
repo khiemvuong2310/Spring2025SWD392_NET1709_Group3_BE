@@ -26,7 +26,7 @@ namespace DianaShop.Service.ReponseModel
         public bool IsDeleted { get; set; }
         public List<int> ProductBatchIds { get; set; } // List of Batch Codes
         public List<string> ProductTags { get; set; } // List of tags like "organic", "vegan", etc.
-        public List<string> ProductImages { get; set; } // List of image URLs
+        public string? ProductImage { get; set; } // List of image URLs
         public List<string> ProductIngredients { get; set; } // List of ingredients
         public List<string> ProductSkinTypes { get; set; } // List of compatible skin types
     }
