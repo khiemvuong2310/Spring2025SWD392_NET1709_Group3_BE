@@ -45,7 +45,6 @@ namespace DianaShop.API.Controllers
                 return BadRequest("Invalid user ID in token");
             }
 
-            // Kiểm tra nếu người dùng có role Manager hoặc Staff, cho phép xem tất cả user
             bool isManagerOrStaff = User.IsInRole("Manager") || User.IsInRole("Staff");
             
             if (!isManagerOrStaff && currentUserId != id)

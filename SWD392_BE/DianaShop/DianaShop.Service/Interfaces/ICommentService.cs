@@ -10,5 +10,6 @@ namespace DianaShop.Service.Interfaces
         Task<IEnumerable<CommentResponseModel>> GetAllAsync();
         Task<CommentResponseModel> GetByIdAsync(int id);
         Task<bool> UpdateAsync(int id, CommentUpdateRequestModel request);
+        Task<IEnumerable<CommentResponseModel>> GetCommentsByPostIdAsync(int postId);
     }
 }

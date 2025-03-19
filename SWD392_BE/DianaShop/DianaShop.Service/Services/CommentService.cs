@@ -27,13 +27,18 @@ namespace DianaShop.Service.Services
 
         public async Task<IEnumerable<CommentResponseModel>> GetAllAsync()
         {
-            var comments = await _context.Comments.ToListAsync();
+            var comments = await _context.Comments
+                .Include(c => c.User)
+                .OrderByDescending(c => c.CreatedDate)
+                .ToListAsync();
             return _mapper.Map<IEnumerable<CommentResponseModel>>(comments);
         }
 
-        public async Task<CommentResponseModel> GetByIdAsync(int id)
+        public async Task<CommentResponseModel?> GetByIdAsync(int id)
         {
-            var comment = await _context.Comments.FindAsync(id);
+            var comment = await _context.Comments
+                .Include(c => c.User)
+                .FirstOrDefaultAsync(c => c.Id == id);
             return comment != null ? _mapper.Map<CommentResponseModel>(comment) : null;
         }
 
@@ -63,6 +68,17 @@ namespace DianaShop.Service.Services
             _context.Comments.Remove(comment);
             await _context.SaveChangesAsync();
             return true;
+        }
+
+        public async Task<IEnumerable<CommentResponseModel>> GetCommentsByPostIdAsync(int postId)
+        {
+            var comments = await _context.Comments
+                .Where(c => c.PostId == postId)
+                .Include(c => c.User)
+                .OrderByDescending(c => c.CreatedDate)
+                .ToListAsync();
+            
+            return _mapper.Map<IEnumerable<CommentResponseModel>>(comments);
         }
     }
 }

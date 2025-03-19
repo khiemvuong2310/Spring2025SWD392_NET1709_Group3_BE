@@ -53,7 +53,16 @@ namespace DianaShop.API.Controllers
         public async Task<IActionResult> Delete(int id)
         {
             var result = await _service.DeleteAsync(id);
-            return result ? Ok("Comment deleted successfully.") : NotFound("Comment not found.");
+            if (!result)
+                return NotFound(new { message = "Comment not found" });
+            return Ok(new { message = "Comment deleted successfully" });
+        }
+
+        [HttpGet("post/{postId}")]
+        public async Task<IActionResult> GetCommentsByPostId(int postId)
+        {
+            var comments = await _service.GetCommentsByPostIdAsync(postId);
+            return Ok(comments);
         }
     }
 }
