@@ -69,8 +69,7 @@ namespace DianaShop.API.Controllers
         /// Cập nhật trạng thái trong đơn hàng
         /// </summary>
         [HttpPut("status/{orderId}/{status}")]
-        [Authorize(Roles = "Manager")]        
-        [Authorize(Roles = "Staff")]
+        [Authorize(Roles = "Manager, Staff")]
         public async Task<IActionResult> UpdateOrderStatus(int orderId, int status)
         {
             try
