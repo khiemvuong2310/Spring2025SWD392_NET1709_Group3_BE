@@ -28,7 +28,8 @@ namespace DianaShop.Service.Mapping
             .ForMember(dest => dest.ProductImage, opt => opt.MapFrom(src => src.ProductImages.Any() ? src.ProductImages.OrderByDescending(pi => pi.ImageId).FirstOrDefault().Image.Base64Image : null ))
             .ForMember(dest => dest.ProductIngredients, opt => opt.MapFrom(src => src.ProductIngredients.Select(pi => pi.Ingredient.Name).ToList()))
             .ForMember(dest => dest.ProductSkinTypes, opt => opt.MapFrom(src => src.ProductSkinTypes.Select(ps => ps.SkinType.Name).ToList()))
-            .ForMember(dest => dest.IsDeleted, opt => opt.MapFrom(src => src.IsDelete));
+            .ForMember(dest => dest.IsDeleted, opt => opt.MapFrom(src => src.IsDelete))
+            .ForMember(dest => dest.Feedbacks, opt => opt.MapFrom(src => src.Feedbacks));
         }
     }
 }

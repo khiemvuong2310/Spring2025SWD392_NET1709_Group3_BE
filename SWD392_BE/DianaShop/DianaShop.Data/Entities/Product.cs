@@ -39,5 +39,6 @@ namespace DianaShop.Data.Entities
 
         public virtual ICollection<CartProduct> CartProducts { get; set; }
         public virtual ICollection<OrderDetail> OrderDetails { get; set; }
+        public virtual ICollection<FeedBack> Feedbacks { get; set; }
     }
 }

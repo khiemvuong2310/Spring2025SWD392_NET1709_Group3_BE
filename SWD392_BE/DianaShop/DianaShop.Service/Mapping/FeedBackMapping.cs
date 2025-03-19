@@ -22,7 +22,7 @@ namespace DianaShop.Service.Mapping
                 .ForMember(dest => dest.Comment, opt => opt.MapFrom(src => src.Comment))
                 .ForMember(dest => dest.CreatedDate, opt => opt.MapFrom(src => src.CreatedDate))
                 .ForMember(dest => dest.ReplyOn, opt => opt.MapFrom(src => src.ReplyOn));
-
+            CreateMap<FeedBack, FeedbackResponse>();
             // FeedBack -> FeedBackResponseModel
             CreateMap<FeedBack, FeedBackResponseModel>()
                 .ForMember(dest => dest.UserId, opt => opt.MapFrom(src => src.UserID))

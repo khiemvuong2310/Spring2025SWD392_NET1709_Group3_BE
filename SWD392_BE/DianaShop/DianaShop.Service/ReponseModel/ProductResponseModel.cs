@@ -29,6 +29,7 @@ namespace DianaShop.Service.ReponseModel
         public string? ProductImage { get; set; } // List of image URLs
         public List<string> ProductIngredients { get; set; } // List of ingredients
         public List<string> ProductSkinTypes { get; set; } // List of compatible skin types
+        public List<FeedbackResponse> Feedbacks { get; set; }
     }
 
     public class ProductResponseCart
