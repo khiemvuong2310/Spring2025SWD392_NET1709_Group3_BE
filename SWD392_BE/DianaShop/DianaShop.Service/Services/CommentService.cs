@@ -47,7 +47,12 @@ namespace DianaShop.Service.Services
             var comment = _mapper.Map<Comment>(request);
             _context.Comments.Add(comment);
             await _context.SaveChangesAsync();
-            return _mapper.Map<CommentResponseModel>(comment);
+
+            var createdComment = await _context.Comments
+                .Include(c => c.User)
+                .FirstOrDefaultAsync(c => c.Id == comment.Id);
+
+            return _mapper.Map<CommentResponseModel>(createdComment);
         }
 
         public async Task<bool> UpdateAsync(int id, CommentUpdateRequestModel request)
