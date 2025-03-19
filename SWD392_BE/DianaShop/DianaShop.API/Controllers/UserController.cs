@@ -3,6 +3,7 @@ using DianaShop.Service.RequestModel;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace DianaShop.API.Controllers
 {
@@ -19,7 +20,7 @@ namespace DianaShop.API.Controllers
 
         // Lấy tất cả người dùng
         [HttpGet]
-        //[Authorize]
+        [Authorize]
         public async Task<IActionResult> GetAllUsers()
         {
             var users = await _userService.GetAllUsersAsync();
@@ -28,21 +29,42 @@ namespace DianaShop.API.Controllers
 
         // Lấy người dùng theo ID
         [HttpGet("{id}")]
-        [Authorize(Roles = "Manager, Staff")]
+        [Authorize]
         public async Task<IActionResult> GetUserById(int id)
         {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            
+            if (userIdClaim == null)
+            {
+                return Unauthorized("User ID not found in token claims");
+            }
+            
+            // Chuyển đổi ID từ claim sang int
+            if (!int.TryParse(userIdClaim.Value, out int currentUserId))
+            {
+                return BadRequest("Invalid user ID in token");
+            }
+
+            // Kiểm tra nếu người dùng có role Manager hoặc Staff, cho phép xem tất cả user
+            bool isManagerOrStaff = User.IsInRole("Manager") || User.IsInRole("Staff");
+            
+            if (!isManagerOrStaff && currentUserId != id)
+            {
+                return Forbid("You can only view your own user information");
+            }
+
             var user = await _userService.GetUserByIdAsync(id);
             if (user == null)
             {
                 return NotFound("User not found.");
             }
+            
             return Ok(user);
         }
 
         // Tạo người dùng mới
         [HttpPost]
-        [Authorize(Roles = "Manager, Staff")]
-        //[Authorize]
+        [Authorize(Roles = "Manager")]
         public async Task<IActionResult> CreateUser([FromBody] UserCreateRequest request)
         {
             if (!ModelState.IsValid)
@@ -56,8 +78,7 @@ namespace DianaShop.API.Controllers
 
         // Cập nhật người dùng
         [HttpPut("{id}")]
-        [Authorize(Roles = "Manager, Staff")]
-        //[Authorize]
+        [Authorize]
         public async Task<IActionResult> UpdateUser(int id, [FromBody] UserUpdateRequest request)
         {
             if (!ModelState.IsValid)
