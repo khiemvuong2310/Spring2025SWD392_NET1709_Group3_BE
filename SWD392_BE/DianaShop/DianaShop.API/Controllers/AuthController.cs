@@ -71,6 +71,19 @@ namespace DianaShop.API.Controllers
             return StatusCode(result.Code ?? StatusCodes.Status500InternalServerError, result);
         }
 
+        [HttpPost("set-email-verified")]
+        [Authorize(Roles = "Manager")]
+        public async Task<IActionResult> SetEmailVerified([FromBody] EmailRequest request)
+        {
+            if (string.IsNullOrEmpty(request.Email))
+            {
+                return BadRequest(new { message = "Email is required" });
+            }
+            
+            var result = await _authServices.SetEmailVerified(request.Email);
+            return StatusCode(result.Code ?? StatusCodes.Status500InternalServerError, result);
+        }
+
         [HttpPost("send-email")]
         public async Task<ActionResult> Gets(int userId)
         {

@@ -80,14 +80,13 @@ namespace DianaShop.Service.Services
                     };
                 }
 
-                // We'll check if user has verified email by checking if there's a verification code for this email
-                if (_verificationCodes.ContainsKey(email))
+                // Check if email is verified
+                if (!user.EmailVerified)
                 {
-                    // There's still an active verification code, user hasn't verified their email yet
                     return new BaseResponseForLogin<LoginResponseModel>
                     {
                         Code = StatusCodes.Status403Forbidden,
-                        Message = "Please verify your email. Your verification code is still valid.",
+                        Message = "Please verify your email before logging in",
                         Data = null,
                         IsBanned = false,
                         RequiresVerification = true
@@ -263,8 +262,8 @@ namespace DianaShop.Service.Services
                     Password = PasswordTools.HashPassword(registerModel.Password),
                     Phone = registerModel.Phone,
                     Status = true,
-                    wallet = 0 // Initialize wallet with 0
-                    // EmailVerified field removed
+                    wallet = 0, // Initialize wallet with 0
+                    EmailVerified = false // Set EmailVerified to false by default
                 };
 
                 await _unitOfWork.Repository<User>().InsertAsync(user);
@@ -733,6 +732,11 @@ namespace DianaShop.Service.Services
                     };
                 }
 
+                // Set EmailVerified to true
+                user.EmailVerified = true;
+                await _unitOfWork.Repository<User>().Update(user, user.Id);
+                await _unitOfWork.CommitAsync();
+
                 // Generate tokens for the verified user
                 var userDetails = await _userService.GetUserByEmailAsync(user.Email);
                 var userWithRole = await _userService.GetUserByUsernameAsync(userDetails.Username);
@@ -835,6 +839,44 @@ namespace DianaShop.Service.Services
   </div>
 </body>
 </html>";
+        }
+
+        public async Task<BaseResponse> SetEmailVerified(string email)
+        {
+            try
+            {
+                var user = await _unitOfWork.Repository<User>()
+                    .AsQueryable()
+                    .Where(u => u.Email == email && !u.IsDelete)
+                    .FirstOrDefaultAsync();
+
+                if (user == null)
+                {
+                    return new BaseResponse
+                    {
+                        Code = StatusCodes.Status404NotFound,
+                        Message = "User not found"
+                    };
+                }
+
+                user.EmailVerified = true;
+                await _unitOfWork.Repository<User>().Update(user, user.Id);
+                await _unitOfWork.CommitAsync();
+
+                return new BaseResponse
+                {
+                    Code = StatusCodes.Status200OK,
+                    Message = "Email verified successfully"
+                };
+            }
+            catch (Exception ex)
+            {
+                return new BaseResponse
+                {
+                    Code = StatusCodes.Status500InternalServerError,
+                    Message = "Failed to verify email: " + ex.Message
+                };
+            }
         }
     }
 }

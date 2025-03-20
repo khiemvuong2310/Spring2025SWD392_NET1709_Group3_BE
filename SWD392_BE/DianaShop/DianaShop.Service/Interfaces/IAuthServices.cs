@@ -13,5 +13,6 @@ namespace DianaShop.Service.Interfaces
         Task<BaseResponse<TokenModel>> RefreshTokenAsync(string refreshToken);
         Task<BaseResponse> SendVerificationEmailAsync(string email);
         Task<BaseResponse<TokenModel>> VerifyAccountAsync(EmailVerificationModel model);
+        Task<BaseResponse> SetEmailVerified(string email);
     }
 }
