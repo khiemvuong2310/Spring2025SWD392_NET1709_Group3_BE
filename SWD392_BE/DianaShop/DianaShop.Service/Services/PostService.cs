@@ -73,7 +73,7 @@ namespace DianaShop.Service.Services
                 post.PostImages = new List<PostImage>();
                 foreach (var ImageId in model.ImageFiles)
                 {
-                    var image = await _imageService.ConvertToImageAsync(ImageId);
+                    var image = await _imageService.AddSingleAsync(ImageId);
                     if (image != null) post.PostImages.Add(new PostImage { Image = image });
                 }
             }
@@ -120,7 +120,7 @@ namespace DianaShop.Service.Services
                 post.PostImages = new List<PostImage>();
                 foreach (var ImageId in model.ImageFiles)
                 {
-                    var image = await _imageService.ConvertToImageAsync(ImageId);
+                    var image = await _imageService.AddSingleAsync(ImageId);
                     if (image != null) post.PostImages.Add(new PostImage { Image = image });
                 }
                 if (existingImages.Any())

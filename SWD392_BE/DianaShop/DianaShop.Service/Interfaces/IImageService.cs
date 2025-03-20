@@ -14,7 +14,8 @@ namespace DianaShop.Service.Interfaces
     {
         Task<PaginatedResponse<ImageResponseModel>> GetAllAsync(ImageQueryRequest request);
         Task<ImageResponseModel?> GetByIdAsync(int id);
-        Task<Image?> ConvertToImageAsync(IFormFile file);
+        //Task<Image?> ConvertToImageAsync(IFormFile file);
+        Task<Image?> AddSingleAsync(IFormFile file);
         Task<List<ImageResponseModel>> AddAsync(List<IFormFile> files);
         Task<ImageResponseModel?> UpdateAsync(int id, IFormFile file);
         Task SoftDeleteAsync(int id);
