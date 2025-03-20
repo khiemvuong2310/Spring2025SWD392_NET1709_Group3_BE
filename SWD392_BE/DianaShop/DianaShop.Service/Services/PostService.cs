@@ -36,6 +36,7 @@ namespace DianaShop.Service.Services
                 .Where(p => request.UserId == null || p.UserId == request.UserId)
                 .Where(p => string.IsNullOrEmpty(request.Title) || p.Title.Contains(request.Title))
                 .Where(p => p.Status == request.Status)
+                .Where(p => !request.TagIds.Any() || p.PostTags.Any(pt => request.TagIds.Contains(pt.TagId)))
                 .Where(p => request.MinCreatedDate == null || p.CreatedDate >= request.MinCreatedDate)
                 .Where(p => request.MaxCreatedDate == null || p.CreatedDate <= request.MaxCreatedDate)
                 .Where(p => request.MinPublishedDate == null || p.UpdatedDate >= request.MinPublishedDate)
