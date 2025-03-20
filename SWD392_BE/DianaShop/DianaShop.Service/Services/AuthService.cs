@@ -320,31 +320,42 @@ namespace DianaShop.Service.Services
         public async Task<BaseResponse<TokenModel>> AdminGenAcc(AdminCreateAccountModel adminCreateAccountModel)
         {
             try
-        {
-            var existingUser = await _unitOfWork.Repository<User>().FindAsync(u => u.Email == adminCreateAccountModel.Email);
-
-            if (existingUser != null)
             {
-                return new BaseResponse<TokenModel>
+                var existingUser = await _unitOfWork.Repository<User>().FindAsync(u => u.Email == adminCreateAccountModel.Email);
+
+                if (existingUser != null)
                 {
+                    return new BaseResponse<TokenModel>
+                    {
                         Code = StatusCodes.Status409Conflict,
-                    Message = "Email already exists",
-                };
-            }
+                        Message = "Email already exists",
+                    };
+                }
 
-            var user = new User()
-            {
-                Location = adminCreateAccountModel.Location,
-                Username = adminCreateAccountModel.Username,
-                Email = adminCreateAccountModel.Email,
-                Password = "01234",
-                Phone = adminCreateAccountModel.Phone,
-                Status = true,
+                var user = new User()
+                {
+                    Location = adminCreateAccountModel.Location,
+                    Username = adminCreateAccountModel.Username,
+                    Email = adminCreateAccountModel.Email,
+                    Password = PasswordTools.HashPassword("0123456"),
+                    Phone = adminCreateAccountModel.Phone,
+                    Status = true,
                     wallet = 0,
-            };
+                };
 
-            await _unitOfWork.Repository<User>().InsertAsync(user);
-            await _unitOfWork.CommitAsync();
+                await _unitOfWork.Repository<User>().InsertAsync(user);
+                await _unitOfWork.CommitAsync();
+
+                // Assign Manager role
+                var userRole = new UserRole
+                {
+                    UserId = user.Id,
+                    RoleId = 1, // Manager role ID
+                    Status = true
+                };
+                
+                await _unitOfWork.Repository<UserRole>().InsertAsync(userRole);
+                await _unitOfWork.SaveChangesAsync();
 
                 // Create VoucherStorage for the new user
                 var voucherStorageRequest = new VoucherStorageRequestModel
@@ -354,29 +365,26 @@ namespace DianaShop.Service.Services
                 
                 await _voucherStorageService.CreateVoucherStorageAsync(voucherStorageRequest);
 
-                var result = await SendAccount(user.Id);
-                if (result.Code != StatusCodes.Status200OK)
+                // Gửi email trực tiếp thay vì gọi SendAccount
+                await SendEmailAsync(
+                    user.Email,
+                    "YOUR ENTRY ACCOUNT",
+                    GetAccountEmailTemplate(user.Email, "0123456")
+                );
+
+                var userWithRole = await _userService.GetUserByUsernameAsync(user.Username);
+                var roleNames = string.Join(",", userWithRole.UserRoles.Select(ur => ur.RoleName));
+                string token = GenerateJwtToken(user.Username, roleNames, user.Id);
+
+                return new BaseResponse<TokenModel>
                 {
-                    return new BaseResponse<TokenModel>
-                    {
-                        Code = result.Code,
-                        Message = result.Message,
-                    };
-                }
-
-            var userWithRole = await _userService.GetUserByUsernameAsync(user.Username);
-            var roleNames = string.Join(",", userWithRole.UserRoles.Select(ur => ur.RoleName));
-            string token = GenerateJwtToken(user.Username, roleNames, user.Id);
-
-            return new BaseResponse<TokenModel>
-            {
                     Code = StatusCodes.Status201Created,
                     Message = "Account created successfully",
-                Data = new TokenModel
-                {
-                    Token = token
-                }
-            };
+                    Data = new TokenModel
+                    {
+                        Token = token
+                    }
+                };
             }
             catch (Exception ex)
             {
