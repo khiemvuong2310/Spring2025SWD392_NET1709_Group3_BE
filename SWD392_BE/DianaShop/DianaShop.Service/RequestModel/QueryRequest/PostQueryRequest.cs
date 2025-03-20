@@ -11,7 +11,7 @@ namespace DianaShop.Service.RequestModel.QueryRequest
     {
         public string? Title { get; set; }
         public int? UserId { get; set; }
-        public bool Status { get; set; } = true;
+        public bool? Status { get; set; }
         public DateTime? MinCreatedDate { get; set; }
         public DateTime? MaxCreatedDate { get; set; }
         public DateTime? MinPublishedDate { get; set; }
