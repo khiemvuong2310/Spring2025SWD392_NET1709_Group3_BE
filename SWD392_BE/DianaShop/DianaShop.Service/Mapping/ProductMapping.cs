@@ -29,7 +29,7 @@ namespace DianaShop.Service.Mapping
             .ForMember(dest => dest.ProductIngredients, opt => opt.MapFrom(src => src.ProductIngredients.Select(pi => pi.Ingredient.Name).ToList()))
             .ForMember(dest => dest.ProductSkinTypes, opt => opt.MapFrom(src => src.ProductSkinTypes.Select(ps => ps.SkinType.Name).ToList()))
             .ForMember(dest => dest.IsDeleted, opt => opt.MapFrom(src => src.IsDelete))
-            .ForMember(dest => dest.Feedbacks, opt => opt.MapFrom(src => src.Feedbacks.Select(f => !f.IsDelete)));
+            .ForMember(dest => dest.Feedbacks, opt => opt.MapFrom(src => src.Feedbacks.Where(f => !f.IsDelete)));
         }
     }
 }
