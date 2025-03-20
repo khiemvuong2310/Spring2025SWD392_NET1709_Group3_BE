@@ -11,17 +11,12 @@ namespace DianaShop.Service.Interfaces
     public interface IOrderService
     {
         Task<IEnumerable<OrderResponseModel>> GetAllOrder();
+        Task<PaginatedResponse<OrderResponseModel>> SearchOrder(GetOrderRequestModel request);
         Task<IEnumerable<OrderResponseModel>> GetAllOrderByUser(int userId);
         Task<OrderResponseModel?> GetOrderById(int orderId);
-
-        //Task<IEnumerable<OrderDetailResponseModel>> GetOrderDetails(int orderId);
-        //Task<OrderDetailResponseModel> AddOrderDetail(OrderDetailRequestModel request);
-        //Task<OrderDetailResponseModel> UpdateOrderDetail(OrderDetailRequestModel request);
         Task<OrderResponseModel> CreateOrder(OrderRequestModel request);
         Task<OrderResponseModel> UpdateOrder(int orderId, int status);
         Task<OrderResponseModel> AddVoucherToOrder(int orderId, int voucherId);
-        //Task<bool> RemoveOrderDetail(int orderId, int productId);
-        //Task<bool> ClearOrder(int orderId);
         Task<bool> RemoveOrder(int orderId);
 
     }

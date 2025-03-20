@@ -51,6 +51,15 @@ namespace DianaShop.API.Controllers
             return Ok(response);
         }
 
+        /// 🛒 Lấy order theo thuộc tính
+        [HttpGet("search/{orderId}")]
+        [Authorize]
+        public async Task<IActionResult> SearchOrder([FromBody] GetOrderRequestModel request)
+        {
+            var response = await _orderService.SearchOrder(request);
+            return Ok(response);
+        }
+
         /// 🛒 API tạo đơn hàng mới cho User
         [HttpPost("create order")]
         [Authorize]
@@ -75,6 +84,25 @@ namespace DianaShop.API.Controllers
             try
             {
                 var result = await _orderService.UpdateOrder(orderId, status);
+                var response = await _orderService.GetOrderById(result.Id);
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Cập nhật trạng thái trong đơn hàng
+        /// </summary>
+        [HttpPut("cancelorder/{orderId}")]
+        [Authorize]
+        public async Task<IActionResult> CancelOrder(int orderId)
+        {
+            try
+            {
+                var result = await _orderService.UpdateOrder(orderId, 6);
                 var response = await _orderService.GetOrderById(result.Id);
                 return Ok(response);
             }

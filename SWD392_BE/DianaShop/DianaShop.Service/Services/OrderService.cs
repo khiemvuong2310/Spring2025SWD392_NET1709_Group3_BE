@@ -33,6 +33,45 @@ namespace DianaShop.Service.Services
                 .ToListAsync();
         }
 
+        public async Task<PaginatedResponse<OrderResponseModel>> SearchOrder(GetOrderRequestModel request)
+        {
+            var orderQuery = _unitOfWork.Repository<Order>()
+                .GetAll()
+                .Where(o => o.StatusId == null || o.StatusId == request.StatusId)
+                .Where(o => o.UserID == null || o.UserID == request.UserID)
+                .Where(o => o.VoucherID == null || o.VoucherID == request.VoucherID)
+                .Where(o => o.Quantity == null || o.Quantity == request.Quantity)
+                .Where(o => o.Address == null || o.Address.Contains(request.Address))
+                .Where(o => request.MinAmount == null || o.FinalAmount >= request.MinAmount)
+                .Where(o => request.MaxAmount == null || o.FinalAmount <= request.MaxAmount)
+                .Where(o => request.MinCreatedDate == null || o.OrderDate <= request.MinCreatedDate)
+                .Where(o => request.MaxCreatedDate == null || o.OrderDate <= request.MaxCreatedDate)
+                .Where(o => request.MinUpdateDate == null || o.UpdateDate >= request.MinUpdateDate)
+                .Where(o => request.MaxUpdateDate == null || o.UpdateDate <= request.MaxUpdateDate)
+                .ProjectTo<OrderResponseModel>(_mapper.ConfigurationProvider);
+
+            switch(request.SortBy)
+            {
+                case OrderSort.Default:
+                    orderQuery = request.Ascending ? orderQuery.OrderBy(p => p.Id) : orderQuery.OrderByDescending(p => p.Id);
+                    break;
+                case OrderSort.Quantity: 
+                    orderQuery = request.Ascending ? orderQuery.OrderBy(p => p.Quantity) : orderQuery.OrderByDescending(p => p.Quantity);
+                    break;
+                case OrderSort.Address:
+                    orderQuery = request.Ascending ? orderQuery.OrderBy(p => p.Address) : orderQuery.OrderByDescending(p => p.Address);
+                    break;
+                case OrderSort.FinalAmount:
+                    orderQuery = request.Ascending ? orderQuery.OrderBy(p => p.FinalAmount) : orderQuery.OrderByDescending(p => p.FinalAmount);
+                    break;
+                default: 
+                    break;
+            }
+
+
+            return await PaginatedResponse<OrderResponseModel>.CreateAsync(orderQuery, request.PageNumber, request.PageSize);
+        }
+
 
         public async Task<IEnumerable<OrderResponseModel>> GetAllOrderByUser(int userId)
         {
