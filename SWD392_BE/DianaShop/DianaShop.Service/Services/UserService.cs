@@ -63,6 +63,7 @@ namespace DianaShop.Service.Services
 
             var user = _mapper.Map<User>(request);
             user.Password = PasswordTools.HashPassword(user.Password);
+            user.EmailVerified = true;
 
             // Lưu user vào database trước khi gán UserRoles để tránh lỗi vòng lặp
             await _unitOfWork.Repository<User>().InsertAsync(user);
