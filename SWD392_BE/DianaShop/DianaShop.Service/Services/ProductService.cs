@@ -155,8 +155,26 @@ namespace DianaShop.Service.Services
 
         public async Task UpdateProductAsync(int id, ProductRequestModel model)
         {
-            var existingProduct = await _unitOfWork.Repository<Product>().AsQueryable().Where(p => p.Id == id).Include(p => p.ProductImages).FirstOrDefaultAsync();
+            var existingProduct = await _unitOfWork.Repository<Product>().AsQueryable().Where(p => p.Id == id)
+                .Include(p => p.ProductImages)
+                .Include(p => p.ProductTags)
+                .Include(p => p.ProductIngredients)
+                .FirstOrDefaultAsync();
             var updatedProduct = await HandleValidation(model);
+            //foreach (var tag in updatedProduct.ProductTags)
+            //{
+            //    if (existingProduct.ProductTags.FirstOrDefault(pt => pt.TagId == tag.TagId) != null)
+            //    {
+            //        updatedProduct.ProductTags.Remove(tag);
+            //    }
+            //}
+            //foreach (var ingredient in updatedProduct.ProductIngredients)
+            //{
+            //    if (existingProduct.ProductIngredients.FirstOrDefault(pi => pi.IngredientId == ingredient.IngredientId) != null)
+            //    {
+            //        updatedProduct.ProductIngredients.Remove(ingredient);
+            //    }
+            //}
 
             // Preserve the existing images if none are provided in the model
             if (existingProduct.ProductImages.Any() && updatedProduct.ProductImages.Any())

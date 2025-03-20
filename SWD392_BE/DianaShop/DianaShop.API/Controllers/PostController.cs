@@ -44,7 +44,7 @@ namespace DianaShop.API.Controllers
             return CreatedAtAction(nameof(GetById), new { id = response.Id }, response);
         }
 
-        [Authorize(Roles = "Staff,Manager")]
+        //[Authorize(Roles = "Staff,Manager")]
         [HttpPut("publication/{id}")]
         public async Task<IActionResult> UpdatePublicationStatus(int id)
         {
@@ -54,7 +54,7 @@ namespace DianaShop.API.Controllers
             return NoContent();
         }
 
-        [Authorize(Roles = "Staff,Manager")]
+        //[Authorize(Roles = "Staff,Manager")]
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, [FromForm] PostRequestModel request)
         {

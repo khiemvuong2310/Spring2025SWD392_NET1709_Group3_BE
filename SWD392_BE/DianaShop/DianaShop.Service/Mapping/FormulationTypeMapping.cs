@@ -15,8 +15,7 @@ namespace DianaShop.Service.Mapping
         public FormulationTypeMapping()
         {
             CreateMap<FormulationTypeRequestModel, FormulationType>();
-            CreateMap<FormulationType, FormulationTypeResponseModel>()
-                .ForMember(dest => dest.Products, opt => opt.MapFrom(src => src.Products));
+            CreateMap<FormulationType, FormulationTypeResponseModel>();
         }
     }
 }

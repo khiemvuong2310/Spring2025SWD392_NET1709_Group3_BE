@@ -17,6 +17,5 @@ namespace DianaShop.Service.ReponseModel
         public bool IsEssentialOilFree { get; set; }
         public bool IsSiliconeFree { get; set; }
         public bool IsSulfateFree { get; set; }
-        public List<ProductResponseModel> Products { get; set; }
     }
 }

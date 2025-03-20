@@ -15,8 +15,7 @@ namespace DianaShop.Service.Mapping
         public BrandMapping()
         {
             CreateMap<BrandRequestModel, Brand>();
-            CreateMap<Brand, BrandResponseModel>()
-                .ForMember(dest => dest.Products, opt => opt.MapFrom(src => src.Products));
+            CreateMap<Brand, BrandResponseModel>();
         }
     }
 }
