@@ -18,7 +18,7 @@ namespace DianaShop.Data.Entities
         public string? Token { get; set; }
         public string? Image { get; set; }
         public bool? Status { get; set; }
-        public bool EmailVerify { get; set; } = false;
+        public bool EmailVerified { get; set; } = false;
         public int? SkinTypeId { get; set; }
         public decimal? wallet { get; set; }
 

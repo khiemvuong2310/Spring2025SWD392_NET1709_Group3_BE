@@ -81,7 +81,7 @@ namespace DianaShop.Service.Services
                 }
 
                 // Check if email is verified
-                if (!user.EmailVerify)
+                if (!user.EmailVerified)
                 {
                     return new BaseResponseForLogin<LoginResponseModel>
                     {
@@ -263,7 +263,7 @@ namespace DianaShop.Service.Services
                     Phone = registerModel.Phone,
                     Status = true,
                     wallet = 0, // Initialize wallet with 0
-                    EmailVerify = false // Set EmailVerify to false by default
+                    EmailVerified = false // Set EmailVerified to false by default
                 };
 
                 await _unitOfWork.Repository<User>().InsertAsync(user);
@@ -732,8 +732,8 @@ namespace DianaShop.Service.Services
                     };
                 }
 
-                // Set EmailVerify to true
-                user.EmailVerify = true;
+                // Set EmailVerified to true
+                user.EmailVerified = true;
                 await _unitOfWork.Repository<User>().Update(user, user.Id);
                 await _unitOfWork.CommitAsync();
 
@@ -839,6 +839,44 @@ namespace DianaShop.Service.Services
   </div>
 </body>
 </html>";
+        }
+
+        public async Task<BaseResponse> SetEmailVerified(string email)
+        {
+            try
+            {
+                var user = await _unitOfWork.Repository<User>()
+                    .AsQueryable()
+                    .Where(u => u.Email == email && !u.IsDelete)
+                    .FirstOrDefaultAsync();
+
+                if (user == null)
+                {
+                    return new BaseResponse
+                    {
+                        Code = StatusCodes.Status404NotFound,
+                        Message = "User not found"
+                    };
+                }
+
+                user.EmailVerified = true;
+                await _unitOfWork.Repository<User>().Update(user, user.Id);
+                await _unitOfWork.CommitAsync();
+
+                return new BaseResponse
+                {
+                    Code = StatusCodes.Status200OK,
+                    Message = "Email verified successfully"
+                };
+            }
+            catch (Exception ex)
+            {
+                return new BaseResponse
+                {
+                    Code = StatusCodes.Status500InternalServerError,
+                    Message = "Failed to verify email: " + ex.Message
+                };
+            }
         }
     }
 }
