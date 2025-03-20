@@ -22,7 +22,7 @@ namespace DianaShop.Service.Mapping
                 src =>  $"{(src.Packaging.IsRefillable ? "Refillable" : "Non-refillable")} {src.Packaging.Size} {src.Packaging.Material} {src.Packaging.Type}"))
             .ForMember(dest => dest.Category, opt => opt.MapFrom(src => src.Category.Name))
             .ForMember(dest => dest.Brand, opt => opt.MapFrom(src => src.Brand.Name))
-            .ForMember(dest => dest.StockQuantity, opt => opt.MapFrom(src => src.ProductBatches.Where(pb => pb.Status == true && !pb.IsDelete).Sum(pb => pb.Quantity)))
+            .ForMember(dest => dest.StockQuantity, opt => opt.MapFrom(src => src.ProductBatches.Where(pb => pb.Status == true && !pb.IsDelete && pb.ExpiryDate > DateTime.Now).Sum(pb => pb.Quantity)))
             .ForMember(dest => dest.ProductBatchIds, opt => opt.MapFrom(src => src.ProductBatches.Select(pb => pb.Id).ToList()))
             .ForMember(dest => dest.ProductTags, opt => opt.MapFrom(src => src.ProductTags.Select(pt => pt.Tag.Name).ToList()))
             .ForMember(dest => dest.ProductImage, opt => opt.MapFrom(src => src.ProductImages.Any() ? src.ProductImages.OrderByDescending(pi => pi.ImageId).FirstOrDefault().Image.Base64Image : null ))
