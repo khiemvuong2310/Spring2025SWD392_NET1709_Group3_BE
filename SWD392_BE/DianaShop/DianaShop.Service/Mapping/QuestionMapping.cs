@@ -14,7 +14,8 @@ namespace DianaShop.Service.Mapping
     {
         public QuestionMapping()
         {
-            CreateMap<Question, QuestionResponseModel>();
+            CreateMap<Question, QuestionResponseModel>()
+                .ForMember(dest => dest.Answers, opt => opt.MapFrom(src => src.Answers.Where(a => !a.IsDelete)));
             CreateMap<QuestionRequestModel, Question>();          
         }
     }
