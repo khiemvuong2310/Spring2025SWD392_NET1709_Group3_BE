@@ -30,7 +30,7 @@ namespace DianaShop.Service.Services
             var feedbacks = await _unitOfWork.Repository<FeedBack>()
                 .Include(f => f.Product)
                 .Include(f => f.User)
-                .Where(f => !f.IsDelete) // Lọc các FeedBack chưa bị xóa
+                .Where(f => !f.IsDelete) 
                 .ToListAsync();
 
             return _mapper.Map<IEnumerable<FeedBackResponseModel>>(feedbacks);
