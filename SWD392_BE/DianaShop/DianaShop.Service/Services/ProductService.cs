@@ -125,7 +125,7 @@ namespace DianaShop.Service.Services
                 product.ProductImages = new List<ProductImage>();               
                 foreach (var imageUrl in model.ProductImageFiles)
                 {
-                    var image = await _imageService.ConvertToImageAsync(imageUrl);
+                    var image = await _imageService.AddSingleAsync(imageUrl);
                     if (image != null)
                     {
                         product.ProductImages.Add(new ProductImage { Image = image });

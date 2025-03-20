@@ -59,6 +59,7 @@ namespace DianaShop.API.AppStarts
             services.AddScoped<IPaymentService, PaymentService>();
             services.AddScoped<ISkinTypeService, SkinTypeService>();
             services.AddScoped<ISkincareRoutineService, SkincareRoutineService>();
+            services.AddScoped<IBlobService, BlobService>();
             //services.AddScoped<IJwtService, JwtService>();
 
             // Thêm AutoMapper vào dịch vụ
