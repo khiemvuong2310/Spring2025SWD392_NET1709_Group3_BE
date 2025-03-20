@@ -80,14 +80,13 @@ namespace DianaShop.Service.Services
                     };
                 }
 
-                // We'll check if user has verified email by checking if there's a verification code for this email
-                if (_verificationCodes.ContainsKey(email))
+                // Check if email is verified
+                if (!user.EmailVerify)
                 {
-                    // There's still an active verification code, user hasn't verified their email yet
                     return new BaseResponseForLogin<LoginResponseModel>
                     {
                         Code = StatusCodes.Status403Forbidden,
-                        Message = "Please verify your email. Your verification code is still valid.",
+                        Message = "Please verify your email before logging in",
                         Data = null,
                         IsBanned = false,
                         RequiresVerification = true
@@ -263,8 +262,8 @@ namespace DianaShop.Service.Services
                     Password = PasswordTools.HashPassword(registerModel.Password),
                     Phone = registerModel.Phone,
                     Status = true,
-                    wallet = 0 // Initialize wallet with 0
-                    // EmailVerified field removed
+                    wallet = 0, // Initialize wallet with 0
+                    EmailVerify = false // Set EmailVerify to false by default
                 };
 
                 await _unitOfWork.Repository<User>().InsertAsync(user);
@@ -732,6 +731,11 @@ namespace DianaShop.Service.Services
                         Message = "User not found"
                     };
                 }
+
+                // Set EmailVerify to true
+                user.EmailVerify = true;
+                await _unitOfWork.Repository<User>().Update(user, user.Id);
+                await _unitOfWork.CommitAsync();
 
                 // Generate tokens for the verified user
                 var userDetails = await _userService.GetUserByEmailAsync(user.Email);
