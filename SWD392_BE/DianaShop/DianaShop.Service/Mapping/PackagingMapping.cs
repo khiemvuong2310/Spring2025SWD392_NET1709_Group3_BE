@@ -15,8 +15,7 @@ namespace DianaShop.Service.Mapping
         public PackagingMapping()
         {
             CreateMap<PackagingRequestModel, Packaging>();
-            CreateMap<Packaging, PackagingResponseModel>()
-                .ForMember(dest => dest.Products, opt => opt.MapFrom(src => src.Products));
+            CreateMap<Packaging, PackagingResponseModel>();
         }
     }
 }

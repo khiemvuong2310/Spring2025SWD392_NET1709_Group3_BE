@@ -14,9 +14,7 @@ namespace DianaShop.Service.Mapping
     {
         public TagMapping()
         {
-            CreateMap<Tag, TagResponseModel>()
-                .ForMember(dest => dest.Products, opt => opt.MapFrom(src => src.ProductTags.Select(pt => pt.Product.Name).ToList()))
-                .ForMember(dest => dest.Posts, opt => opt.MapFrom(src => src.PostTags.Select(pt => pt.Post.Title).ToList()));
+            CreateMap<Tag, TagResponseModel>();
             CreateMap<TagRequestModel, Tag>();
         }
     }

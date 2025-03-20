@@ -15,8 +15,7 @@ namespace DianaShop.Service.Mapping
         public IngredientMapping()
         {
             CreateMap<IngredientRequestModel, Ingredient>();
-            CreateMap<Ingredient, IngredientResponseModel>()
-                .ForMember(dest => dest.Products, opt => opt.MapFrom(src => src.ProductIngredients.Select(pi => pi.Product.Name).ToList()));
+            CreateMap<Ingredient, IngredientResponseModel>();
         }
     }
 }

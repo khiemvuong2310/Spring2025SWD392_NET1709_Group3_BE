@@ -18,14 +18,7 @@ namespace DianaShop.Service.Mapping
             CreateMap<CategoryRequestModel, Category>();
 
             // Ánh xạ từ Category (Entity) -> CategoryResponseModel
-            CreateMap<Category, CategoryResponseModel>()
-                .ForMember(dest => dest.Products, opt => opt.MapFrom(src => src.Products.Select(p => new ProductResponseModel
-                {
-                    FormulationType = p.FormulationType.Texture,
-                    Packaging = p.Packaging.Type,
-                    Category = p.Category.Name,
-                    Brand = p.Brand.Name,
-                }).ToList()));
+            CreateMap<Category, CategoryResponseModel>();
         }
     }
 }
