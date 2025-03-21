@@ -192,16 +192,21 @@ namespace DianaShop.Service.Services
             if (user != null && file.Length > 0)
             {
                 var imageUrl = await _blobService.UploadImageAsync(file);
-                var image = new Image { Base64Image = imageUrl };
-                await _unitOfWork.Repository<Image>().InsertAsync(image);
-                if (image != null)
+                if (imageUrl != null)
                 {
-                    if (user.Image != null)
+                    if (!string.IsNullOrEmpty(user.Image))
                     {
-                        var fileName = Path.GetFileName(new Uri(user.Image).LocalPath);
-                        await _blobService.DeleteImageAsync(fileName);
+                        try
+                        {
+                            var fileName = Path.GetFileName(new Uri(user.Image).LocalPath);
+                            await _blobService.DeleteImageAsync(fileName);
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine($"Error deleting old image: {ex.Message}");
+                        }
                     }
-                    user.Image = image.Base64Image;
+                    user.Image = imageUrl;
                     await _unitOfWork.CommitAsync();
                 }
             }

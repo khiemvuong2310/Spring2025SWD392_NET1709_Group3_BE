@@ -64,7 +64,7 @@ namespace DianaShop.API.Controllers
         // Tạo người dùng mới
         [HttpPost]
         [Authorize(Roles = "Manager")]
-        public async Task<IActionResult> CreateUser([FromBody] UserCreateRequest request)
+        public async Task<IActionResult> CreateUser([FromForm] UserCreateRequest request)
         {
             if (!ModelState.IsValid)
             {
@@ -78,7 +78,7 @@ namespace DianaShop.API.Controllers
         // Cập nhật người dùng
         [HttpPut("{id}")]
         [Authorize]
-        public async Task<IActionResult> UpdateUser(int id, [FromBody] UserUpdateRequest request)
+        public async Task<IActionResult> UpdateUser(int id, [FromForm] UserUpdateRequest request)
         {
             if (!ModelState.IsValid)
             {
@@ -91,6 +91,31 @@ namespace DianaShop.API.Controllers
                 return NotFound("User not found.");
             }
 
+            return Ok(updatedUser);
+        }
+
+        // Cập nhật hình ảnh profile người dùng
+        [HttpPost("profile-image")]
+        [Authorize]
+        public async Task<IActionResult> UploadProfileImage(IFormFile imageFile)
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+
+            if (userIdClaim == null)
+            {
+                return Unauthorized("User ID not found in token claims");
+            }
+
+            // Chuyển đổi ID từ claim sang int
+            if (!int.TryParse(userIdClaim.Value, out int currentUserId))
+            {
+                return BadRequest("Invalid user ID in token");
+            }
+            var updatedUser = await _userService.AddProfileImageAsync(currentUserId, imageFile);
+            if (updatedUser == null)
+            {
+                return NotFound("User not found.");
+            }
             return Ok(updatedUser);
         }
 

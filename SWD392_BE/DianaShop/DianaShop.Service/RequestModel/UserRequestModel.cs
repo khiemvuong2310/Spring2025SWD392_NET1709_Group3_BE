@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 
 namespace DianaShop.Service.RequestModel
 {
@@ -33,7 +34,7 @@ namespace DianaShop.Service.RequestModel
         //[Required(ErrorMessage = "Skin type is required.")]
         //public int? SkinTypeId { get; set; }
 
-        public bool Status { get; set; } = true; 
+        public bool Status { get; set; } = true;   
     }
     public class UserUpdateRequest
     {
@@ -49,8 +50,6 @@ namespace DianaShop.Service.RequestModel
 
         [StringLength(100, ErrorMessage = "Location cannot exceed 100 characters.")]
         public string? Location { get; set; }
-
-        public string? Image { get; set; }
 
         public bool? Status { get; set; }
 
