@@ -95,21 +95,27 @@ namespace DianaShop.API.Controllers
         }
 
         // Cập nhật hình ảnh profile người dùng
-        [HttpPost("{id}/image")]
+        [HttpPost("profile-image")]
         [Authorize]
-        public async Task<IActionResult> UploadProfileImage(int id, IFormFile imageFile)
+        public async Task<IActionResult> UploadProfileImage(IFormFile imageFile)
         {
-            if (imageFile == null || imageFile.Length == 0)
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+
+            if (userIdClaim == null)
             {
-                return BadRequest("No image was uploaded.");
+                return Unauthorized("User ID not found in token claims");
             }
-            
-            var updatedUser = await _userService.AddProfileImageAsync(id, imageFile);
+
+            // Chuyển đổi ID từ claim sang int
+            if (!int.TryParse(userIdClaim.Value, out int currentUserId))
+            {
+                return BadRequest("Invalid user ID in token");
+            }
+            var updatedUser = await _userService.AddProfileImageAsync(currentUserId, imageFile);
             if (updatedUser == null)
             {
                 return NotFound("User not found.");
             }
-
             return Ok(updatedUser);
         }
 

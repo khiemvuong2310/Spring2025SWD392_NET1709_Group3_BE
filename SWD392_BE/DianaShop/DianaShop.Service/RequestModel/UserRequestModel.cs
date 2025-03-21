@@ -34,9 +34,7 @@ namespace DianaShop.Service.RequestModel
         //[Required(ErrorMessage = "Skin type is required.")]
         //public int? SkinTypeId { get; set; }
 
-        public bool Status { get; set; } = true; 
-        
-        public IFormFile? ImageFile { get; set; }
+        public bool Status { get; set; } = true;   
     }
     public class UserUpdateRequest
     {
@@ -52,10 +50,6 @@ namespace DianaShop.Service.RequestModel
 
         [StringLength(100, ErrorMessage = "Location cannot exceed 100 characters.")]
         public string? Location { get; set; }
-
-        public IFormFile? ImageFile { get; set; }
-        
-        public string? Image { get; set; }
 
         public bool? Status { get; set; }
 
