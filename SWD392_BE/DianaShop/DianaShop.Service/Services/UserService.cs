@@ -109,18 +109,8 @@ namespace DianaShop.Service.Services
 
             if (existingUserResponse == null) return null;
 
-            //var existingUser = _mapper.Map<User>(existingUserResponse);
-
-            if (request.Username == null &&
-                request.Email == null &&
-                request.Phone == null &&
-                request.Location == null &&
-                request.Image == null &&
-                request.Status == null &&
-                request.SkinTypeId == null)
-            {
-                return _mapper.Map<UserResponseModel>(existingUserResponse);
-            }
+            // Kiểm tra xem có bất kỳ trường nào được cập nhật không
+            bool hasUpdates = false;
 
             if (!string.IsNullOrEmpty(request.Email))
             {
@@ -131,19 +121,47 @@ namespace DianaShop.Service.Services
                 {
                     throw new InvalidOperationException("Email already exists.");
                 }
+                existingUserResponse.Email = request.Email;
+                hasUpdates = true;
             }
 
             // Cập nhật từng trường nếu có giá trị mới
-            if (!string.IsNullOrEmpty(request.Username)) existingUserResponse.Username = request.Username;
-            if (!string.IsNullOrEmpty(request.Email)) existingUserResponse.Email = request.Email;
-            if (!string.IsNullOrEmpty(request.Phone)) existingUserResponse.Phone = request.Phone;
-            if (!string.IsNullOrEmpty(request.Location)) existingUserResponse.Location = request.Location;
-            if (!string.IsNullOrEmpty(request.Image)) existingUserResponse.Image = request.Image;
-            if (request.Status.HasValue) existingUserResponse.Status = request.Status.Value;
-            if (request.SkinTypeId.HasValue) existingUserResponse.SkinTypeId = request.SkinTypeId.Value;
+            if (!string.IsNullOrEmpty(request.Username)) 
+            {
+                existingUserResponse.Username = request.Username;
+                hasUpdates = true;
+            }
+            if (request.Image != null) // Thay đổi điều kiện để chấp nhận cả chuỗi rỗng
+            {
+                existingUserResponse.Image = request.Image;
+                hasUpdates = true;
+            }
+            if (!string.IsNullOrEmpty(request.Phone)) 
+            {
+                existingUserResponse.Phone = request.Phone;
+                hasUpdates = true;
+            }
+            if (!string.IsNullOrEmpty(request.Location)) 
+            {
+                existingUserResponse.Location = request.Location;
+                hasUpdates = true;
+            }
+            if (request.Status.HasValue) 
+            {
+                existingUserResponse.Status = request.Status.Value;
+                hasUpdates = true;
+            }
+            if (request.SkinTypeId.HasValue) 
+            {
+                existingUserResponse.SkinTypeId = request.SkinTypeId.Value;
+                hasUpdates = true;
+            }
 
-            await _unitOfWork.Repository<User>().Update(existingUserResponse, id);
-            await _unitOfWork.SaveChangesAsync();
+            if (hasUpdates)
+            {
+                await _unitOfWork.Repository<User>().Update(existingUserResponse, id);
+                await _unitOfWork.SaveChangesAsync();
+            }
 
             return _mapper.Map<UserResponseModel>(existingUserResponse);
         }
