@@ -64,7 +64,7 @@ namespace DianaShop.API.Controllers
         // Tạo người dùng mới
         [HttpPost]
         [Authorize(Roles = "Manager")]
-        public async Task<IActionResult> CreateUser([FromBody] UserCreateRequest request)
+        public async Task<IActionResult> CreateUser([FromForm] UserCreateRequest request)
         {
             if (!ModelState.IsValid)
             {
@@ -78,7 +78,7 @@ namespace DianaShop.API.Controllers
         // Cập nhật người dùng
         [HttpPut("{id}")]
         [Authorize]
-        public async Task<IActionResult> UpdateUser(int id, [FromBody] UserUpdateRequest request)
+        public async Task<IActionResult> UpdateUser(int id, [FromForm] UserUpdateRequest request)
         {
             if (!ModelState.IsValid)
             {
@@ -86,6 +86,25 @@ namespace DianaShop.API.Controllers
             }
 
             var updatedUser = await _userService.UpdateUserAsync(id, request);
+            if (updatedUser == null)
+            {
+                return NotFound("User not found.");
+            }
+
+            return Ok(updatedUser);
+        }
+
+        // Cập nhật hình ảnh profile người dùng
+        [HttpPost("{id}/image")]
+        [Authorize]
+        public async Task<IActionResult> UploadProfileImage(int id, IFormFile imageFile)
+        {
+            if (imageFile == null || imageFile.Length == 0)
+            {
+                return BadRequest("No image was uploaded.");
+            }
+            
+            var updatedUser = await _userService.AddProfileImageAsync(id, imageFile);
             if (updatedUser == null)
             {
                 return NotFound("User not found.");

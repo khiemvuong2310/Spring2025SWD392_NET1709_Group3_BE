@@ -14,6 +14,9 @@ using DianaShop.Service.Interfaces;
 using DianaShop.Repository.Utils;
 using System.Text.RegularExpressions;
 using AutoMapper.QueryableExtensions;
+using Microsoft.AspNetCore.Http;
+using System.IO;
+
 namespace DianaShop.Service.Services
 {
     public class UserService : IUserService
@@ -21,12 +24,17 @@ namespace DianaShop.Service.Services
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly IVoucherStorageService _voucherStorageService; // Inject VoucherService
+        private readonly IImageService _imageService; // Inject ImageService
+        private readonly IBlobService _blobService; // Inject BlobService
 
-        public UserService(IUnitOfWork unitOfWork, IMapper mapper, IVoucherStorageService voucherStorageService)
+        public UserService(IUnitOfWork unitOfWork, IMapper mapper, IVoucherStorageService voucherStorageService, 
+                          IImageService imageService, IBlobService blobService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _voucherStorageService = voucherStorageService;
+            _imageService = imageService;
+            _blobService = blobService;
         }
 
         // Lấy tất cả người dùng
@@ -64,6 +72,13 @@ namespace DianaShop.Service.Services
             var user = _mapper.Map<User>(request);
             user.Password = PasswordTools.HashPassword(user.Password);
             user.EmailVerified = true;
+            
+            // Upload image if provided
+            if (request.ImageFile != null && request.ImageFile.Length > 0)
+            {
+                var imageUrl = await _blobService.UploadImageAsync(request.ImageFile);
+                user.Image = imageUrl;
+            }
 
             // Lưu user vào database trước khi gán UserRoles để tránh lỗi vòng lặp
             await _unitOfWork.Repository<User>().InsertAsync(user);
@@ -99,15 +114,14 @@ namespace DianaShop.Service.Services
             return createdUser;
         }
 
-
         public async Task<UserResponseModel?> UpdateUserAsync(int id, UserUpdateRequest request)
         {
-            var existingUserResponse = await _unitOfWork.Repository<User>()
+            var existingUser = await _unitOfWork.Repository<User>()
                 .AsQueryable()
                 .Where(u => u.Id == id && !u.IsDelete)
                 .FirstOrDefaultAsync();
 
-            if (existingUserResponse == null) return null;
+            if (existingUser == null) return null;
 
             // Kiểm tra xem có bất kỳ trường nào được cập nhật không
             bool hasUpdates = false;
@@ -121,51 +135,109 @@ namespace DianaShop.Service.Services
                 {
                     throw new InvalidOperationException("Email already exists.");
                 }
-                existingUserResponse.Email = request.Email;
+                existingUser.Email = request.Email;
                 hasUpdates = true;
             }
 
             // Cập nhật từng trường nếu có giá trị mới
             if (!string.IsNullOrEmpty(request.Username)) 
             {
-                existingUserResponse.Username = request.Username;
+                existingUser.Username = request.Username;
                 hasUpdates = true;
             }
-            if (request.Image != null) // Thay đổi điều kiện để chấp nhận cả chuỗi rỗng
+            
+            // Xử lý hình ảnh
+            if (request.ImageFile != null && request.ImageFile.Length > 0)
             {
-                existingUserResponse.Image = request.Image;
+                // Xóa ảnh cũ nếu có
+                if (!string.IsNullOrEmpty(existingUser.Image))
+                {
+                    try
+                    {
+                        var fileName = Path.GetFileName(new Uri(existingUser.Image).LocalPath);
+                        await _blobService.DeleteImageAsync(fileName);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Error deleting old image: {ex.Message}");
+                    }
+                }
+
+                // Upload ảnh mới
+                var imageUrl = await _blobService.UploadImageAsync(request.ImageFile);
+                existingUser.Image = imageUrl;
                 hasUpdates = true;
+                Console.WriteLine($"Updated image to: {imageUrl}");
             }
+            else if (request.Image != null) 
+            {
+                existingUser.Image = request.Image;
+                hasUpdates = true;
+                Console.WriteLine($"Updated image URL to: {request.Image}");
+            }
+            
             if (!string.IsNullOrEmpty(request.Phone)) 
             {
-                existingUserResponse.Phone = request.Phone;
+                existingUser.Phone = request.Phone;
                 hasUpdates = true;
             }
             if (!string.IsNullOrEmpty(request.Location)) 
             {
-                existingUserResponse.Location = request.Location;
+                existingUser.Location = request.Location;
                 hasUpdates = true;
             }
             if (request.Status.HasValue) 
             {
-                existingUserResponse.Status = request.Status.Value;
+                existingUser.Status = request.Status.Value;
                 hasUpdates = true;
             }
             if (request.SkinTypeId.HasValue) 
             {
-                existingUserResponse.SkinTypeId = request.SkinTypeId.Value;
+                existingUser.SkinTypeId = request.SkinTypeId.Value;
                 hasUpdates = true;
             }
 
             if (hasUpdates)
             {
-                await _unitOfWork.Repository<User>().Update(existingUserResponse, id);
+                await _unitOfWork.Repository<User>().Update(existingUser, id);
                 await _unitOfWork.SaveChangesAsync();
             }
 
-            return _mapper.Map<UserResponseModel>(existingUserResponse);
+            return _mapper.Map<UserResponseModel>(existingUser);
         }
 
+        // Thêm/cập nhật hình ảnh hồ sơ
+        public async Task<UserResponseModel?> AddProfileImageAsync(int id, IFormFile imageFile)
+        {
+            var user = await _unitOfWork.Repository<User>().GetById(id);
+            if (user == null || imageFile == null || imageFile.Length <= 0)
+            {
+                return null;
+            }
+
+            // Xóa ảnh cũ nếu có
+            if (!string.IsNullOrEmpty(user.Image))
+            {
+                try
+                {
+                    var fileName = Path.GetFileName(new Uri(user.Image).LocalPath);
+                    await _blobService.DeleteImageAsync(fileName);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error deleting old image: {ex.Message}");
+                }
+            }
+
+            // Upload ảnh mới
+            var imageUrl = await _blobService.UploadImageAsync(imageFile);
+            user.Image = imageUrl;
+
+            await _unitOfWork.Repository<User>().Update(user, id);
+            await _unitOfWork.SaveChangesAsync();
+
+            return _mapper.Map<UserResponseModel>(user);
+        }
 
         // Cập nhật mật khẩu người dùng
         public async Task<bool> UpdatePasswordAsync(int id, string oldPassword, string newPassword)
@@ -194,7 +266,6 @@ namespace DianaShop.Service.Services
 
             return true;
         }
-
 
         // Cập nhật ví người dùng
         public async Task<bool> UpdateWalletAsync(int id, decimal? wallet)
