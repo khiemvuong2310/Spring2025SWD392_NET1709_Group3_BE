@@ -5,6 +5,7 @@ using DianaShop.Repository.UnitOfWork;
 using DianaShop.Service.Interfaces;
 using DianaShop.Service.ReponseModel;
 using DianaShop.Service.RequestModel;
+using DianaShop.Service.RequestModel.QueryRequest;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -33,7 +34,7 @@ namespace DianaShop.Service.Services
                 .ToListAsync();
         }
 
-        public async Task<PaginatedResponse<OrderResponseModel>> SearchOrder(GetOrderRequestModel request)
+        public async Task<PaginatedResponse<OrderResponseModel>> SearchOrder(OrderQueryRequest request)
         {
             var orderQuery = _unitOfWork.Repository<Order>()
                 .GetAll()

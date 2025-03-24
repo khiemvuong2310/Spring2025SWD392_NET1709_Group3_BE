@@ -1,5 +1,6 @@
 ﻿using DianaShop.Service.ReponseModel;
 using DianaShop.Service.RequestModel;
+using DianaShop.Service.RequestModel.QueryRequest;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,7 +12,7 @@ namespace DianaShop.Service.Interfaces
     public interface IOrderService
     {
         Task<IEnumerable<OrderResponseModel>> GetAllOrder();
-        Task<PaginatedResponse<OrderResponseModel>> SearchOrder(GetOrderRequestModel request);
+        Task<PaginatedResponse<OrderResponseModel>> SearchOrder(OrderQueryRequest request);
         Task<IEnumerable<OrderResponseModel>> GetAllOrderByUser(int userId);
         Task<OrderResponseModel?> GetOrderById(int orderId);
         Task<OrderResponseModel> CreateOrder(OrderRequestModel request);
