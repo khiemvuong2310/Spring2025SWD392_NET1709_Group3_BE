@@ -2,6 +2,7 @@
 using DianaShop.Service.Interfaces;
 using DianaShop.Service.ReponseModel;
 using DianaShop.Service.RequestModel;
+using DianaShop.Service.RequestModel.QueryRequest;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -52,9 +53,9 @@ namespace DianaShop.API.Controllers
         }
 
         /// 🛒 Lấy order theo thuộc tính
-        [HttpGet("search/{orderId}")]
+        [HttpGet]
         [Authorize]
-        public async Task<IActionResult> SearchOrder([FromBody] GetOrderRequestModel request)
+        public async Task<IActionResult> SearchOrder([FromBody] OrderQueryRequest request)
         {
             var response = await _orderService.SearchOrder(request);
             return Ok(response);
