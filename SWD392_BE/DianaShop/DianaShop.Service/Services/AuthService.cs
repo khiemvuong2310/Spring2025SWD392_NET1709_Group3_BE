@@ -83,11 +83,26 @@ namespace DianaShop.Service.Services
                 // Check if email is verified
                 if (!user.EmailVerified)
                 {
+                    // Generate new verification code and send email
+                    var verificationCode = GenerateVerificationCode();
+                    _verificationCodes[user.Email] = (verificationCode, DateTime.UtcNow.AddMinutes(30));
+
+                    await SendEmailAsync(
+                        user.Email,
+                        "Email Verification",
+                        GetVerificationEmailTemplate(verificationCode)
+                    );
+
+                    var unverifiedUserDetails = await _userService.GetUserByEmailAsync(email);
                     return new BaseResponseForLogin<LoginResponseModel>
                     {
                         Code = StatusCodes.Status403Forbidden,
-                        Message = "Please verify your email before logging in",
-                        Data = null,
+                        Message = "Please verify your email before logging in. A new verification code has been sent to your email.",
+                        Data = new LoginResponseModel
+                        {
+                            User = unverifiedUserDetails,
+                            EmailVerified = false
+                        },
                         IsBanned = false,
                         RequiresVerification = true
                     };
@@ -114,6 +129,7 @@ namespace DianaShop.Service.Services
                         Data = new LoginResponseModel
                         {
                             User = userDetails,
+                            EmailVerified = true
                         },
                         IsBanned = true,
                     };
@@ -128,6 +144,7 @@ namespace DianaShop.Service.Services
                         Token = token,
                         RefreshToken = refreshToken,
                         User = userDetails,
+                        EmailVerified = true
                     },
                     IsBanned = false
                 };
