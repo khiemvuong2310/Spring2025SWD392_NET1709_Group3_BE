@@ -16,7 +16,7 @@ namespace DianaShop.Service.Mapping
         {
             // Mapping User -> UserResponseModel
             CreateMap<User, UserResponseModel>()
-                .ForMember(dest => dest.SkinTypeName, opt => opt.MapFrom(src => src.SkinType.Name))
+                //.ForMember(dest => dest.SkinTypeName, opt => opt.MapFrom(src => src.SkinType.Name))
                 .ForMember(dest => dest.VoucherStorage, opt => opt.MapFrom(src => src.VoucherStorage))
                 .ForMember(dest => dest.UserRoles, opt => opt.MapFrom(src => src.UserRoles.Select(ur =>
                     new UserRoleResponseNameModel
@@ -43,7 +43,6 @@ namespace DianaShop.Service.Mapping
                 .ForMember(dest => dest.VoucherStorage, opt => opt.Ignore())
                 .ForMember(dest => dest.FeedBacks, opt => opt.Ignore())
                 .ForMember(dest => dest.UserRoles, opt => opt.Ignore())
-                .ForMember(dest => dest.SkinTypeId, opt => opt.MapFrom(src => src.SkinTypeId))
                 .ForMember(dest => dest.Orders, opt => opt.Ignore())
                 .ForMember(dest => dest.Payments, opt => opt.Ignore())
                 .ForMember(dest => dest.VnPay, opt => opt.Ignore())

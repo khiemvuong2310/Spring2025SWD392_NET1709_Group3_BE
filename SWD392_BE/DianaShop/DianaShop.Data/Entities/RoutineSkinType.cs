@@ -16,5 +16,6 @@ namespace DianaShop.Data.Entities
         public decimal Percentage { get; set; }
         public virtual SkinType SkinType { get; set; }
         public virtual SkincareRoutine Routine { get; set; }
+        
     }
 }

@@ -24,8 +24,7 @@ namespace DianaShop.Service.Mapping
                 .ForMember(dest => dest.RoutineSteps, opt => opt.MapFrom(src => src.RoutineSteps));
             CreateMap<RoutineStepRequestModel, RoutineStep>();
 
-            CreateMap<RoutineSkinType, RoutineSkinTypeResponse>()
-                .ForMember(dest => dest.Percentage, opt => opt.MapFrom(src => src.Percentage*100));
+            
 
         }
     }

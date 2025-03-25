@@ -269,6 +269,10 @@ namespace DianaShop.Data.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
+                    b.Property<string>("ContentType")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
                     b.Property<bool>("IsDelete")
                         .HasColumnType("tinyint(1)");
 
@@ -802,6 +806,10 @@ namespace DianaShop.Data.Migrations
                     b.Property<int>("SkinTypeId")
                         .HasColumnType("int");
 
+                    b.Property<decimal>("Percentage")
+                        .HasPrecision(3, 2)
+                        .HasColumnType("decimal(3,2)");
+
                     b.HasKey("RoutineId", "SkinTypeId");
 
                     b.HasIndex("SkinTypeId");
@@ -839,6 +847,21 @@ namespace DianaShop.Data.Migrations
                     b.HasIndex("SkincareRoutineId");
 
                     b.ToTable("RoutineStep");
+                });
+
+            modelBuilder.Entity("DianaShop.Data.Entities.SavedRoutine", b =>
+                {
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("RoutineId")
+                        .HasColumnType("int");
+
+                    b.HasKey("UserId", "RoutineId");
+
+                    b.HasIndex("RoutineId");
+
+                    b.ToTable("SavedRoutines");
                 });
 
             modelBuilder.Entity("DianaShop.Data.Entities.SkinType", b =>
@@ -998,6 +1021,9 @@ namespace DianaShop.Data.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
+                    b.Property<bool>("EmailVerified")
+                        .HasColumnType("tinyint(1)");
+
                     b.Property<string>("Image")
                         .HasColumnType("longtext");
 
@@ -1014,9 +1040,6 @@ namespace DianaShop.Data.Migrations
                     b.Property<string>("Phone")
                         .HasColumnType("longtext");
 
-                    b.Property<int?>("SkinTypeId")
-                        .HasColumnType("int");
-
                     b.Property<bool?>("Status")
                         .HasColumnType("tinyint(1)");
 
@@ -1031,8 +1054,6 @@ namespace DianaShop.Data.Migrations
                         .HasColumnType("decimal(18, 4)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("SkinTypeId");
 
                     b.ToTable("Users");
                 });
@@ -1056,6 +1077,25 @@ namespace DianaShop.Data.Migrations
                     b.HasIndex("RoleId");
 
                     b.ToTable("UserRoles");
+                });
+
+            modelBuilder.Entity("DianaShop.Data.Entities.UserSkinType", b =>
+                {
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SkinTypeId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("Percentage")
+                        .HasPrecision(3, 2)
+                        .HasColumnType("decimal(3,2)");
+
+                    b.HasKey("UserId", "SkinTypeId");
+
+                    b.HasIndex("SkinTypeId");
+
+                    b.ToTable("UserSkinTypes");
                 });
 
             modelBuilder.Entity("DianaShop.Data.Entities.VnPayTransaction", b =>
@@ -1228,7 +1268,7 @@ namespace DianaShop.Data.Migrations
             modelBuilder.Entity("DianaShop.Data.Entities.FeedBack", b =>
                 {
                     b.HasOne("DianaShop.Data.Entities.Product", "Product")
-                        .WithMany()
+                        .WithMany("Feedbacks")
                         .HasForeignKey("ProductID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -1524,6 +1564,25 @@ namespace DianaShop.Data.Migrations
                     b.Navigation("SkincareRoutine");
                 });
 
+            modelBuilder.Entity("DianaShop.Data.Entities.SavedRoutine", b =>
+                {
+                    b.HasOne("DianaShop.Data.Entities.SkincareRoutine", "Routine")
+                        .WithMany("SavedRoutines")
+                        .HasForeignKey("RoutineId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DianaShop.Data.Entities.User", "User")
+                        .WithMany("SavedRoutines")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Routine");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("DianaShop.Data.Entities.Storage", b =>
                 {
                     b.HasOne("DianaShop.Data.Entities.Voucher", "Voucher")
@@ -1543,15 +1602,6 @@ namespace DianaShop.Data.Migrations
                     b.Navigation("VoucherStorage");
                 });
 
-            modelBuilder.Entity("DianaShop.Data.Entities.User", b =>
-                {
-                    b.HasOne("DianaShop.Data.Entities.SkinType", "SkinType")
-                        .WithMany("Users")
-                        .HasForeignKey("SkinTypeId");
-
-                    b.Navigation("SkinType");
-                });
-
             modelBuilder.Entity("DianaShop.Data.Entities.UserRole", b =>
                 {
                     b.HasOne("DianaShop.Data.Entities.Role", "Role")
@@ -1567,6 +1617,25 @@ namespace DianaShop.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("Role");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("DianaShop.Data.Entities.UserSkinType", b =>
+                {
+                    b.HasOne("DianaShop.Data.Entities.SkinType", "SkinType")
+                        .WithMany("UserSkinTypes")
+                        .HasForeignKey("SkinTypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DianaShop.Data.Entities.User", "User")
+                        .WithMany("UserSkinTypes")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("SkinType");
 
                     b.Navigation("User");
                 });
@@ -1669,6 +1738,8 @@ namespace DianaShop.Data.Migrations
                 {
                     b.Navigation("CartProducts");
 
+                    b.Navigation("Feedbacks");
+
                     b.Navigation("OrderDetails");
 
                     b.Navigation("ProductBatches");
@@ -1700,7 +1771,7 @@ namespace DianaShop.Data.Migrations
 
                     b.Navigation("RoutineSkinTypes");
 
-                    b.Navigation("Users");
+                    b.Navigation("UserSkinTypes");
                 });
 
             modelBuilder.Entity("DianaShop.Data.Entities.SkincareRoutine", b =>
@@ -1708,6 +1779,8 @@ namespace DianaShop.Data.Migrations
                     b.Navigation("RoutineSkinTypes");
 
                     b.Navigation("RoutineSteps");
+
+                    b.Navigation("SavedRoutines");
                 });
 
             modelBuilder.Entity("DianaShop.Data.Entities.StageStatus", b =>
@@ -1735,7 +1808,11 @@ namespace DianaShop.Data.Migrations
 
                     b.Navigation("Payments");
 
+                    b.Navigation("SavedRoutines");
+
                     b.Navigation("UserRoles");
+
+                    b.Navigation("UserSkinTypes");
 
                     b.Navigation("VnPay");
 

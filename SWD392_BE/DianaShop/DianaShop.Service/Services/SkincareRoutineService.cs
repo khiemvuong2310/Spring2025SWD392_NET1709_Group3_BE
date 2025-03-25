@@ -214,5 +214,43 @@ namespace DianaShop.Service.Services
             }
             return routineSteps;
         }
+
+        public async Task<PaginatedResponse<SkincareRoutineResponseModel>> GetSavedRoutine(int userId, SkincareRoutineQueryRequest request)
+        {
+            var routines = _unitOfWork.Repository<SkincareRoutine>().GetAll()
+                .Where(r => r.SavedRoutines.Any(ur => ur.UserId == userId))
+                .Where(r => request.IsDeleted == null || r.IsDelete == request.IsDeleted)
+                .Where(r => string.IsNullOrEmpty(request.Name) || r.Name.Contains(request.Name))
+                .Where(r => !request.SkinTypeIds.Any() || r.RoutineSkinTypes.Any(rs => request.SkinTypeIds.Contains(rs.SkinTypeId)))
+                .ProjectTo<SkincareRoutineResponseModel>(_mapper.ConfigurationProvider);
+            return await PaginatedResponse<SkincareRoutineResponseModel>.CreateAsync(routines, request.PageNumber, request.PageSize);
+        }
+
+        public async Task SaveRoutine(int userId, int routineId)
+        {
+            var savedRoutine = await _unitOfWork.Repository<SavedRoutine>()
+                .AsQueryable()
+                .Where(ur => ur.UserId == userId && ur.RoutineId == routineId)
+                .FirstOrDefaultAsync();
+            if (savedRoutine != null) return;
+            savedRoutine = new SavedRoutine
+            {
+                UserId = userId,
+                RoutineId = routineId
+            };
+            await _unitOfWork.Repository<SavedRoutine>().InsertAsync(savedRoutine);
+            await _unitOfWork.SaveChangesAsync();
+        }
+
+        public async Task UnsaveRoutine(int userId, int routineId)
+        {
+            var savedRoutine = await _unitOfWork.Repository<SavedRoutine>()
+                .AsQueryable()
+                .Where(ur => ur.UserId == userId && ur.RoutineId == routineId)
+                .FirstOrDefaultAsync();
+            if (savedRoutine == null) return;
+            _unitOfWork.Repository<SavedRoutine>().Remove(savedRoutine);
+            await _unitOfWork.SaveChangesAsync();
+        }
     }
 }

@@ -27,7 +27,7 @@ namespace DianaShop.Service.Services
         private readonly IImageService _imageService; // Inject ImageService
         private readonly IBlobService _blobService; // Inject BlobService
 
-        public UserService(IUnitOfWork unitOfWork, IMapper mapper, IVoucherStorageService voucherStorageService, 
+        public UserService(IUnitOfWork unitOfWork, IMapper mapper, IVoucherStorageService voucherStorageService,
                           IImageService imageService, IBlobService blobService)
         {
             _unitOfWork = unitOfWork;
@@ -71,7 +71,7 @@ namespace DianaShop.Service.Services
 
             var user = _mapper.Map<User>(request);
             user.Password = PasswordTools.HashPassword(user.Password);
-            user.EmailVerified = true;         
+            user.EmailVerified = true;
 
 
             // Lưu user vào database trước khi gán UserRoles để tránh lỗi vòng lặp
@@ -134,30 +134,25 @@ namespace DianaShop.Service.Services
             }
 
             // Cập nhật từng trường nếu có giá trị mới
-            if (!string.IsNullOrEmpty(request.Username)) 
+            if (!string.IsNullOrEmpty(request.Username))
             {
                 existingUser.Username = request.Username;
                 hasUpdates = true;
-            }         
-            
-            if (!string.IsNullOrEmpty(request.Phone)) 
+            }
+
+            if (!string.IsNullOrEmpty(request.Phone))
             {
                 existingUser.Phone = request.Phone;
                 hasUpdates = true;
             }
-            if (!string.IsNullOrEmpty(request.Location)) 
+            if (!string.IsNullOrEmpty(request.Location))
             {
                 existingUser.Location = request.Location;
                 hasUpdates = true;
             }
-            if (request.Status.HasValue) 
+            if (request.Status.HasValue)
             {
                 existingUser.Status = request.Status.Value;
-                hasUpdates = true;
-            }
-            if (request.SkinTypeId.HasValue) 
-            {
-                existingUser.SkinTypeId = request.SkinTypeId.Value;
                 hasUpdates = true;
             }
 
@@ -254,6 +249,65 @@ namespace DianaShop.Service.Services
                 .ProjectTo<UserResponseModel>(_mapper.ConfigurationProvider)
                 .FirstOrDefaultAsync();
             return user;
+        }
+
+        public async Task AddUserSkinTypeAsync(int userId, RoutineOrUserSkinTypeRequest request)
+        {
+            var user = await _unitOfWork.Repository<User>().GetById(userId);
+            if (user == null)
+            {
+                throw new KeyNotFoundException("User not found.");
+            }
+            var skinType = await _unitOfWork.Repository<SkinType>().GetById(request.SkinTypeId);
+            if (skinType == null)
+            {
+                throw new KeyNotFoundException("Skin type not found.");
+            }
+            var totalPercentage = await _unitOfWork.Repository<UserSkinType>().AsQueryable()
+                .Where(ust => ust.UserId == userId)
+                .SumAsync(ust => ust.Percentage);
+            var userSkinType = new UserSkinType
+            {
+                UserId = userId,
+                SkinTypeId = request.SkinTypeId,
+                Percentage = request.Percentage != 0 ? request.Percentage / 100 : 0
+            };
+            await _unitOfWork.Repository<UserSkinType>().InsertAsync(userSkinType);
+            await _unitOfWork.SaveChangesAsync();
+        }
+
+        public async Task UpdateUserSkinTypeAsync(int userId, RoutineOrUserSkinTypeRequest request)
+        {
+            var userSkinType = await _unitOfWork.Repository<UserSkinType>().AsQueryable()
+                .Where(ust => ust.UserId == userId && ust.SkinTypeId == request.SkinTypeId)
+                .FirstOrDefaultAsync();
+            if (userSkinType == null)
+            {
+                throw new KeyNotFoundException("User skin type not found.");
+            }
+            userSkinType.Percentage = request.Percentage != 0 ? request.Percentage / 100 : 0;
+            await _unitOfWork.SaveChangesAsync();
+        }
+
+        public async Task DeleteUserSkinTypeAsync(int userId, int skinTypeId)
+        {
+            var userSkinType = await _unitOfWork.Repository<UserSkinType>().AsQueryable()
+                .Where(ust => ust.UserId == userId && ust.SkinTypeId == skinTypeId)
+                .FirstOrDefaultAsync();
+            if (userSkinType == null)
+            {
+                throw new KeyNotFoundException("User skin type not found.");
+            }
+            _unitOfWork.Repository<UserSkinType>().Delete(userSkinType);
+            await _unitOfWork.SaveChangesAsync();
+        }
+
+        public async Task<IEnumerable<RoutineOrUserSkinTypeResponse>> GetUserSkinTypesAsync(int userId)
+        {
+            return await _unitOfWork.Repository<UserSkinType>().AsQueryable()
+                .Where(ust => ust.UserId == userId)
+                .ProjectTo<RoutineOrUserSkinTypeResponse>(_mapper.ConfigurationProvider)
+                .ToListAsync();
         }
     }
 }

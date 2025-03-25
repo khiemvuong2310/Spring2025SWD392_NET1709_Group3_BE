@@ -11,8 +11,8 @@ namespace DianaShop.Data.Entities
         public string Name { get; set; }
         public string Description { get; set; }
         public virtual ICollection<Answer> Answers { get; set; }
-        public virtual ICollection<User> Users { get; set; }
         public virtual ICollection<ProductSkinType> ProductSkinTypes { get; set; }
         public virtual ICollection<RoutineSkinType> RoutineSkinTypes { get; set; }
+        public virtual ICollection<UserSkinType> UserSkinTypes { get; set; }
     }
 }

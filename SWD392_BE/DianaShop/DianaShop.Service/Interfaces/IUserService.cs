@@ -17,5 +17,9 @@ namespace DianaShop.Service.Interfaces
         Task<bool> UpdateWalletAsync(int id, decimal? wallet);
         Task<UserResponseModel?> GetUserByUsernameAsync(string username);
         Task<UserResponseModel?> GetUserByEmailAsync(string email);
+        Task AddUserSkinTypeAsync(int userId, RoutineOrUserSkinTypeRequest request);
+        Task UpdateUserSkinTypeAsync(int userId, RoutineOrUserSkinTypeRequest request);
+        Task DeleteUserSkinTypeAsync(int userId, int skinTypeId);
+        Task<IEnumerable<RoutineOrUserSkinTypeResponse>> GetUserSkinTypesAsync(int userId);
     }
 }

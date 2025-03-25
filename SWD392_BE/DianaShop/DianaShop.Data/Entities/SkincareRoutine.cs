@@ -12,5 +12,6 @@ namespace DianaShop.Data.Entities
         public string Description { get; set; }
         public virtual List<RoutineSkinType> RoutineSkinTypes { get; set; }
         public virtual List<RoutineStep> RoutineSteps { get; set; }
+        public virtual ICollection<SavedRoutine> SavedRoutines { get; set; }
     }
 }

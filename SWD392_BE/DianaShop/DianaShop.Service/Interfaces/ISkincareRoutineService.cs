@@ -20,5 +20,8 @@ namespace DianaShop.Service.Interfaces
         Task UpdateRoutineStepAsync(int id, RoutineStepRequestModel request);
         Task DeleteRoutineAsync(int id);
         Task<SkincareRoutineResponseModel?> DeleteRoutineStepAsync(int id);
+        Task<PaginatedResponse<SkincareRoutineResponseModel>> GetSavedRoutine(int userId, SkincareRoutineQueryRequest request);
+        Task SaveRoutine(int userId, int routineId);
+        Task UnsaveRoutine(int userId, int routineId);
     }
 }

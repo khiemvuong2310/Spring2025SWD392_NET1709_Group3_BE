@@ -13,10 +13,10 @@ namespace DianaShop.Service.ReponseModel
         public string Name { get; set; }
         public string Description { get; set; }
         public bool IsDeleted { get; set; }
-        public List<RoutineSkinTypeResponse> SkinTypes { get; set; }
+        public List<RoutineOrUserSkinTypeResponse> SkinTypes { get; set; }
         public List<RoutineStepResponseModel> RoutineSteps { get; set; }
     }
-    public class RoutineSkinTypeResponse
+    public class RoutineOrUserSkinTypeResponse
     {
         public int SkinTypeId { get; set; }
         public string SkinTypeName { get; set; }
