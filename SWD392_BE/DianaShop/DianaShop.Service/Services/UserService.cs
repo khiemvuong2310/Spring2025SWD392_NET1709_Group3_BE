@@ -49,10 +49,38 @@ namespace DianaShop.Service.Services
         // Lấy người dùng theo ID
         public async Task<UserResponseModel?> GetUserByIdAsync(int id)
         {
-            return await _unitOfWork.Repository<User>().AsQueryable()
+            // Get the user with basic information
+            var user = await _unitOfWork.Repository<User>().AsQueryable()
                 .Where(u => u.Id == id && !u.IsDelete)
                 .ProjectTo<UserResponseModel>(_mapper.ConfigurationProvider)
                 .FirstOrDefaultAsync();
+            
+            if (user != null)
+            {
+                // Get the user's skin types with skin type information
+                var userSkinTypes = await _unitOfWork.Repository<UserSkinType>()
+                    .AsQueryable()
+                    .Where(ust => ust.UserId == user.Id)
+                    .Select(ust => new 
+                    {
+                        ust.SkinTypeId,
+                        ust.Percentage,
+                        SkinTypeName = ust.SkinType.Name
+                    })
+                    .OrderByDescending(ust => ust.Percentage)
+                    .ToListAsync();
+
+                // Get the dominant skin type (highest percentage)
+                var dominantSkinType = userSkinTypes.FirstOrDefault();
+
+                if (dominantSkinType != null)
+                {
+                    user.SkinTypeId = dominantSkinType.SkinTypeId;
+                    user.SkinTypeName = dominantSkinType.SkinTypeName;
+                }
+            }
+
+            return user;
         }
 
         // Tạo người dùng mới
@@ -233,21 +261,76 @@ namespace DianaShop.Service.Services
         // Lấy người dùng theo username
         public async Task<UserResponseModel?> GetUserByUsernameAsync(string username)
         {
-            return await _unitOfWork.Repository<User>()
+            // Get the user with basic information
+            var user = await _unitOfWork.Repository<User>()
                 .AsQueryable()
                 .Where(u => u.Username == username && !u.IsDelete)
                 .ProjectTo<UserResponseModel>(_mapper.ConfigurationProvider)
                 .FirstOrDefaultAsync();
+            
+            if (user != null)
+            {
+                // Get the user's skin types with skin type information
+                var userSkinTypes = await _unitOfWork.Repository<UserSkinType>()
+                    .AsQueryable()
+                    .Where(ust => ust.UserId == user.Id)
+                    .Select(ust => new 
+                    {
+                        ust.SkinTypeId,
+                        ust.Percentage,
+                        SkinTypeName = ust.SkinType.Name
+                    })
+                    .OrderByDescending(ust => ust.Percentage)
+                    .ToListAsync();
+
+                // Get the dominant skin type (highest percentage)
+                var dominantSkinType = userSkinTypes.FirstOrDefault();
+
+                if (dominantSkinType != null)
+                {
+                    user.SkinTypeId = dominantSkinType.SkinTypeId;
+                    user.SkinTypeName = dominantSkinType.SkinTypeName;
+                }
+            }
+
+            return user;
         }
 
         // Lấy người dùng theo email
         public async Task<UserResponseModel?> GetUserByEmailAsync(string email)
         {
+            // Get the user with basic information
             var user = await _unitOfWork.Repository<User>()
                 .AsQueryable()
                 .Where(u => u.Email == email)
                 .ProjectTo<UserResponseModel>(_mapper.ConfigurationProvider)
                 .FirstOrDefaultAsync();
+            
+            if (user != null)
+            {
+                // Get the user's skin types with skin type information
+                var userSkinTypes = await _unitOfWork.Repository<UserSkinType>()
+                    .AsQueryable()
+                    .Where(ust => ust.UserId == user.Id)
+                    .Select(ust => new 
+                    {
+                        ust.SkinTypeId,
+                        ust.Percentage,
+                        SkinTypeName = ust.SkinType.Name
+                    })
+                    .OrderByDescending(ust => ust.Percentage)
+                    .ToListAsync();
+
+                // Get the dominant skin type (highest percentage)
+                var dominantSkinType = userSkinTypes.FirstOrDefault();
+
+                if (dominantSkinType != null)
+                {
+                    user.SkinTypeId = dominantSkinType.SkinTypeId;
+                    user.SkinTypeName = dominantSkinType.SkinTypeName;
+                }
+            }
+
             return user;
         }
 
