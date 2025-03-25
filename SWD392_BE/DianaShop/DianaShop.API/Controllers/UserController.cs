@@ -173,7 +173,7 @@ namespace DianaShop.API.Controllers
                 await _userService.UpdateUserSkinTypeAsync(currentUserId, request);
                 return Ok(new { message = "Skin type updated successfully." });
             }
-            if (userSkinTypes.Sum(x => x.Percentage * 100) + request.Percentage > 100)
+            if (userSkinTypes.Sum(x => x.Percentage) + request.Percentage > 100)
             {
                 return BadRequest(new { message = "Total percentage of skin types cannot exceed 100." });
             }
@@ -200,9 +200,9 @@ namespace DianaShop.API.Controllers
             return NoContent();
         }
 
-        [HttpPut("skin-type/{id}")]
+        [HttpPut("skin-type")]
         [Authorize]
-        public async Task<IActionResult> UpdateSkinType(int id, [FromBody] RoutineOrUserSkinTypeRequest request)
+        public async Task<IActionResult> UpdateSkinType([FromBody] RoutineOrUserSkinTypeRequest request)
         {
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
             if (userIdClaim == null)
@@ -215,7 +215,7 @@ namespace DianaShop.API.Controllers
                 return BadRequest("Invalid user ID in token");
             }
             var userSkinTypes = await _userService.GetUserSkinTypesAsync(currentUserId);
-            if (userSkinTypes.Where(u => u.SkinTypeId != request.SkinTypeId).Sum(x => x.Percentage * 100) + request.Percentage > 100)
+            if (userSkinTypes.Where(u => u.SkinTypeId != request.SkinTypeId).Sum(x => x.Percentage) + request.Percentage > 100)
             {
                 return BadRequest(new { message = "Total percentage of skin types cannot exceed 100." });
             }
