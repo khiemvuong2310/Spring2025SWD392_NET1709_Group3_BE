@@ -45,7 +45,8 @@ namespace DianaShop.Data
         public DbSet<CartProduct> CartProducts { get; set; }
         public DbSet<Order> Orders { get; set; }
         public DbSet<OrderDetail> OrderDetails { get; set; }
-
+        public DbSet<SavedRoutine> SavedRoutines { get; set; }
+        public DbSet<UserSkinType> UserSkinTypes { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<UserRole>()
@@ -159,6 +160,28 @@ namespace DianaShop.Data
                 .HasOne(cp => cp.Product)
                 .WithMany(p => p.CartProducts)
                 .HasForeignKey(cp => cp.ProductId);
+
+            modelBuilder.Entity<SavedRoutine>()
+                .HasKey(sr => new { sr.UserId, sr.RoutineId });
+            modelBuilder.Entity<SavedRoutine>()
+                .HasOne(sr => sr.User)
+                .WithMany(u => u.SavedRoutines)
+                .HasForeignKey(sr => sr.UserId);
+            modelBuilder.Entity<SavedRoutine>()
+                .HasOne(sr => sr.Routine)
+                .WithMany(r => r.SavedRoutines)
+                .HasForeignKey(sr => sr.RoutineId);
+
+            modelBuilder.Entity<UserSkinType>()
+                .HasKey(ust => new { ust.UserId, ust.SkinTypeId });
+            modelBuilder.Entity<UserSkinType>()
+                .HasOne(ust => ust.User)
+                .WithMany(u => u.UserSkinTypes)
+                .HasForeignKey(ust => ust.UserId);
+            modelBuilder.Entity<UserSkinType>()
+                .HasOne(ust => ust.SkinType)
+                .WithMany(st => st.UserSkinTypes)
+                .HasForeignKey(ust => ust.SkinTypeId);
 
             // Cấu hình Order
             modelBuilder.Entity<Order>()

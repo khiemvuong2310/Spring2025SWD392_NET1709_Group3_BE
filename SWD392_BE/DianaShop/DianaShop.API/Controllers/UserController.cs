@@ -153,6 +153,93 @@ namespace DianaShop.API.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
+        [HttpPost("skin-type")]
+        [Authorize]
+        public async Task<IActionResult> AddSkinType([FromBody] RoutineOrUserSkinTypeRequest request)
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null)
+            {
+                return Unauthorized("User ID not found in token claims");
+            }
+            // Chuyển đổi ID từ claim sang int
+            if (!int.TryParse(userIdClaim.Value, out int currentUserId))
+            {
+                return BadRequest("Invalid user ID in token");
+            }
+            var userSkinTypes = await _userService.GetUserSkinTypesAsync(currentUserId);
+            if (userSkinTypes.Any(u => u.SkinTypeId == request.SkinTypeId))
+            {
+                await _userService.UpdateUserSkinTypeAsync(currentUserId, request);
+                return Ok(new { message = "Skin type updated successfully." });
+            }
+            if (userSkinTypes.Sum(x => x.Percentage * 100) + request.Percentage > 100)
+            {
+                return BadRequest(new { message = "Total percentage of skin types cannot exceed 100." });
+            }
+            await _userService.AddUserSkinTypeAsync(currentUserId, request);
+            return Ok(new { message = "Skin type added successfully." });
+
+        }
+
+        [HttpDelete("skin-type/{id}")]
+        [Authorize]
+        public async Task<IActionResult> DeleteSkinType(int id)
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null)
+            {
+                return Unauthorized("User ID not found in token claims");
+            }
+            // Chuyển đổi ID từ claim sang int
+            if (!int.TryParse(userIdClaim.Value, out int currentUserId))
+            {
+                return BadRequest("Invalid user ID in token");
+            }
+            await _userService.DeleteUserSkinTypeAsync(currentUserId, id);
+            return NoContent();
+        }
+
+        [HttpPut("skin-type/{id}")]
+        [Authorize]
+        public async Task<IActionResult> UpdateSkinType(int id, [FromBody] RoutineOrUserSkinTypeRequest request)
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null)
+            {
+                return Unauthorized("User ID not found in token claims");
+            }
+            // Chuyển đổi ID từ claim sang int
+            if (!int.TryParse(userIdClaim.Value, out int currentUserId))
+            {
+                return BadRequest("Invalid user ID in token");
+            }
+            var userSkinTypes = await _userService.GetUserSkinTypesAsync(currentUserId);
+            if (userSkinTypes.Where(u => u.SkinTypeId != request.SkinTypeId).Sum(x => x.Percentage * 100) + request.Percentage > 100)
+            {
+                return BadRequest(new { message = "Total percentage of skin types cannot exceed 100." });
+            }
+            await _userService.UpdateUserSkinTypeAsync(currentUserId, request);
+            return NoContent();
+        }
+
+        [HttpGet("skin-type")]
+        [Authorize]
+        public async Task<IActionResult> GetUserSkinTypes()
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null)
+            {
+                return Unauthorized("User ID not found in token claims");
+            }
+            // Chuyển đổi ID từ claim sang int
+            if (!int.TryParse(userIdClaim.Value, out int currentUserId))
+            {
+                return BadRequest("Invalid user ID in token");
+            }
+            var userSkinTypes = await _userService.GetUserSkinTypesAsync(currentUserId);
+            return Ok(userSkinTypes);
+        }
 
     }
 }

@@ -3,6 +3,7 @@ using DianaShop.Service.RequestModel;
 using DianaShop.Service.RequestModel.QueryRequest;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 namespace DianaShop.API.Controllers
 {
     public class SkincareRoutineController : BaseController
@@ -93,6 +94,62 @@ namespace DianaShop.API.Controllers
             var response = await _skincareRoutineService.DeleteRoutineStepAsync(id);
             if (response == null) return NotFound();
             return Ok(response);
+        }
+
+        [HttpGet("saved")]
+        [Authorize]
+        public async Task<IActionResult> GetSavedRoutine([FromQuery] SkincareRoutineQueryRequest request)
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+
+            if (userIdClaim == null)
+            {
+                return Unauthorized("User ID not found in token claims");
+            }
+
+            // Chuyển đổi ID từ claim sang int
+            if (!int.TryParse(userIdClaim.Value, out int currentUserId))
+            {
+                return BadRequest("Invalid user ID in token");
+            }
+            var response = await _skincareRoutineService.GetSavedRoutine(currentUserId, request);
+            return Ok(response);
+        }
+
+        [HttpPost("{routineId}/save")]
+        [Authorize]
+        public async Task<IActionResult> SaveRoutine(int routineId)
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null)
+            {
+                return Unauthorized("User ID not found in token claims");
+            }
+            // Chuyển đổi ID từ claim sang int
+            if (!int.TryParse(userIdClaim.Value, out int currentUserId))
+            {
+                return BadRequest("Invalid user ID in token");
+            }
+            await _skincareRoutineService.SaveRoutine(currentUserId, routineId);
+            return NoContent();
+        }
+
+        [HttpDelete("{routineId}/save")]
+        [Authorize]
+        public async Task<IActionResult> UnsaveRoutine(int routineId)
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null)
+            {
+                return Unauthorized("User ID not found in token claims");
+            }
+            // Chuyển đổi ID từ claim sang int
+            if (!int.TryParse(userIdClaim.Value, out int currentUserId))
+            {
+                return BadRequest("Invalid user ID in token");
+            }
+            await _skincareRoutineService.UnsaveRoutine(currentUserId, routineId);
+            return NoContent();
         }
     }
 }

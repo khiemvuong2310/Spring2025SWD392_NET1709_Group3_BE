@@ -19,16 +19,16 @@ namespace DianaShop.Data.Entities
         public string? Image { get; set; }
         public bool? Status { get; set; }
         public bool EmailVerified { get; set; } = false;
-        public int? SkinTypeId { get; set; }
         public decimal? wallet { get; set; }
 
         public virtual Cart Cart { get; set; }  
-        public virtual SkinType SkinType { get; set; }
         public virtual ICollection<VoucherStorage> VoucherStorage { get; set; }
         public virtual ICollection<UserRole>? UserRoles { get; set; }
         public virtual ICollection<FeedBack> FeedBacks { get; set; }
         public virtual ICollection<Order> Orders { get; set; }
         public virtual ICollection<Payment> Payments { get; set; }
         public virtual ICollection<VnPayTransaction>? VnPay { get; set; }
+        public virtual ICollection<SavedRoutine> SavedRoutines { get; set; }
+        public virtual ICollection<UserSkinType> UserSkinTypes { get; set; }
     }
 }

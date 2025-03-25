@@ -30,10 +30,6 @@ namespace DianaShop.Service.RequestModel
         [Required(ErrorMessage = "Location is required.")]
         [StringLength(100, ErrorMessage = "Location cannot exceed 100 characters.")]
         public string Location { get; set; }
-
-        //[Required(ErrorMessage = "Skin type is required.")]
-        //public int? SkinTypeId { get; set; }
-
         public bool Status { get; set; } = true;   
     }
     public class UserUpdateRequest
