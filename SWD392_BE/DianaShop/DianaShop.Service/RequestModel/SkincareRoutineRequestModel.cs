@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DianaShop.Data.Entities;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -14,8 +15,16 @@ namespace DianaShop.Service.RequestModel
         [Required]
         public string Description { get; set; }
         [Required]
-        public List<int> SkinTypeIds { get; set; }
+        public List<RoutineSkinTypeRequest> RoutineSkinTypes { get; set; }
         public List<RoutineStepRequestModel> RoutineSteps { get; set; } = new List<RoutineStepRequestModel>();
 
+    }
+    public class RoutineSkinTypeRequest
+    {
+        [Required]
+        public int SkinTypeId { get; set; }
+        [Required]
+        [Range(0, 100)]
+        public decimal Percentage { get; set; }
     }
 }

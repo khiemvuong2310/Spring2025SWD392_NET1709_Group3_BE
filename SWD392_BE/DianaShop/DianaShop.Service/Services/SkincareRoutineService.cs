@@ -57,15 +57,19 @@ namespace DianaShop.Service.Services
         public async Task<SkincareRoutineResponseModel?> CreateRoutineAsync(SkincareRoutineRequestModel request)
         {
             var routine = _mapper.Map<SkincareRoutine>(request);
-            if (request.SkinTypeIds.Any())
+            if (request.RoutineSkinTypes.Any())
             {
                 routine.RoutineSkinTypes = new List<RoutineSkinType>();
-                foreach (var skinTypeId in request.SkinTypeIds)
+                foreach (var routineSkinType in request.RoutineSkinTypes)
                 {
-                    var skinType = await _unitOfWork.Repository<SkinType>().GetById(skinTypeId);
+                    var skinType = await _unitOfWork.Repository<SkinType>().GetById(routineSkinType.SkinTypeId);
                     if (skinType != null)
                     {
-                        routine.RoutineSkinTypes.Add(new RoutineSkinType { SkinType = skinType });
+                        routine.RoutineSkinTypes.Add(new RoutineSkinType
+                        {
+                            SkinType = skinType,
+                            Percentage = routineSkinType.Percentage != 0 ? routineSkinType.Percentage / 100 : 0
+                        });
                     }
                 }
             }
@@ -112,15 +116,16 @@ namespace DianaShop.Service.Services
                 .FirstOrDefaultAsync();
             if (routine == null) throw new Exception("Routine not found");
             _mapper.Map(request, routine);
-            if (request.SkinTypeIds.Any())
+            if (request.RoutineSkinTypes.Any())
             {
                 routine.RoutineSkinTypes = new List<RoutineSkinType>();
-                foreach (var skinTypeId in request.SkinTypeIds)
+                foreach (var routineSkinType in request.RoutineSkinTypes)
                 {
-                    var skinType = await _unitOfWork.Repository<SkinType>().GetById(skinTypeId);
+                    var skinType = await _unitOfWork.Repository<SkinType>().GetById(routineSkinType.SkinTypeId);
                     if (skinType != null)
                     {
-                        routine.RoutineSkinTypes.Add(new RoutineSkinType { SkinType = skinType });
+                        routine.RoutineSkinTypes.Add(new RoutineSkinType { SkinType = skinType, 
+                            Percentage = routineSkinType.Percentage != 0 ? routineSkinType.Percentage / 100 : 0 });
                     }
                 }
             }
