@@ -46,6 +46,149 @@ namespace DianaShop.Service.Services
                 .ToListAsync();
         }
 
+        // Lấy tất cả người dùng với bộ lọc
+        public async Task<DynamicResponse<UserResponseModel>> GetAllUsersAsync(RequestModel.QueryRequest.UserQueryRequest queryRequest)
+        {
+            var query = _unitOfWork.Repository<User>().AsQueryable().Where(u => !u.IsDelete);
+
+            // Apply filters
+            if (!string.IsNullOrEmpty(queryRequest.Username))
+            {
+                query = query.Where(u => u.Username.Contains(queryRequest.Username));
+            }
+
+            if (!string.IsNullOrEmpty(queryRequest.Email))
+            {
+                query = query.Where(u => u.Email.Contains(queryRequest.Email));
+            }
+
+            if (!string.IsNullOrEmpty(queryRequest.Phone))
+            {
+                query = query.Where(u => u.Phone.Contains(queryRequest.Phone));
+            }
+
+            if (!string.IsNullOrEmpty(queryRequest.Location))
+            {
+                query = query.Where(u => u.Location.Contains(queryRequest.Location));
+            }
+
+            if (queryRequest.Status.HasValue)
+            {
+                query = query.Where(u => u.Status == queryRequest.Status.Value);
+            }
+            
+            if (queryRequest.EmailVerified.HasValue)
+            {
+                query = query.Where(u => u.EmailVerified == queryRequest.EmailVerified.Value);
+            }
+
+            if (queryRequest.RoleId.HasValue)
+            {
+                query = query.Where(u => u.UserRoles.Any(ur => ur.RoleId == queryRequest.RoleId.Value));
+            }
+
+            // Get total count for pagination
+            var totalCount = await query.CountAsync();
+
+            // Apply sorting
+            if (!string.IsNullOrEmpty(queryRequest.Sort))
+            {
+                bool isDescending = !string.IsNullOrEmpty(queryRequest.Order) && 
+                                   queryRequest.Order.ToLower() == "desc";
+
+                switch (queryRequest.Sort.ToLower())
+                {
+                    case "username":
+                        query = isDescending 
+                            ? query.OrderByDescending(u => u.Username) 
+                            : query.OrderBy(u => u.Username);
+                        break;
+                    case "email":
+                        query = isDescending 
+                            ? query.OrderByDescending(u => u.Email) 
+                            : query.OrderBy(u => u.Email);
+                        break;
+                    case "location":
+                        query = isDescending 
+                            ? query.OrderByDescending(u => u.Location) 
+                            : query.OrderBy(u => u.Location);
+                        break;
+                    case "phone":
+                        query = isDescending 
+                            ? query.OrderByDescending(u => u.Phone) 
+                            : query.OrderBy(u => u.Phone);
+                        break;
+                    case "status":
+                        query = isDescending 
+                            ? query.OrderByDescending(u => u.Status) 
+                            : query.OrderBy(u => u.Status);
+                        break;
+                    case "emailverified":
+                        query = isDescending 
+                            ? query.OrderByDescending(u => u.EmailVerified) 
+                            : query.OrderBy(u => u.EmailVerified);
+                        break;
+                    default:
+                        query = query.OrderByDescending(u => u.Id);
+                        break;
+                }
+            }
+            else
+            {
+                query = query.OrderByDescending(u => u.Id);
+            }
+
+            // Apply pagination
+            var page = queryRequest.PageNumber <= 0 ? 1 : queryRequest.PageNumber;
+            var size = queryRequest.PageSize <= 0 ? 10 : queryRequest.PageSize;
+            
+            var pagedQuery = query
+                .Skip((page - 1) * size)
+                .Take(size);
+
+            // Get users from database
+            var users = await pagedQuery
+                .ProjectTo<UserResponseModel>(_mapper.ConfigurationProvider)
+                .ToListAsync();
+
+            // Process skin type information for each user
+            foreach (var user in users)
+            {
+                var userSkinTypes = await _unitOfWork.Repository<UserSkinType>()
+                    .AsQueryable()
+                    .Where(ust => ust.UserId == user.Id)
+                    .Select(ust => new 
+                    {
+                        ust.SkinTypeId,
+                        ust.Percentage,
+                        SkinTypeName = ust.SkinType.Name
+                    })
+                    .OrderByDescending(ust => ust.Percentage)
+                    .ToListAsync();
+
+                var dominantSkinType = userSkinTypes.FirstOrDefault();
+                if (dominantSkinType != null)
+                {
+                    user.SkinTypeId = dominantSkinType.SkinTypeId;
+                    user.SkinTypeName = dominantSkinType.SkinTypeName;
+                }
+            }
+
+            // Create and return response
+            return new DynamicResponse<UserResponseModel>
+            {
+                Code = StatusCodes.Status200OK,
+                Message = "Get users successfully",
+                Data = users.ToList(),
+                MetaData = new PagingMetaData
+                {
+                    Page = page,
+                    Size = size,
+                    Total = totalCount
+                }
+            };
+        }
+
         // Lấy người dùng theo ID
         public async Task<UserResponseModel?> GetUserByIdAsync(int id)
         {

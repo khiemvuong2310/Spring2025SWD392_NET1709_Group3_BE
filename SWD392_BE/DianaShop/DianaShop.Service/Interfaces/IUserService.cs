@@ -1,6 +1,7 @@
 ﻿using DianaShop.Data.Entities;
 using DianaShop.Service.ReponseModel;
 using DianaShop.Service.RequestModel;
+using DianaShop.Service.RequestModel.QueryRequest;
 using Microsoft.AspNetCore.Http;
 
 namespace DianaShop.Service.Interfaces
@@ -10,6 +11,7 @@ namespace DianaShop.Service.Interfaces
         Task<UserResponseModel> CreateUserAsync(UserCreateRequest request);
         Task<bool> DeleteUserAsync(int id);
         Task<IEnumerable<UserResponseModel>> GetAllUsersAsync();
+        Task<DynamicResponse<UserResponseModel>> GetAllUsersAsync(UserQueryRequest queryRequest);
         Task<UserResponseModel?> GetUserByIdAsync(int id);
         Task<UserResponseModel?> UpdateUserAsync(int id, UserUpdateRequest request);
         Task<UserResponseModel?> AddProfileImageAsync(int id, IFormFile imageFile);

@@ -18,13 +18,29 @@ namespace DianaShop.API.Controllers
             _userService = userService;
         }
 
-        // Lấy tất cả người dùng
+        // Lấy tất cả người dùng (hiện tại chỉ hỗ trợ lấy tất cả, không có lọc và phân trang)
+        // Giữ lại để tương thích ngược với code cũ
         [HttpGet]
         [Authorize]
         public async Task<IActionResult> GetAllUsers()
         {
-            var users = await _userService.GetAllUsersAsync();
-            return Ok(users);
+            var defaultRequest = new DianaShop.Service.RequestModel.QueryRequest.UserQueryRequest
+            {
+                PageNumber = 1,
+                PageSize = 1000 
+            };
+
+            var response = await _userService.GetAllUsersAsync(defaultRequest);
+            return Ok(response.Data); 
+        }
+
+        // Lấy tất cả người dùng với bộ lọc
+        [HttpGet("filter")]
+        [Authorize(Roles = "Manager,Staff")]
+        public async Task<IActionResult> GetFilteredUsers([FromQuery] DianaShop.Service.RequestModel.QueryRequest.UserQueryRequest queryRequest)
+        {
+            var response = await _userService.GetAllUsersAsync(queryRequest);
+            return Ok(response);
         }
 
         // Lấy người dùng theo ID
@@ -239,6 +255,43 @@ namespace DianaShop.API.Controllers
             }
             var userSkinTypes = await _userService.GetUserSkinTypesAsync(currentUserId);
             return Ok(userSkinTypes);
+        }
+
+        // Lấy tất cả người dùng với bộ lọc (dành cho Customer)
+        [HttpGet("public-filter")]
+        [Authorize]
+        public async Task<IActionResult> GetPublicFilteredUsers([FromQuery] DianaShop.Service.RequestModel.QueryRequest.UserQueryRequest queryRequest)
+        {
+            // Lấy userId từ token để xác định người dùng hiện tại
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null)
+            {
+                return Unauthorized("User ID not found in token claims");
+            }
+
+            // Chỉ Manager và Staff có thể xem EmailVerified và Status
+            bool isManagerOrStaff = User.IsInRole("Manager") || User.IsInRole("Staff");
+            if (!isManagerOrStaff)
+            {
+                // Ẩn các thuộc tính nhạy cảm cho Customer
+                queryRequest.EmailVerified = null;
+                queryRequest.Status = null;
+            }
+
+            var response = await _userService.GetAllUsersAsync(queryRequest);
+            
+            // Nếu không phải là Manager hoặc Staff, ẩn thông tin nhạy cảm
+            if (!isManagerOrStaff)
+            {
+                foreach (var user in response.Data)
+                {
+                    user.Email = null;
+                    user.Phone = null;
+                    user.Password = null;
+                }
+            }
+            
+            return Ok(response);
         }
 
     }
