@@ -96,7 +96,7 @@ namespace DianaShop.Service.Services
                     var unverifiedUserDetails = await _userService.GetUserByEmailAsync(email);
                     return new BaseResponseForLogin<LoginResponseModel>
                     {
-                        Code = StatusCodes.Status403Forbidden,
+                        Code = StatusCodes.Status200OK,
                         Message = "Please verify your email before logging in. A new verification code has been sent to your email.",
                         Data = new LoginResponseModel
                         {
