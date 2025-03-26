@@ -194,7 +194,7 @@ namespace DianaShop.Service.Services
         {
             // Get the user with basic information
             var user = await _unitOfWork.Repository<User>().AsQueryable()
-                .Where(u => u.Id == id && !u.IsDelete)
+                .Where(u => u.Id == id)
                 .ProjectTo<UserResponseModel>(_mapper.ConfigurationProvider)
                 .FirstOrDefaultAsync();
             
