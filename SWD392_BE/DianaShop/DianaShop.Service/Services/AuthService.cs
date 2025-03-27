@@ -356,6 +356,7 @@ namespace DianaShop.Service.Services
                     Password = PasswordTools.HashPassword("0123456"),
                     Phone = adminCreateAccountModel.Phone,
                     Status = true,
+                    EmailVerified = true,
                     wallet = 0,
                 };
 

@@ -31,7 +31,7 @@ namespace DianaShop.Service.RequestModel
             var currentVietnamTime = TimeZoneInfo.ConvertTime(DateTime.Now, vietnamTime);
             var todayVietnam = new DateTime(currentVietnamTime.Year, currentVietnamTime.Month, currentVietnamTime.Day);
 
-            // Convert input dates to Vietnam timezone
+            // Convert input dates to Vietnam timezone  
             var expiryDateVietnam = TimeZoneInfo.ConvertTime(ExpiryDate, vietnamTime);
             var importDateVietnam = TimeZoneInfo.ConvertTime(ImportDate, vietnamTime);
             var manufactureDateVietnam = TimeZoneInfo.ConvertTime(ManufactureDate, vietnamTime);
