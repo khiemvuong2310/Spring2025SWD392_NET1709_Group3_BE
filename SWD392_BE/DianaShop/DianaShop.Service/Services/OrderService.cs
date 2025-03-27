@@ -30,6 +30,7 @@ namespace DianaShop.Service.Services
         {
             return await _unitOfWork.Repository<Order>()
                 .GetQueryable()
+                .Where(x => !x.IsDelete && x.StatusId != 6)
                 .ProjectTo<OrderResponseModel>(_mapper.ConfigurationProvider)
                 .ToListAsync();
         }
@@ -78,7 +79,7 @@ namespace DianaShop.Service.Services
         {
             return await _unitOfWork.Repository<Order>()
                 .AsQueryable()
-                .Where(cp => cp.UserID == userId)
+                .Where(cp => cp.UserID == userId && !cp.IsDelete && cp.StatusId != 6)
                 .ProjectTo<OrderResponseModel>(_mapper.ConfigurationProvider)
                 .ToListAsync();
         }
@@ -87,7 +88,7 @@ namespace DianaShop.Service.Services
         {
             return await _unitOfWork.Repository<Order>()
                 .GetQueryable()
-                .Where(cp => cp.Id == orderId)
+                .Where(cp => cp.Id == orderId && !cp.IsDelete && cp.StatusId != 6)
                 .ProjectTo<OrderResponseModel>(_mapper.ConfigurationProvider)
                 .FirstOrDefaultAsync();
         }
@@ -135,20 +136,38 @@ namespace DianaShop.Service.Services
                 return false;
             }
 
-            var orderDetails = _unitOfWork.Repository<OrderDetail>()
-                .GetQueryable()
-                .Where(cp => cp.OrderId == orderId);
-            if (await orderDetails.AnyAsync())
-            {
-                //_unitOfWork.Repository<OrderDetail>().DeleteRange(orderDetails);
-                throw new ArgumentException("There are order detail isn't delete.");
-            }
-
-            _unitOfWork.Repository<Order>().Delete(order);
+            order.StatusId = 6;
+            order.IsDelete = true;
+            order.UpdateDate = DateTime.Now;
+            await _unitOfWork.Repository<Order>().UpdateAsync(order);
 
             await _unitOfWork.SaveChangesAsync();
             return true;
         }
+
+        //public async Task<bool> RemoveOrder(int orderId)
+        //{
+        //    var order = await _unitOfWork.Repository<Order>()
+        //        .FindAsync(c => c.Id == orderId);
+        //    if (order == null)
+        //    {
+        //        return false;
+        //    }
+
+        //    var orderDetails = _unitOfWork.Repository<OrderDetail>()
+        //        .GetQueryable()
+        //        .Where(cp => cp.OrderId == orderId);
+        //    if (await orderDetails.AnyAsync())
+        //    {
+        //        //_unitOfWork.Repository<OrderDetail>().DeleteRange(orderDetails);
+        //        throw new ArgumentException("There are order detail isn't delete.");
+        //    }
+
+        //    _unitOfWork.Repository<Order>().Delete(order);
+
+        //    await _unitOfWork.SaveChangesAsync();
+        //    return true;
+        //}
 
         public async Task<OrderResponseModel> UpdateOrder(int orderId, int status)
         {
