@@ -177,6 +177,7 @@ namespace DianaShop.API.Controllers
                 }
                 catch (Exception ex)
                 {
+                    var before01 = await _orderDetailService.ClearOrderDetail(order.Id);
                     var error01 = await _orderService.RemoveOrder(order.Id);
                     return BadRequest($"Failed to add product {item.ProductId}: {ex.Message}");
                 }

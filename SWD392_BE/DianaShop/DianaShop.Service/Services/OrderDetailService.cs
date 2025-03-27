@@ -43,6 +43,20 @@ namespace DianaShop.Service.Services
             var existingProduct = await _unitOfWork.Repository<OrderDetail>()
                 .FindAsync(cp => cp.OrderId == request.OrderID && cp.ProductId == request.ProductId);
 
+            
+            //var inStock = product.ProductBatches.Where(pb => pb.Status == true && !pb.IsDelete).Sum(pb => pb.Quantity) ?? 0;
+            var batchs = await _unitOfWork.Repository<ProductBatch>().GetAll().Where(p => p.ProductID == request.ProductId && p.Quantity != 0 && p.Status == true && !p.IsDelete && p.ExpiryDate > DateTime.Now).ToListAsync();
+            int inStock = 0;
+            foreach (var batch in batchs)
+            {
+                inStock += (batch.Quantity ?? 0);
+            }
+
+            if (inStock < request.Quantity)
+            {
+                throw new KeyNotFoundException($"Product with Id {request.ProductId} are insufficient unit in stock.");
+            }
+
             if (existingProduct != null)
             {
                 existingProduct.Quantity += request.Quantity;
@@ -69,19 +83,6 @@ namespace DianaShop.Service.Services
             await _unitOfWork.Repository<Order>().UpdateAsync(order);
 
             //cập nhật product sau khi mua
-            //var inStock = product.ProductBatches.Where(pb => pb.Status == true && !pb.IsDelete).Sum(pb => pb.Quantity) ?? 0;
-            var batchs = await _unitOfWork.Repository<ProductBatch>().GetAll().Where(p => p.ProductID == product.Id && p.Status == true && !p.IsDelete && p.ExpiryDate > DateTime.Now).ToListAsync();
-            int inStock = 0;
-            foreach (var batch in batchs)
-            {
-                inStock += (batch.Quantity ?? 0);
-            }
-
-            if (inStock < request.Quantity)
-            {
-                throw new KeyNotFoundException($"Product with Id {request.ProductId} are insufficient unit in stock.");
-            }
-
             var batchList = new List<ProductBatch>();
             var tmpQuantity = request.Quantity;
             while (tmpQuantity != 0)
