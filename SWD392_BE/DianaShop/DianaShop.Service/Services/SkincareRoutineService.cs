@@ -67,7 +67,7 @@ namespace DianaShop.Service.Services
                     {
                         routine.RoutineSkinTypes.Add(new RoutineSkinType
                         {
-                            SkinType = skinType,
+                            SkinTypeId = routineSkinType.SkinTypeId,
                             Percentage = routineSkinType.Percentage != 0 ? routineSkinType.Percentage / 100 : 0
                         });
                     }

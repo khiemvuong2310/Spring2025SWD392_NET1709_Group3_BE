@@ -6,6 +6,7 @@ using DianaShop.Service.RequestModel.QueryRequest;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace DianaShop.API.Controllers
 {
@@ -141,7 +142,6 @@ namespace DianaShop.API.Controllers
             return Ok(new { Message = "Order cleared successfully!" });
         }
 
-        /// ✅ Thanh toán giỏ hàng
         [HttpPost("checkout")]
         [Authorize]
         public async Task<IActionResult> Checkout([FromBody] CheckoutRequestModel request)
@@ -151,64 +151,75 @@ namespace DianaShop.API.Controllers
                 return BadRequest("Invalid user ID.");
             }
 
+
             var orderRequest = new OrderRequestModel
             {
                 UserID = request.UserID,
                 Address = request.Address,
                 Shipprice = request.Shipprice
             };
-            var success1 = await _orderService.CreateOrder(orderRequest);
+            var order = await _orderService.CreateOrder(orderRequest);
 
-            var listDetail = request.Details;
-            //var listsuccess2 = List<OrderDetailResponseModel>();
+            var errors = new List<string>();
 
-            foreach (var item in listDetail)
+            // Xử lý thêm chi tiết đơn hàng
+            foreach (var item in request.Details)
             {
                 try
                 {
                     var detailRequest = new OrderDetailRequestModel
                     {
-                        OrderID = success1.Id,
+                        OrderID = order.Id,
                         ProductId = item.ProductId,
                         Quantity = item.Quantity
                     };
-
-                    var detail = await _orderDetailService.AddOrderDetail(detailRequest);
+                    await _orderDetailService.AddOrderDetail(detailRequest);
                 }
                 catch (Exception ex)
                 {
-                    return BadRequest(new { message = ex.Message });
+                    var before01 = await _orderDetailService.ClearOrderDetail(order.Id);
+                    var error01 = await _orderService.RemoveOrder(order.Id);
+                    return BadRequest($"Failed to add product {item.ProductId}: {ex.Message}");
                 }
             }
 
-            if (request.voucherID != null && request.voucherID > 0)
+            // Xử lý voucher nếu có
+            if (request.voucherID.HasValue && request.voucherID > 0)
             {
                 try
                 {
-                    var voucherID = request.voucherID ?? 0;
-                    var voucherResult = await _orderService.AddVoucherToOrder(success1.Id, voucherID);
+                    await _orderService.AddVoucherToOrder(order.Id, request.voucherID.Value);
                 }
                 catch (Exception ex)
                 {
-                    return NotFound(new { message = ex.Message });
+                    var error02 = await _orderService.RemoveOrder(order.Id);
+                    return BadRequest($"Failed to apply voucher {request.voucherID.Value}: {ex.Message}");
                 }
             }
 
-            var paymentRequest = new PaymentRequestModel
+            // Xử lý thanh toán
+            try
             {
-                OrderID = success1.Id,
-                PaymentMethodID = request.PaymentMethodID
-            };
-            var paymentResponse = await _paymentService.CreatePayment(paymentRequest);
+                var paymentRequest = new PaymentRequestModel
+                {
+                    OrderID = order.Id,
+                    PaymentMethodID = request.PaymentMethodID
+                };
+                var paymentResponse = await _paymentService.CreatePayment(paymentRequest);
+            }
+            catch (Exception ex)
+            {
+                var error03 = await _orderService.RemoveOrder(order.Id);
+                return BadRequest($"Payment failed: {ex.Message}");
+            }
 
-            var orderResponse = await _orderService.GetOrderById(success1.Id);
-
+            var orderResponse = await _orderService.GetOrderById(order.Id);
             return Ok(new
             {
-                Message = "Check out successfully",
-                orderResponse,
-                paymentResponse
+                Message = "Checkout successfully",
+                orderResponse
             });
         }
+
     }
 }

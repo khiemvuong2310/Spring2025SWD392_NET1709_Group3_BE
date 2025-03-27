@@ -43,6 +43,20 @@ namespace DianaShop.Service.Services
             var existingProduct = await _unitOfWork.Repository<OrderDetail>()
                 .FindAsync(cp => cp.OrderId == request.OrderID && cp.ProductId == request.ProductId);
 
+            
+            //var inStock = product.ProductBatches.Where(pb => pb.Status == true && !pb.IsDelete).Sum(pb => pb.Quantity) ?? 0;
+            var batchs = await _unitOfWork.Repository<ProductBatch>().GetAll().Where(p => p.ProductID == request.ProductId && p.Quantity != 0 && p.Status == true && !p.IsDelete && p.ExpiryDate > DateTime.Now).ToListAsync();
+            int inStock = 0;
+            foreach (var batch in batchs)
+            {
+                inStock += (batch.Quantity ?? 0);
+            }
+
+            if (inStock < request.Quantity)
+            {
+                throw new KeyNotFoundException($"Product with Id {request.ProductId} are insufficient unit in stock.");
+            }
+
             if (existingProduct != null)
             {
                 existingProduct.Quantity += request.Quantity;
@@ -69,25 +83,12 @@ namespace DianaShop.Service.Services
             await _unitOfWork.Repository<Order>().UpdateAsync(order);
 
             //cập nhật product sau khi mua
-            //var inStock = product.ProductBatches.Where(pb => pb.Status == true && !pb.IsDelete).Sum(pb => pb.Quantity) ?? 0;
-            var batchs = await _unitOfWork.Repository<ProductBatch>().GetAll().Where(p => p.ProductID == product.Id && !p.IsDelete).ToListAsync();
-            int inStock = 0;
-            foreach (var batch in batchs)
-            {
-                inStock += (batch.Quantity ?? 0);
-            }
-
-            if (inStock < request.Quantity)
-            {
-                throw new KeyNotFoundException($"Product with Id {request.ProductId} are insufficient unit in stock.");
-            }
-
             var batchList = new List<ProductBatch>();
             var tmpQuantity = request.Quantity;
             while (tmpQuantity != 0)
             {
                 var batch = await _unitOfWork.Repository<ProductBatch>().AsQueryable()
-                .Where(b => b.ProductID == request.ProductId && b.Quantity != 0 && !b.IsDelete)
+                .Where(b => b.ProductID == request.ProductId && b.Quantity != 0 && !b.IsDelete && b.Status == true && b.ExpiryDate > DateTime.Now)
                 .OrderBy(pb => pb.ImportDate)
                 .FirstOrDefaultAsync();
                 
@@ -139,11 +140,12 @@ namespace DianaShop.Service.Services
             //cập nhật product sau khi xóa
             var orderDetailList = await orderDetails.ToListAsync(); // ✅ Nạp dữ liệu trước
             var batchList = new List<ProductBatch>();
+            var updateDetailList = new List<OrderDetail>();
 
             foreach (var item in orderDetailList)
             {
                 var batch = await _unitOfWork.Repository<ProductBatch>().AsQueryable()
-                    .Where(b => b.ProductID == item.ProductId && !b.IsDelete)
+                    .Where(b => b.ProductID == item.ProductId && !b.IsDelete && b.Status == true && b.ExpiryDate > DateTime.Now)
                     .OrderBy(pb => pb.ImportDate)
                     .FirstOrDefaultAsync();
 
@@ -153,10 +155,12 @@ namespace DianaShop.Service.Services
                 }
                 batch.Quantity += item.Quantity;
                 batchList.Add(batch);
-
+                item.IsDelete = true;
+                updateDetailList.Add(item);
             }
 
-            _unitOfWork.Repository<OrderDetail>().DeleteRange(orderDetails);
+            //_unitOfWork.Repository<OrderDetail>().DeleteRange(orderDetails);
+            await _unitOfWork.Repository<OrderDetail>().UpdateRangeAsync(updateDetailList);
             await _unitOfWork.Repository<Order>().UpdateAsync(order);
             await _unitOfWork.Repository<ProductBatch>().UpdateRangeAsync(batchList);
             await _unitOfWork.SaveChangesAsync();
@@ -167,12 +171,11 @@ namespace DianaShop.Service.Services
         {
             var orderDetails = await _unitOfWork.Repository<OrderDetail>()
                 .GetQueryable()
-                .Where(cp => cp.OrderId == orderId)
+                .Where(cp => cp.OrderId == orderId && !cp.IsDelete)
                 .Include(cp => cp.Product)
                 .ToListAsync();
             return _mapper.Map<IEnumerable<OrderDetailResponseModel>>(orderDetails);
         }
-
 
         public async Task<bool> RemoveOrderDetail(int orderId, int productId)
         {
@@ -193,7 +196,7 @@ namespace DianaShop.Service.Services
 
             //cập nhật product sau khi xóa
             var batch = await _unitOfWork.Repository<ProductBatch>().AsQueryable()
-                .Where(b => b.ProductID == productId && b.ExpiryDate > DateTime.Now && b.IsDelete == false)
+                .Where(b => b.ProductID == productId && b.ExpiryDate > DateTime.Now && b.IsDelete == false && b.Status == true)
                 .OrderBy(pb => pb.ImportDate)
                 .FirstOrDefaultAsync();
             if (batch == null)
@@ -202,7 +205,8 @@ namespace DianaShop.Service.Services
             }
             batch.Quantity += orderDetail.Quantity;
 
-            _unitOfWork.Repository<OrderDetail>().Delete(orderDetail);
+            orderDetail.IsDelete = true;
+            await _unitOfWork.Repository<OrderDetail>().UpdateAsync(orderDetail);
             await _unitOfWork.Repository<Order>().UpdateAsync(order);
             await _unitOfWork.Repository<ProductBatch>().UpdateAsync(batch);
             await _unitOfWork.SaveChangesAsync();
@@ -228,7 +232,7 @@ namespace DianaShop.Service.Services
 
             //cập nhật product sau khi cập nhật
             var batch = await _unitOfWork.Repository<ProductBatch>().AsQueryable()
-                .Where(b => b.ProductID == request.ProductId)
+                .Where(b => b.ProductID == request.ProductId && b.Status == true && b.ExpiryDate > DateTime.Now)
                 .OrderBy(pb => pb.ImportDate)
                 .FirstOrDefaultAsync();
             if (batch == null)

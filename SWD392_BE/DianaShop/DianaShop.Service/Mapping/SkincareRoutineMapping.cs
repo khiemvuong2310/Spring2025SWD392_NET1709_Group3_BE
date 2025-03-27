@@ -21,7 +21,9 @@ namespace DianaShop.Service.Mapping
             CreateMap<RoutineStep, RoutineStepResponseModel>();
 
             CreateMap<SkincareRoutineRequestModel, SkincareRoutine>()
-                .ForMember(dest => dest.RoutineSteps, opt => opt.MapFrom(src => src.RoutineSteps));
+                .ForMember(dest => dest.RoutineSteps, opt => opt.MapFrom(src => src.RoutineSteps))
+                .ForMember(dest => dest.RoutineSkinTypes, opt => opt.Ignore());
+
             CreateMap<RoutineStepRequestModel, RoutineStep>();
 
             
