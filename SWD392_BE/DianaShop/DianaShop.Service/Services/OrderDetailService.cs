@@ -70,7 +70,7 @@ namespace DianaShop.Service.Services
 
             //cập nhật product sau khi mua
             //var inStock = product.ProductBatches.Where(pb => pb.Status == true && !pb.IsDelete).Sum(pb => pb.Quantity) ?? 0;
-            var batchs = await _unitOfWork.Repository<ProductBatch>().GetAll().Where(p => p.ProductID == product.Id && !p.IsDelete).ToListAsync();
+            var batchs = await _unitOfWork.Repository<ProductBatch>().GetAll().Where(p => p.ProductID == product.Id && p.Status == true && !p.IsDelete && p.ExpiryDate > DateTime.Now).ToListAsync();
             int inStock = 0;
             foreach (var batch in batchs)
             {
@@ -87,7 +87,7 @@ namespace DianaShop.Service.Services
             while (tmpQuantity != 0)
             {
                 var batch = await _unitOfWork.Repository<ProductBatch>().AsQueryable()
-                .Where(b => b.ProductID == request.ProductId && b.Quantity != 0 && !b.IsDelete)
+                .Where(b => b.ProductID == request.ProductId && b.Quantity != 0 && !b.IsDelete && b.Status == true && b.ExpiryDate > DateTime.Now)
                 .OrderBy(pb => pb.ImportDate)
                 .FirstOrDefaultAsync();
                 
@@ -144,7 +144,7 @@ namespace DianaShop.Service.Services
             foreach (var item in orderDetailList)
             {
                 var batch = await _unitOfWork.Repository<ProductBatch>().AsQueryable()
-                    .Where(b => b.ProductID == item.ProductId && !b.IsDelete)
+                    .Where(b => b.ProductID == item.ProductId && !b.IsDelete && b.Status == true && b.ExpiryDate > DateTime.Now)
                     .OrderBy(pb => pb.ImportDate)
                     .FirstOrDefaultAsync();
 
@@ -195,7 +195,7 @@ namespace DianaShop.Service.Services
 
             //cập nhật product sau khi xóa
             var batch = await _unitOfWork.Repository<ProductBatch>().AsQueryable()
-                .Where(b => b.ProductID == productId && b.ExpiryDate > DateTime.Now && b.IsDelete == false)
+                .Where(b => b.ProductID == productId && b.ExpiryDate > DateTime.Now && b.IsDelete == false && b.Status == true)
                 .OrderBy(pb => pb.ImportDate)
                 .FirstOrDefaultAsync();
             if (batch == null)
@@ -266,7 +266,7 @@ namespace DianaShop.Service.Services
 
             //cập nhật product sau khi cập nhật
             var batch = await _unitOfWork.Repository<ProductBatch>().AsQueryable()
-                .Where(b => b.ProductID == request.ProductId)
+                .Where(b => b.ProductID == request.ProductId && b.Status == true && b.ExpiryDate > DateTime.Now)
                 .OrderBy(pb => pb.ImportDate)
                 .FirstOrDefaultAsync();
             if (batch == null)
