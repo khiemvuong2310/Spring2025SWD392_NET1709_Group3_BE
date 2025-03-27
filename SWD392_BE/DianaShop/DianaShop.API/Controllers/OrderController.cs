@@ -135,82 +135,12 @@ namespace DianaShop.API.Controllers
         [Authorize]
         public async Task<IActionResult> RemoveOrder(int orderId)
         {
-            //var condition = await _orderDetailService.ClearOrderDetail(orderId);
+            var condition = await _orderDetailService.ClearOrderDetail(orderId);
             var result = await _orderService.RemoveOrder(orderId);
             if (!result)
                 return BadRequest("Order does not exist.");
             return Ok(new { Message = "Order cleared successfully!" });
         }
-
-        ///// ✅ Thanh toán giỏ hàng
-        //[HttpPost("checkout")]
-        //[Authorize]
-        //public async Task<IActionResult> Checkout([FromBody] CheckoutRequestModel request)
-        //{
-        //    if (request == null || request.UserID <= 0)
-        //    {
-        //        return BadRequest("Invalid user ID.");
-        //    }
-
-        //    var orderRequest = new OrderRequestModel
-        //    {
-        //        UserID = request.UserID,
-        //        Address = request.Address,
-        //        Shipprice = request.Shipprice
-        //    };
-        //    var success1 = await _orderService.CreateOrder(orderRequest);
-
-        //    var listDetail = request.Details;
-        //    //var listsuccess2 = List<OrderDetailResponseModel>();
-
-        //    foreach (var item in listDetail)
-        //    {
-        //        try
-        //        {
-        //            var detailRequest = new OrderDetailRequestModel
-        //            {
-        //                OrderID = success1.Id,
-        //                ProductId = item.ProductId,
-        //                Quantity = item.Quantity
-        //            };
-
-        //            var detail = await _orderDetailService.AddOrderDetail(detailRequest);
-        //        }
-        //        catch (Exception ex)
-        //        {
-        //            return BadRequest(new { message = ex.Message });
-        //        }
-        //    }
-
-        //    if (request.voucherID != null && request.voucherID > 0)
-        //    {
-        //        try
-        //        {
-        //            var voucherID = request.voucherID ?? 0;
-        //            var voucherResult = await _orderService.AddVoucherToOrder(success1.Id, voucherID);
-        //        }
-        //        catch (Exception ex)
-        //        {
-        //            return NotFound(new { message = ex.Message });
-        //        }
-        //    }
-
-        //    var paymentRequest = new PaymentRequestModel
-        //    {
-        //        OrderID = success1.Id,
-        //        PaymentMethodID = request.PaymentMethodID
-        //    };
-        //    var paymentResponse = await _paymentService.CreatePayment(paymentRequest);
-
-        //    var orderResponse = await _orderService.GetOrderById(success1.Id);
-
-        //    return Ok(new
-        //    {
-        //        Message = "Check out successfully",
-        //        orderResponse,
-        //        paymentResponse
-        //    });
-        //}
 
         [HttpPost("checkout")]
         [Authorize]

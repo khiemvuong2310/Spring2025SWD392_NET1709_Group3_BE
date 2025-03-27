@@ -212,41 +212,6 @@ namespace DianaShop.Service.Services
             return true;
         }
 
-        //public async Task<bool> RemoveOrderDetail(int orderId, int productId)
-        //{
-        //    var orderDetail = await _unitOfWork.Repository<OrderDetail>()
-        //    .FindAsync(cp => cp.OrderId == orderId && cp.ProductId == productId);
-        //    if (orderDetail == null)
-        //        return false;
-
-        //    var order = await _unitOfWork.Repository<Order>().FindAsync(cp => cp.Id == orderId);
-        //    if (order == null)
-        //        return false;
-
-        //    //cập nhật order sau khi xóa
-        //    order.Quantity -= orderDetail.Quantity;
-        //    order.TotalAmount -= (orderDetail.Quantity * orderDetail.UnitPrice);
-        //    order.FinalAmount += (order.TotalAmount + order.ShipAmount);
-        //    order.UpdateDate = DateTime.Now;
-
-        //    //cập nhật product sau khi xóa
-        //    var batch = await _unitOfWork.Repository<ProductBatch>().AsQueryable()
-        //        .Where(b => b.ProductID == productId && b.ExpiryDate > DateTime.Now && b.IsDelete == false)
-        //        .OrderBy(pb => pb.ImportDate)
-        //        .FirstOrDefaultAsync();
-        //    if (batch == null)
-        //    {
-        //        throw new KeyNotFoundException($"Product with Batch {productId} not found.");
-        //    }
-        //    batch.Quantity += orderDetail.Quantity;
-
-        //    _unitOfWork.Repository<OrderDetail>().Delete(orderDetail);
-        //    await _unitOfWork.Repository<Order>().UpdateAsync(order);
-        //    await _unitOfWork.Repository<ProductBatch>().UpdateAsync(batch);
-        //    await _unitOfWork.SaveChangesAsync();
-        //    return true;
-        //}
-
         public async Task<OrderDetailResponseModel> UpdateOrderDetail(OrderDetailRequestModel request)
         {
             var orderDetail = await _unitOfWork.Repository<OrderDetail>()
