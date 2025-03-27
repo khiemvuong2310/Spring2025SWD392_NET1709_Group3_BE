@@ -134,7 +134,7 @@ namespace DianaShop.API.Controllers
         [Authorize]
         public async Task<IActionResult> RemoveOrder(int orderId)
         {
-            var condition = await _orderDetailService.ClearOrderDetail(orderId);
+            //var condition = await _orderDetailService.ClearOrderDetail(orderId);
             var result = await _orderService.RemoveOrder(orderId);
             if (!result)
                 return BadRequest("Order does not exist.");
