@@ -39,7 +39,7 @@ namespace DianaShop.API.Controllers
 
         [HttpPost]
         [Authorize(Roles = "Staff,Manager")]
-        public async Task<IActionResult> Create([FromForm]SkincareRoutineRequestModel model)
+        public async Task<IActionResult> Create([FromBody]SkincareRoutineRequestModel model)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
             var response = await _skincareRoutineService.CreateRoutineAsync(model);
@@ -57,7 +57,7 @@ namespace DianaShop.API.Controllers
 
         [HttpPut("{id}")]
         [Authorize(Roles = "Staff,Manager")]
-        public async Task<IActionResult> Update(int id, [FromForm] SkincareRoutineRequestModel model)
+        public async Task<IActionResult> Update(int id, [FromBody] SkincareRoutineRequestModel model)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
             var response = await _skincareRoutineService.GetRoutineByIdAsync(id);
