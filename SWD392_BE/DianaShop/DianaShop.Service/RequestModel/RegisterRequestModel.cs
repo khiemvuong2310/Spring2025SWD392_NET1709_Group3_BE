@@ -9,7 +9,6 @@ namespace DianaShop.Service.RequestModel
 {
     public class AdminCreateAccountModel
     {
-        //public int UserId {  get; set; }
         [RegularExpression(@"^[\p{L}0-9\s]+$", ErrorMessage = "Username cannot contain special characters.")]
         [Required(ErrorMessage = "Username is required.")]
         [StringLength(50, ErrorMessage = "Username cannot exceed 50 characters.")]

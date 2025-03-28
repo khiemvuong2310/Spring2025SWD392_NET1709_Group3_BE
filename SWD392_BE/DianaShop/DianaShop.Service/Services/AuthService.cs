@@ -337,7 +337,11 @@ namespace DianaShop.Service.Services
         {
             try
             {
-                var existingUser = await _unitOfWork.Repository<User>().FindAsync(u => u.Email == adminCreateAccountModel.Email);
+                // Kiểm tra user đã tồn tại chưa
+                var existingUser = await _unitOfWork.Repository<User>()
+                    .AsQueryable()
+                    .Where(u => u.Email == adminCreateAccountModel.Email && !u.IsDelete)
+                    .FirstOrDefaultAsync();
 
                 if (existingUser != null)
                 {
@@ -348,6 +352,7 @@ namespace DianaShop.Service.Services
                     };
                 }
 
+                // Tạo user mới
                 var user = new User()
                 {
                     Location = adminCreateAccountModel.Location,
@@ -360,38 +365,45 @@ namespace DianaShop.Service.Services
                     wallet = 0,
                 };
 
+                // Thêm user vào database
                 await _unitOfWork.Repository<User>().InsertAsync(user);
                 await _unitOfWork.CommitAsync();
 
-                // Assign Manager role
+                // Lấy Id của user vừa tạo
+                int userId = user.Id;
+
+                // Tạo UserRole
                 var userRole = new UserRole
                 {
-                    UserId = user.Id,
+                    UserId = userId,
                     RoleId = 1, // Manager role ID
                     Status = true
                 };
                 
+                // Thêm UserRole vào database
                 await _unitOfWork.Repository<UserRole>().InsertAsync(userRole);
-                await _unitOfWork.SaveChangesAsync();
+                await _unitOfWork.CommitAsync();
 
-                // Create VoucherStorage for the new user
+                // Tạo VoucherStorage
                 var voucherStorageRequest = new VoucherStorageRequestModel
                 {
-                    UserID = user.Id
+                    UserID = userId
                 };
                 
+                // Gọi service tạo VoucherStorage
                 await _voucherStorageService.CreateVoucherStorageAsync(voucherStorageRequest);
 
-                // Gửi email trực tiếp thay vì gọi SendAccount
+                // Gửi email trực tiếp
                 await SendEmailAsync(
                     user.Email,
                     "YOUR ENTRY ACCOUNT",
                     GetAccountEmailTemplate(user.Email, "0123456")
                 );
 
+                // Tạo token
                 var userWithRole = await _userService.GetUserByUsernameAsync(user.Username);
                 var roleNames = string.Join(",", userWithRole.UserRoles.Select(ur => ur.RoleName));
-                string token = GenerateJwtToken(user.Username, roleNames, user.Id);
+                string token = GenerateJwtToken(user.Username, roleNames, userId);
 
                 return new BaseResponse<TokenModel>
                 {
